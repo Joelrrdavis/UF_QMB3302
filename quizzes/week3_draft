@@ -1,0 +1,95 @@
+Title: Debugging Loop Behavior (Evaluating)
+21) What is the problem with the following code?
+
+<pythonpre>for i in range(3):
+print("Looping")</pythonpre>
+
+a) The loop will not execute
+@ No. The loop structure is valid but improperly formatted.
+*b) Missing indentation
+@ Yes. The body of the loop must be indented to avoid an error.
+c) The range is incorrect
+@ No. The range(3) is valid and runs three times.
+d) SyntaxError due to parentheses
+@ No. Parentheses are correctly used.
+
+Title: Creating a Function to Return Results (Creating)
+22) Which of the following correctly defines a function that returns the product of two numbers and 10 added to it?
+
+a)
+<pythonpre>def calculate(a, b):
+return a + b * 10</pythonpre>
+@ No. This code adds a and multiplies b incorrectly.
+
+b)
+<pythonpre>def calculate(a, b):
+return (a * b) + 10</pythonpre>
+@ Yes. This function correctly multiplies a and b, then adds 10.
+
+c)
+<pythonpre>def calculate(a, b):
+print((a * b) + 10)</pythonpre>
+@ No. This prints the result but does not return it.
+
+d)
+<pythonpre>calculate(a, b):
+return (a * b) + 10</pythonpre>
+@ No. The def keyword is missing.
+
+Title: Analyzing a Nested Loop (Analyzing)
+23) What is the output of the following code?
+
+<pythonpre>for i in range(2):
+for j in range(2):
+print(i, j)</pythonpre>
+
+a) 0 0, 0 1, 1 0, 1 1
+@ Yes. The outer loop runs twice, and the inner loop also runs twice for each value of i.
+*b) 0 0, 0 1, 1 0, 1 1
+@ Correct. The nested loops generate all combinations of i and j in the ranges.
+c) 0 1, 1 0
+@ No. This omits some combinations.
+d) 1 1
+@ No. All combinations are printed, not just the final one.
+
+Title: Predicting Conditional Behavior (Analyzing)
+24) What will be printed by the following code?
+
+<pythonpre>x = 4
+if x > 2 and x < 5:
+print("In range")
+else:
+print("Out of range")</pythonpre>
+
+a) In range
+@ Yes. The condition x > 2 and x < 5 is True, so the first branch executes.
+*b) In range
+@ Correct. Both parts of the condition are satisfied.
+c) Out of range
+@ No. The condition evaluates to True.
+d) None
+@ No. The code ensures an output is printed.
+
+Title: Writing a Function with a Default Parameter (Creating)
+25) Which of the following correctly defines a function with a default value for a parameter?
+
+a)
+<pythonpre>def greet(name):
+print("Hello", name)</pythonpre>
+@ No. This does not include a default value.
+
+*b)
+<pythonpre>def greet(name="World"):
+print("Hello", name)</pythonpre>
+@ Yes. The parameter name has a default value of "World".
+
+c)
+<pythonpre>def greet("World"):
+print("Hello", World)</pythonpre>
+@ No. Parameters cannot be strings.
+
+d)
+<pythonpre>def greet(name, "World"):
+print("Hello", name)</pythonpre>
+@ No. Parameters cannot be strings or separated this way.
+

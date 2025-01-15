@@ -3,5 +3,10 @@ project:
 format:
   html:
     embed-resources: true
-
-
+  pdf:
+    toc: false
+    number-sections: true
+    colorlinks: true
+execute:
+  echo: false
+jupyter: python3

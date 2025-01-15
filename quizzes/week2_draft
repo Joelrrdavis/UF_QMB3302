@@ -1,0 +1,325 @@
+Title: Understanding Comparison Operators (Remembering)
+
+What is the result of the following expression?
+<pythonpre>5 > 3</pythonpre>
+
+a) False
+@ No. This expression checks if 5 is greater than 3, which is true.
+*b) True
+@ Yes. 5 is greater than 3.
+c) SyntaxError
+@ No. This is valid Python syntax.
+d) None
+@ No. None is not returned in this case.
+
+Title: Understanding Equality Operators (Remembering)
+2) What will the following code output?
+
+<pythonpre>print(2 == 2)</pythonpre>
+
+a) False
+@ No. The == operator checks equality, and 2 equals 2.
+*b) True
+@ Yes. The == operator returns True when both values are equal.
+c) SyntaxError
+@ No. This is valid Python syntax.
+d) None
+@ No. The result of the comparison is True, not None.
+
+Title: Understanding the if Statement (Understanding)
+3) What does the following code print?
+
+<pythonpre>if 4 < 5:
+print("True")
+else:
+print("False")</pythonpre>
+
+a) False
+@ No. The condition 4 < 5 evaluates to True.
+*b) True
+@ Yes. Since 4 is less than 5, the if branch executes.
+c) None
+@ No. The else ensures a value is printed.
+d) SyntaxError
+@ No. The code is valid.
+
+Title: Understanding else Branch (Understanding)
+4) What is the output of the following code?
+
+<pythonpre>if 2 > 10:
+print("Yes")
+else:
+print("No")</pythonpre>
+
+a) Yes
+@ No. The condition 2 > 10 is False, so the else branch runs.
+*b) No
+@ Yes. Since the condition is False, the code executes the else branch.
+c) None
+@ No. The else ensures an output.
+d) SyntaxError
+@ No. This code is valid.
+
+Title: Evaluating if-else Logic (Applying)
+5) What does this code print?
+
+<pythonpre>x = 7
+if x % 2 == 0:
+print("Even")
+else:
+print("Odd")</pythonpre>
+
+a) Even
+@ No. The condition checks for even numbers, but 7 is odd.
+*b) Odd
+@ Yes. Since 7 % 2 is not 0, the else branch executes.
+c) None
+@ No. The else branch ensures output.
+d) SyntaxError
+@ No. This code is valid.
+
+Title: Predicting a while Loop (Analyzing)
+6) How many times will the following loop execute?
+
+<pythonpre>i = 1
+while i < 5:
+print(i)
+i += 1</pythonpre>
+
+a) 3 times
+@ No. Carefully count the iterations.
+*b) 4 times
+@ Yes. i takes values 1, 2, 3, and 4 before the condition becomes False.
+c) 5 times
+@ No. The loop stops before i equals 5.
+d) Infinite
+@ No. The loop increments i and eventually stops.
+
+Title: Understanding the for Loop (Understanding)
+7) What will the following code print?
+
+<pythonpre>for i in range(3):
+print(i)</pythonpre>
+
+a) 0, 1, 2
+@ Yes. The range(3) generates values 0, 1, and 2.
+*b) 0, 1, 2
+@ Correct. The for loop iterates through these values.
+c) 1, 2, 3
+@ No. range(3) starts at 0 by default.
+d) None
+@ No. The loop prints all values in the range.
+
+Title: Debugging a while Loop (Evaluating)
+8) What is wrong with the following code?
+
+<pythonpre>i = 0
+while i < 3:
+print("Hello")</pythonpre>
+
+a) Infinite loop
+@ Yes. The value of i is never updated, so the condition remains True forever.
+b) SyntaxError
+@ No. The syntax is correct.
+c) Missing parentheses
+@ No. Parentheses are correct here.
+d) i starts at 1
+@ No. The loop starts with i = 0.
+
+Title: Understanding Function Definitions (Remembering)
+9) What does the following code do?
+
+<pythonpre>def greet():
+print("Hello")</pythonpre>
+
+a) Defines a function
+@ Yes. This code defines a function named greet.
+b) Calls a function
+@ No. The function is defined but not yet called.
+c) Prints "Hello" immediately
+@ No. The function is not executed until it is called.
+d) Throws an error
+@ No. This code is valid.
+
+Title: Calling a Function (Applying)
+10) What is the output of this code?
+
+<pythonpre>def greet():
+print("Hello")
+
+greet()</pythonpre>
+
+a) Nothing
+@ No. The function greet is called and executes its body.
+*b) Hello
+@ Yes. Calling the function executes the print statement inside it.
+c) SyntaxError
+@ No. This is valid Python syntax.
+d) None
+@ No. The function produces output.
+
+Title: Analyzing if-else Logic (Analyzing)
+11) What will be printed by the following code?
+
+<pythonpre>x = 10
+if x > 5:
+print("Greater")
+else:
+print("Smaller")</pythonpre>
+
+a) Smaller
+@ No. The condition x > 5 is True.
+*b) Greater
+@ Yes. Since x is greater than 5, the first branch executes.
+c) None
+@ No. The else ensures an output.
+d) SyntaxError
+@ No. The code is valid.
+
+Title: Understanding Nested Loops (Understanding)
+12) How many stars (*) will be printed by the following code?
+
+<pythonpre>for i in range(2):
+for j in range(3):
+print("*", end="")</pythonpre>
+
+a) 5
+@ No. Multiply the range lengths to find the total number of iterations.
+*b) 6
+@ Yes. The outer loop runs 2 times, and the inner loop runs 3 times, for a total of 6 stars.
+c) 3
+@ No. This only accounts for one iteration of the outer loop.
+d) 2
+@ No. The inner loop prints multiple stars each time.
+
+Title: Debugging a Function Call (Evaluating)
+13) What is the issue with the following code?
+
+<pythonpre>def greet():
+print("Hello")
+
+greet("Hi")</pythonpre>
+
+a) Function has too many parameters
+@ No. The function greet has no parameters defined.
+*b) Function takes no arguments
+@ Yes. The function greet() is defined without parameters, so passing an argument causes an error.
+c) Missing parentheses
+@ No. Parentheses are correctly used here.
+d) SyntaxError
+@ No. The syntax is correct, but the error is in the argument.
+
+Title: Predicting while Loop Behavior (Analyzing)
+14) How many times will the following code print "Hello"?
+
+<pythonpre>i = 0
+while i < 3:
+print("Hello")
+i += 2</pythonpre>
+
+a) 1
+@ No. The loop will run multiple times.
+*b) 2
+@ Yes. The i value increments by 2, so it runs when i = 0 and i = 2.
+c) 3
+@ No. The loop stops before i equals 3.
+d) Infinite
+@ No. The increment ensures the loop stops.
+
+Title: Evaluating Conditional Logic (Evaluating)
+15) Which of the following conditions will always evaluate to True?
+
+a) 5 < 3
+@ No. This condition is False.
+b) 3 >= 10
+@ No. This condition is False.
+*c) 2 != 1
+@ Yes. The != operator checks for inequality, and 2 is not equal to 1.
+d) 1 == 2
+@ No. This condition is False.
+
+Title: Debugging Function Syntax (Evaluating)
+16) What is missing in the following function definition?
+
+<pythonpre>def add(a, b):
+print(a + b)</pythonpre>
+
+a) Missing return statement
+@ No. A return is not mandatory for functions.
+*b) Indentation
+@ Yes. The body of the function must be indented in Python.
+c) Missing colon
+@ No. The colon is correctly placed after the function header.
+d) Missing parentheses
+@ No. The function header uses correct parentheses.
+
+Title: Understanding Loop Step Size (Applying)
+17) What numbers will be printed by the following code?
+
+<pythonpre>for i in range(1, 6, 2):
+print(i)</pythonpre>
+
+a) 1, 2, 3, 4, 5
+@ No. The step size of 2 skips some numbers.
+*b) 1, 3, 5
+@ Yes. The range function starts at 1 and increments by 2.
+c) 1, 3, 4, 5
+@ No. The step size skips even numbers.
+d) None
+@ No. The loop prints valid numbers.
+
+Title: Creating a Function (Creating)
+18) Which of the following correctly defines a function to multiply two numbers?
+
+a)
+<pythonpre>def multiply(a, b)
+return a * b</pythonpre>
+@ No. The colon : is missing in the header.
+
+*b)
+<pythonpre>def multiply(a, b):
+return a * b</pythonpre>
+@ Yes. This is the correct syntax for defining a function.
+
+c)
+<pythonpre>multiply(a, b):
+return a * b</pythonpre>
+@ No. The def keyword is missing.
+
+d)
+<pythonpre>def multiply(a, b):
+print(a * b)</pythonpre>
+@ No. This prints the result but does not return it.
+
+Title: Understanding Function Return (Applying)
+19) What does the following code print?
+
+<pythonpre>def square(x):
+return x * x
+
+print(square(3))</pythonpre>
+
+a) 6
+@ No. The function multiplies the input by itself.
+*b) 9
+@ Yes. 3 squared equals 9.
+c) square(3)
+@ No. This would print the string "square(3)" if written differently.
+d) None
+@ No. The return ensures a value is returned.
+
+Title: Analyzing a for Loop with Conditions (Analyzing)
+20) What does the following code print?
+
+<pythonpre>for i in range(5):
+if i % 2 == 0:
+print(i)</pythonpre>
+
+a) 1, 3
+@ No. These are the odd numbers, but the code checks for even numbers.
+*b) 0, 2, 4
+@ Yes. The condition i % 2 == 0 prints even numbers from 0 to 4.
+c) 2, 4
+@ No. The loop includes 0 as well.
+d) 5
+@ No. The loop stops before 5.
