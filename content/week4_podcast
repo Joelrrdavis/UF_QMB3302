@@ -1,0 +1,54 @@
+[Intro – 0:00]
+Hey everyone—welcome to your Week 4 recap for Foundations of Analytics and AI. I’m glad you’re here, and I hope this format gives you a chance to just sit back, relax, and reflect a bit—whether you’re walking, driving, or just taking a break from your screen.
+
+This week was all about exploring data—not just running analyses or writing code, but getting a feel for what your data looks like, what it might be trying to tell you, and what kind of story it could help you tell.
+
+[Part 1 – The Mindset of EDA – 2:00]
+So let’s start with a simple idea: Exploratory Data Analysis is about curiosity. You’re not trying to prove anything yet. You’re not building a model. You’re just poking around, asking questions, seeing what stands out.
+
+I always tell students: EDA is like getting to know a city before using GPS. You walk around. You notice the neighborhoods. You find the weird little alleyways. You get a feel for what’s normal and what’s not.
+
+You might look at distributions—where are most of your values clustered? Are there outliers? You might run some quick summaries or visualize a couple of relationships that seem important.
+
+It’s low pressure, but incredibly powerful. Because if you skip this step, you can miss things your model won’t tell you.
+
+[Part 2 – Charting for Clarity – 6:30]
+A big part of EDA is visualization. But not all visuals are good visuals.
+
+This week, we looked at matplotlib and seaborn, and both are great tools. But let me be honest: the bigger challenge isn’t making a plot—it’s making a plot that actually helps someone else understand what’s going on.
+
+So ask yourself:
+
+What question is this plot trying to answer?
+Is it answering that question clearly?
+Would a stranger looking at it see the same story you see?
+I’ve seen too many plots with unreadable labels, 3D pie charts, or axis scales that make differences look way bigger than they are. We call that chart junk, and it erodes trust fast.
+
+One of my favorite examples is a bar chart with a truncated y-axis. It makes a small difference look massive. Technically, it’s not wrong—but it’s misleading.
+
+So as analysts, we have a responsibility not just to analyze data, but to communicate it ethically and effectively.
+
+[Part 3 – Choosing the Right Plot – 12:00]
+Let’s talk briefly about choosing the right chart.
+
+Histograms are great for showing the shape of a single variable—its spread, skew, any outliers.
+Boxplots are amazing for comparing distributions across categories.
+Scatterplots show relationships—do two variables move together?
+Bar charts are for comparisons, not trends. Want to show change over time? Use a line plot.
+The trick isn’t knowing every chart type—it’s being clear about what you’re trying to show. Start with the question. Let the chart follow.
+
+[Part 4 – Tool Talk: matplotlib vs seaborn – 16:00]
+You’ve probably noticed that seaborn is a bit “nicer out of the box.” It gives you colors, gridlines, and clean formatting without much work.
+
+Matplotlib is more flexible—it’s what seaborn is built on. You’ll still use it for things like figure layout or custom labels. But seaborn is your friend for quick insight and pattern-finding.
+
+My advice? Learn both, but don’t feel like you have to memorize syntax. Use examples. Look things up. Even pros do that.
+
+[Part 5 – Wrapping Up – 20:00]
+So here’s the bottom line for this week: good analysis starts with good exploration. Look for patterns, spot problems, visualize your data clearly, and always ask yourself what story you’re trying to tell.
+
+Next week, we shift gears a bit and talk about prompting and LLMs. You’ll learn how to use large language models—not just to generate code, but to explain it, debug it, and actually help you think through your analysis.
+
+Until then—keep exploring. Keep asking questions. And remember: your job isn’t just to find answers. It’s to find better questions.
+
+Talk to you next week.

@@ -1,0 +1,11 @@
+# ignore content generation
+content/
+
+# ignore syllabus
+syllabus/
+
+# ignore lectures
+Lecture/
+
+# ignore env
+envs/
