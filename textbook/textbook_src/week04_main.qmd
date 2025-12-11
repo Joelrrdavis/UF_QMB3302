@@ -1,0 +1,17 @@
+---
+title: "Week 4 – From Data to Models"
+---
+
+# Week 4 – Overview
+
+This chapter will introduce the foundational ideas behind building predictive models.
+
+## Key Topics
+- Train/test split  
+- Linear models  
+- Model evaluation  
+
+## Code for This Week
+(links will be added later)
+
+

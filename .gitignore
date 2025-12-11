@@ -16,8 +16,6 @@ materials/
 # ignore syllabus
 syllabus/
 
-# ignore rawtextbook
-textbook_src/
 
 .ipynb_checkpoints/
 .Rhistory

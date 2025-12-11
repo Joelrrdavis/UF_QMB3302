@@ -1,0 +1,17 @@
+---
+title: "Week 1 – What is Analytics & AI?"
+---
+
+# Week 1 – Overview
+
+This chapter will introduce the core concepts of analytics and artificial intelligence.  
+A more detailed draft will be added soon.
+
+## Key Topics
+- What we mean by “analytics”
+- What we mean by “AI”
+- Data → Model → Decision (the high-level pipeline)
+
+## Code for This Week
+(links will be added later)
+
