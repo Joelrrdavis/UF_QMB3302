@@ -1,6 +1,6 @@
 project:
   type: website
-  output-dir: textbook/docs
+  output-dir: docs
 
 # Tell Quarto exactly which files to render.
 # This avoids rendering code, materials, or ignored folders.
