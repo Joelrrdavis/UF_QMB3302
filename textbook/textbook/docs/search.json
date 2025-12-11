@@ -1,0 +1,233 @@
+[
+  {
+    "objectID": "guides/using_colab.html",
+    "href": "guides/using_colab.html",
+    "title": "Using Google Colab for This Course",
+    "section": "",
+    "text": "Google Colab is a free, cloud-based environment for running Python notebooks.\nYou can use it from any computer without installing Python locally. It is especially helpful if:\n\nYour computer cannot install packages reliably\n\nYou are troubleshooting your Python installation\n\nYou want quick access to a working Python environment\n\nThis guide explains how to open Colab, upload or access notebooks, install packages, work with files, and download your work."
+  },
+  {
+    "objectID": "guides/using_colab.html#temporary-upload",
+    "href": "guides/using_colab.html#temporary-upload",
+    "title": "Using Google Colab for This Course",
+    "section": "Temporary Upload",
+    "text": "Temporary Upload\nfrom google.colab import files\nuploaded = files.upload()"
+  },
+  {
+    "objectID": "guides/using_colab.html#mount-google-drive",
+    "href": "guides/using_colab.html#mount-google-drive",
+    "title": "Using Google Colab for This Course",
+    "section": "Mount Google Drive",
+    "text": "Mount Google Drive\nfrom google.colab import drive\ndrive.mount('/content/drive')\nYour Drive will appear at:\n/content/drive/MyDrive/"
+  },
+  {
+    "objectID": "guides/install_requirements.html",
+    "href": "guides/install_requirements.html",
+    "title": "Installing the Course Requirements and Checking Your Environment",
+    "section": "",
+    "text": "This guide will walk you through:\n\nDownloading the course requirements file\n\nUsing the terminal / command line to navigate to your course folder\n\nInstalling the required Python packages with pip install -r requirements.txt\n\nRunning a small Python script to confirm that everything is set up correctly\n\nBy the end of this guide, your Python environment should be ready for the rest of the semester."
+  },
+  {
+    "objectID": "guides/install_requirements.html#download-the-files",
+    "href": "guides/install_requirements.html#download-the-files",
+    "title": "Installing the Course Requirements and Checking Your Environment",
+    "section": "1.1 — Download the files",
+    "text": "1.1 — Download the files\n\nGo to the location where your instructor has shared the files.\n\nDownload requirements.txt.\n\nDownload check_environment.py."
+  },
+  {
+    "objectID": "guides/install_requirements.html#save-them-to-your-week-1-folder",
+    "href": "guides/install_requirements.html#save-them-to-your-week-1-folder",
+    "title": "Installing the Course Requirements and Checking Your Environment",
+    "section": "1.2 — Save them to your Week 1 folder",
+    "text": "1.2 — Save them to your Week 1 folder\nSave both files in:\nAI_Course/week01/\nSo your folder structure looks like:\nAI_Course/\n  week01/\n    requirements.txt\n    check_environment.py\n  week02/\n  ..."
+  },
+  {
+    "objectID": "guides/install_requirements.html#windows-vs-code-recommended",
+    "href": "guides/install_requirements.html#windows-vs-code-recommended",
+    "title": "Installing the Course Requirements and Checking Your Environment",
+    "section": "Windows (VS Code recommended)",
+    "text": "Windows (VS Code recommended)\n\nOpen VS Code.\n\nClick File → Open Folder… → select AI_Course/week01/.\n\nGo to View → Terminal."
+  },
+  {
+    "objectID": "guides/install_requirements.html#macos-linux",
+    "href": "guides/install_requirements.html#macos-linux",
+    "title": "Installing the Course Requirements and Checking Your Environment",
+    "section": "macOS / Linux",
+    "text": "macOS / Linux\n\nOpen Terminal.\n\nUse cd to navigate to your Week 1 folder (see next step)."
+  },
+  {
+    "objectID": "textbook_src/week03_main.html",
+    "href": "textbook_src/week03_main.html",
+    "title": "Week 3 – Data Structures & Pandas",
+    "section": "",
+    "text": "This chapter will introduce essential data structures and basic data manipulation.\n\n\n\nLists, dictionaries, and tuples\n\nPandas DataFrames\n\nImporting, cleaning, and selecting data\n\n\n\n\n(links will be added later)"
+  },
+  {
+    "objectID": "textbook_src/week03_main.html#key-topics",
+    "href": "textbook_src/week03_main.html#key-topics",
+    "title": "Week 3 – Data Structures & Pandas",
+    "section": "",
+    "text": "Lists, dictionaries, and tuples\n\nPandas DataFrames\n\nImporting, cleaning, and selecting data"
+  },
+  {
+    "objectID": "textbook_src/week03_main.html#code-for-this-week",
+    "href": "textbook_src/week03_main.html#code-for-this-week",
+    "title": "Week 3 – Data Structures & Pandas",
+    "section": "",
+    "text": "(links will be added later)"
+  },
+  {
+    "objectID": "textbook_src/week01_main.html",
+    "href": "textbook_src/week01_main.html",
+    "title": "Week 1 – What is Analytics & AI?",
+    "section": "",
+    "text": "This chapter will introduce the core concepts of analytics and artificial intelligence.\nA more detailed draft will be added soon.\n\n\n\nWhat we mean by “analytics”\nWhat we mean by “AI”\nData → Model → Decision (the high-level pipeline)\n\n\n\n\n(links will be added later)"
+  },
+  {
+    "objectID": "textbook_src/week01_main.html#key-topics",
+    "href": "textbook_src/week01_main.html#key-topics",
+    "title": "Week 1 – What is Analytics & AI?",
+    "section": "",
+    "text": "What we mean by “analytics”\nWhat we mean by “AI”\nData → Model → Decision (the high-level pipeline)"
+  },
+  {
+    "objectID": "textbook_src/week01_main.html#code-for-this-week",
+    "href": "textbook_src/week01_main.html#code-for-this-week",
+    "title": "Week 1 – What is Analytics & AI?",
+    "section": "",
+    "text": "(links will be added later)"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Foundations of Analytics & AI",
+    "section": "",
+    "text": "Foundations of Analytics & AI\n\nCourse Textbook\nWelcome to the online textbook for the course. It is organized to provide a clear, structured pathway through the foundational ideas and practical techniques of analytics and artificial intelligence. Each week’s chapter includes:\n\nAn explaination of the key/core concepts and our objectives for the week.\n\nDemonstrations (where applicable) and worked examples\n\nLinks to downloadable code associated with the topics in the lectures.\n\nPractice sections and applied exercises\n\nShort conceptual notes to reinforce key ideas\n\nThis site is designed to complement the in-class experience while remaining accessible for self-study. All materials can be viewed online and code files can be downloaded from the course repository. The code in github and on Canvas is the same. The data for this course is stored in Canvas.\n\n\n\n\nHow to Use This Textbook\nThe material is organized into three types:\n\n1. Weekly Modules\nThese chapters follow the course schedule and lectures. The readings from the text are not identical to the lectures, but they are close. The readings introduce new concepts, connect them to analytics and AI practice, and provide examples to run independently.\nStart here:\n\nWeek 1 – What is Analytics & AI?\n\nWeek 2 – Python Basics\n\nWeek 3 – Data Structures & Pandas\n\nWeek 4 – From Data to Models\n\n\n\n\n\n2. Practical Guides (Task-Oriented Documentation)\nThese pages provide focused instructions for installing tools, configuring environments, and resolving common issues.\n\nHow to Install Python\n\nInstalling the Course requirements.txt\n\nUsing Google Colab\n\nThese guides remain relevant throughout the semester and may be updated as tools evolve.\n\n\n\n\nCourse Learning Philosophy\nThis textbook is built around two related objectives:\n\nAI Literacy: developing conceptual understanding of modern analytics and AI systems. How they work, where they succeed, and where they sometimes fail.\n\nJob-Relevant Skills: Translating these concepts into practical, executable workflows using Python and contemporary tools.\n\nEach week reinforces both trajectories: one conceptual, one applied.\n\n\n\nAccessing Code and Data\nAll example code for the course is maintained in the main GitHub repository:\n\nCode folder: code/ (available in GitHub and Canvas) Data folder: data/ (available in Canvas only)\n\nYou may download the entire repository as a .zip file or clone it directly.\nLinks to specific scripts and notebooks appear at the end of each week’s chapter.\n\n\n\nNeed Help?\nIf you encounter technical issues with installation, environments, or package setup, consult the Guides section using the navigation bar above. These pages provide step-by-step instructions tailored for this course."
+  },
+  {
+    "objectID": "textbook_src/week02_main.html",
+    "href": "textbook_src/week02_main.html",
+    "title": "Week 2 – Python Basics",
+    "section": "",
+    "text": "This chapter will introduce Python fundamentals needed for the course.\n\n\n\nVariables and data types\n\nControl flow (if/else, loops)\n\nBasic functions\n\n\n\n\n(links will be added later)"
+  },
+  {
+    "objectID": "textbook_src/week02_main.html#key-topics",
+    "href": "textbook_src/week02_main.html#key-topics",
+    "title": "Week 2 – Python Basics",
+    "section": "",
+    "text": "Variables and data types\n\nControl flow (if/else, loops)\n\nBasic functions"
+  },
+  {
+    "objectID": "textbook_src/week02_main.html#code-for-this-week",
+    "href": "textbook_src/week02_main.html#code-for-this-week",
+    "title": "Week 2 – Python Basics",
+    "section": "",
+    "text": "(links will be added later)"
+  },
+  {
+    "objectID": "textbook_src/week04_main.html",
+    "href": "textbook_src/week04_main.html",
+    "title": "Week 4 – From Data to Models",
+    "section": "",
+    "text": "This chapter will introduce the foundational ideas behind building predictive models.\n\n\n\nTrain/test split\n\nLinear models\n\nModel evaluation\n\n\n\n\n(links will be added later)"
+  },
+  {
+    "objectID": "textbook_src/week04_main.html#key-topics",
+    "href": "textbook_src/week04_main.html#key-topics",
+    "title": "Week 4 – From Data to Models",
+    "section": "",
+    "text": "Train/test split\n\nLinear models\n\nModel evaluation"
+  },
+  {
+    "objectID": "textbook_src/week04_main.html#code-for-this-week",
+    "href": "textbook_src/week04_main.html#code-for-this-week",
+    "title": "Week 4 – From Data to Models",
+    "section": "",
+    "text": "(links will be added later)"
+  },
+  {
+    "objectID": "guides/install_python.html",
+    "href": "guides/install_python.html",
+    "title": "Setting Up Python",
+    "section": "",
+    "text": "This document will walk you through the steps to:\n\nInstall Python 3\n\nInstall Visual Studio Code (VS Code)\n\nConfigure VS Code to run .py files\n\nVerify that everything is working correctly\n\nYou only need to complete this setup once on your computer.\nAfter that, you will be able to run all course examples and labs.\n\n\n\n\n\n\nTip\n\n\n\nIf you get stuck at any point:\nInstalling this should be straightforward. LLMs can be a great way to problem solve an install. Use UFs Navigator Chat to help you. There is an optional video on this in the course files. Still stuck? Reach out to a TA and let them help you out. Use the course guidelines for how to ask good questions to request help."
+  },
+  {
+    "objectID": "guides/install_python.html#on-windows",
+    "href": "guides/install_python.html#on-windows",
+    "title": "Setting Up Python",
+    "section": "On Windows?",
+    "text": "On Windows?\n\nOpen the Start Menu.\n\nType cmd and press Enter to open the Command Prompt.\n\nIn the black window, type:\n\npy --version\nor\npython --version\n\nPress Enter.\n\n\nIf you see something like Python 3.10.11, Python 3 is already installed.\n\nIf you see an error or a much older version (like Python 2.x), you should install a current version.\nMost MAC’s will have Python installed, but this is for your system, you want to install it again. We don’t want to be making changes to the factory installed Python."
+  },
+  {
+    "objectID": "guides/install_python.html#on-macos",
+    "href": "guides/install_python.html#on-macos",
+    "title": "Setting Up Python",
+    "section": "on macOS?",
+    "text": "on macOS?\n\nOpen Terminal (Spotlight → type Terminal).\n\nType:\n\npython3 --version\n\nPress Enter.\n\n\nIf you see Python 3.x.x, you have Python 3.\n\nFor the most part, you should install a new version, even if you see this."
+  },
+  {
+    "objectID": "guides/install_python.html#on-linux",
+    "href": "guides/install_python.html#on-linux",
+    "title": "Setting Up Python",
+    "section": "on Linux?",
+    "text": "on Linux?\n\nOpen a terminal.\n\nType:\n\npython3 --version\n\nPress Enter.\n\nIf Python 3 is not installed, follow the installation steps below."
+  },
+  {
+    "objectID": "guides/install_python.html#windows-installation",
+    "href": "guides/install_python.html#windows-installation",
+    "title": "Setting Up Python",
+    "section": "Windows Installation",
+    "text": "Windows Installation\n\nClick Download Python 3.x.x for Windows.\n\nRun the installer (python-3.x.x.exe) after it downloads.\n\nOn the first screen:\n\nCheck the box that says:\n“Add Python 3.x to PATH”\n\nThen click “Install Now”.\n\nWait for the installation to finish.\n\nClick “Close” when done.\n\n\nVerify Python on Windows\nOpen Command Prompt again and type:\npy --version\nor\npython --version\nYou should now see Python 3.x.x.\nIf you don’t, restart your computer and try again."
+  },
+  {
+    "objectID": "guides/install_python.html#macos-installation",
+    "href": "guides/install_python.html#macos-installation",
+    "title": "Setting Up Python",
+    "section": "macOS Installation",
+    "text": "macOS Installation\n\nOn https://www.python.org/downloads/, choose “Download Python 3.x.x for macOS”.\n\nOpen the downloaded .pkg file.\n\nFollow the installer prompts and accept the defaults.\n\n\nVerify Python on macOS\nOpen Terminal and type:\npython3 --version\nYou should see Python 3.x.x.\nIf you don’t, log out and back in, or restart your machine."
+  },
+  {
+    "objectID": "guides/install_python.html#linux-installation-brief",
+    "href": "guides/install_python.html#linux-installation-brief",
+    "title": "Setting Up Python",
+    "section": "Linux Installation (brief)",
+    "text": "Linux Installation (brief)\nOn many Linux distributions, Python 3 is already installed.\nIf not, you can install it with your package manager. For example:\n\nUbuntu / Debian:\nsudo apt-get update\nsudo apt-get install python3 python3-pip\nFedora:\nsudo dnf install python3 python3-pip\n\nAfter installation, check:\npython3 --version"
+  },
+  {
+    "objectID": "guides/install_python.html#download-and-install-vs-code",
+    "href": "guides/install_python.html#download-and-install-vs-code",
+    "title": "Setting Up Python",
+    "section": "Download and Install VS Code",
+    "text": "Download and Install VS Code\n\nGo to: https://code.visualstudio.com/\n\nClick Download for your operating system (Windows, macOS, or Linux).\n\nRun the installer and accept the defaults."
+  },
+  {
+    "objectID": "guides/install_python.html#install-the-python-extension-in-vs-code",
+    "href": "guides/install_python.html#install-the-python-extension-in-vs-code",
+    "title": "Setting Up Python",
+    "section": "Install the Python Extension in VS Code",
+    "text": "Install the Python Extension in VS Code\n\nOpen VS Code.\n\nOn the left sidebar, click the Extensions icon (four squares).\n\nIn the search bar, type: Python.\n\nFind the extension published by Microsoft (it should be at the top).\n\nClick Install.\n\nVS Code will now understand and support Python files."
+  },
+  {
+    "objectID": "guides/install_python.html#running-the-script-vs-code-integrated-terminal",
+    "href": "guides/install_python.html#running-the-script-vs-code-integrated-terminal",
+    "title": "Setting Up Python",
+    "section": "Running the Script (VS Code Integrated Terminal)",
+    "text": "Running the Script (VS Code Integrated Terminal)\n\nIn VS Code, open the Terminal:\n\nView → Terminal, or\n\nPress Ctrl+` (Windows/Linux)\n\nPress Ctrl+Shift+` (macOS, depending on keybindings)\n\nMake sure the terminal is using the correct folder. You should see a path that ends with week01.\nType one of the following commands and press Enter:\n\nOn Windows:\npy test_setup.py\nor\npython test_setup.py\nOn macOS/Linux:\npython3 test_setup.py\n\nYou should see:\n\nPython is working, awesome!\nIf you see that message, your environment is ready."
+  },
+  {
+    "objectID": "guides/install_python.html#python-is-not-recognized-on-windows",
+    "href": "guides/install_python.html#python-is-not-recognized-on-windows",
+    "title": "Setting Up Python",
+    "section": "“Python is not recognized” on Windows",
+    "text": "“Python is not recognized” on Windows\nIf you see:\n'python' is not recognized as an internal or external command\nor\n'py' is not recognized...\nTry:\n\nRestarting your computer.\n\nRunning the installer again and making sure “Add Python to PATH” is checked."
+  },
+  {
+    "objectID": "guides/install_python.html#scripts-not-finding-data-files",
+    "href": "guides/install_python.html#scripts-not-finding-data-files",
+    "title": "Setting Up Python",
+    "section": "Scripts not finding data files",
+    "text": "Scripts not finding data files\nMake sure:\n\nYour .py script and your data files are in the same folder, or\n\nYour script uses the correct relative path, like:\n\nimport pandas as pd\n\ndf = pd.read_csv(\"data/housing_prices.csv\")\nIf you move files around, update the paths accordingly."
+  }
+]
