@@ -1,0 +1,75 @@
+---
+title: "Foundations of Analytics & AI"
+---
+
+# Foundations of Analytics & AI  
+### Course Textbook
+
+Welcome to the online textbook for the course. It is organized to provide a clear, structured pathway through the foundational ideas and practical techniques of analytics and artificial intelligence. Each week’s chapter includes:
+
+- An explaination of the key/core concepts and our objectives for the week.   
+- Demonstrations (where applicable) and worked examples  
+- Links to downloadable code associated with the topics in the lectures.  
+- Practice sections and applied exercises  
+- Short conceptual notes to reinforce key ideas  
+
+This site is designed to complement the in-class experience while remaining accessible for self-study. All materials can be viewed online and code files can be downloaded from the course repository. The code in github and on Canvas is the same. The data for this course is stored in Canvas. 
+
+---
+
+# How to Use This Textbook
+
+The material is organized into three  types:
+
+### **1. Weekly Modules**  
+These chapters follow the course schedule and lectures. The readings from the text are not identical to the lectures, but they are close. The readings introduce new concepts, connect them to analytics and AI practice, and provide examples to run independently.
+
+Start here:
+
+- [Week 1 – What is Analytics & AI?](textbook_src/week01_main.qmd)  
+- [Week 2 – Python Basics](textbook_src/week02_main.qmd)  
+- [Week 3 – Data Structures & Pandas](textbook_src/week03_main.qmd)  
+- [Week 4 – From Data to Models](textbook_src/week04_main.qmd)  
+<!-- Add more weeks as they are created -->
+
+---
+
+### **2. Practical Guides (Task-Oriented Documentation)**  
+These pages provide focused instructions for installing tools, configuring environments, and resolving common issues.
+
+- [How to Install Python](guides/install_python.qmd)  
+- [Installing the Course requirements.txt](guides/install_requirements.qmd)  
+- [Using Google Colab](guides/using_colab.qmd)
+
+These guides remain relevant throughout the semester and may be updated as tools evolve.
+
+---
+
+# Course Learning Philosophy
+
+This textbook is built around two related objectives:
+
+- **AI Literacy:** developing conceptual understanding of modern analytics and AI systems. How they work, where they succeed, and where they sometimes fail.  
+- **Job-Relevant Skills:** Translating these concepts into practical, executable workflows using Python and contemporary tools. 
+
+Each week reinforces both trajectories: one conceptual, one applied.
+
+---
+
+# Accessing Code and Data
+
+All example code for the course is maintained in the main GitHub repository:
+
+> **Code folder:** `code/` (available in GitHub and Canvas)
+> **Data folder:** `data/` (available in Canvas only)
+
+
+You may download the entire repository as a `.zip` file or clone it directly.  
+
+Links to specific scripts and notebooks appear at the end of each week’s chapter.
+
+---
+
+# Need Help?
+
+If you encounter technical issues with installation, environments, or package setup, consult the **Guides** section using the navigation bar above. These pages provide step-by-step instructions tailored for this course.

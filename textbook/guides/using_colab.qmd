@@ -1,0 +1,151 @@
+---
+title: "Using Google Colab for This Course"
+---
+
+# Overview
+
+Google Colab is a free, cloud-based environment for running Python notebooks.  
+You can use it from any computer without installing Python locally. It is especially helpful if:
+
+- Your computer cannot install packages reliably  
+- You are troubleshooting your Python installation  
+- You want quick access to a working Python environment  
+
+This guide explains how to open Colab, upload or access notebooks, install packages, work with files, and download your work.
+
+---
+
+# 1. What Is Google Colab?
+
+Google Colab provides:
+
+- A hosted Python runtime (no setup required)  
+- Built-in Jupyter-like notebook interface  
+- Free GPU/TPU access (not required for this course but available)  
+- Integration with Google Drive  
+
+Colab notebooks use the `.ipynb` format, but you can also copy/paste Python code from `.py` files.
+
+---
+
+# 2. Opening Google Colab
+
+Go to:
+
+<https://colab.research.google.com/>
+
+You will see a window prompting you to:
+
+- Start a new notebook  
+- Upload a `.ipynb` file  
+- Open from Google Drive  
+- Open from GitHub  
+
+---
+
+# 3. Option A — Create a New Notebook
+
+1. Go to **File → New Notebook**.  
+2. A new notebook will open with a default Python environment.  
+3. You can copy/paste code from the course textbook or `.py` files.  
+
+Use **Shift + Enter** to run a cell.
+
+---
+
+# 4. Option B — Upload a Notebook from Your Computer
+
+1. Go to **File → Upload Notebook**  
+2. Select the notebook you downloaded  
+3. Colab will open it in a new tab  
+
+---
+
+# 5. Option C — Open a Notebook Directly from GitHub
+
+1. Go to **File → Open Notebook**  
+2. Choose the **GitHub** tab  
+3. Paste the repository URL  
+4. Select the notebook you want to open  
+
+Example:
+
+```
+https://github.com/<your-username>/undergrad-ai-course
+```
+
+---
+
+# 6. Installing Packages in Colab
+
+Colab comes with many Python packages preinstalled.
+
+To install additional packages:
+
+```python
+!pip install seaborn
+```
+
+Or install from a requirements file:
+
+```python
+!pip install -r requirements.txt
+```
+
+---
+
+# 7. Working with Files
+
+## Temporary Upload
+
+```python
+from google.colab import files
+uploaded = files.upload()
+```
+
+## Mount Google Drive
+
+```python
+from google.colab import drive
+drive.mount('/content/drive')
+```
+
+Your Drive will appear at:
+
+```
+/content/drive/MyDrive/
+```
+
+---
+
+# 8. Saving Your Work
+
+### Save to Drive  
+**File → Save a copy in Drive**
+
+### Download  
+**File → Download → .ipynb**  
+**File → Download → .py**
+
+---
+
+# 9. Limitations of Colab
+
+- Sessions time out  
+- Temporary files are deleted  
+- Packages must be reinstalled each session  
+- Internet connection required  
+
+---
+
+# 10. Summary
+
+Google Colab allows you to:
+
+- Run Python without installing anything  
+- Upload/open notebooks  
+- Install packages  
+- Work with Drive  
+- Download your work  
+
+It is a useful fallback or complementary environment for this course.

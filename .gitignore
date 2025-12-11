@@ -1,11 +1,26 @@
 # ignore content generation
 content/
 
-# ignore syllabus
-syllabus/
+# ignore admin
+admin/
 
-# ignore lectures
-Lecture/
+# ignore data
+data/ 
 
 # ignore env
 envs/
+
+# ignore some materials subfolders
+materials/
+
+# ignore syllabus
+syllabus/
+
+# ignore rawtextbook
+textbook_src/
+
+.ipynb_checkpoints/
+.Rhistory
+.Rproj.user/
+__pycache__/
+*.log

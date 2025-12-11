@@ -1,0 +1,209 @@
+---
+title: "Installing the Course Requirements and Checking Your Environment"
+---
+
+# Overview
+
+This guide will walk you through:
+
+- Downloading the course **requirements file**  
+- Using the **terminal / command line** to navigate to your course folder  
+- Installing the required Python packages with `pip install -r requirements.txt`  
+- Running a small Python script to confirm that everything is set up correctly  
+
+By the end of this guide, your Python environment should be ready for the rest of the semester.
+
+---
+
+# Before You Start
+
+You should already have:
+
+- **Python 3** installed  
+- **VS Code** installed (or another editor, but VS Code is recommended)  
+- A main course folder on your computer, for example:
+
+```text
+AI_Course/
+  week01/
+  week02/
+  ...
+```
+
+If you do **not** have this yet, complete the Python setup instructions first.
+
+---
+
+# Step 1 — Download the Environment Files
+
+Your instructor will provide two files (for example in Canvas) for Week 1:
+
+1. `requirements.txt`  
+2. `check_environment.py`  
+
+## 1.1 — Download the files
+
+1. Go to the location where your instructor has shared the files.  
+2. Download `requirements.txt`.  
+3. Download `check_environment.py`.
+
+## 1.2 — Save them to your Week 1 folder
+
+Save both files in:
+
+```text
+AI_Course/week01/
+```
+
+So your folder structure looks like:
+
+```text
+AI_Course/
+  week01/
+    requirements.txt
+    check_environment.py
+  week02/
+  ...
+```
+
+---
+
+# Step 2 — Open a Terminal / Command Line
+
+## Windows (VS Code recommended)
+
+1. Open **VS Code**.  
+2. Click **File → Open Folder…** → select `AI_Course/week01/`.  
+3. Go to **View → Terminal**.
+
+## macOS / Linux
+
+1. Open **Terminal**.  
+2. Use `cd` to navigate to your Week 1 folder (see next step).
+
+---
+
+# Step 3 — Change Directory to Week 1
+
+### Windows
+
+```bash
+cd %USERPROFILE%\Documents\AI_Course\week01
+```
+
+### macOS / Linux
+
+```bash
+cd ~/AI_Course/week01
+```
+
+Check your location:
+
+```bash
+pwd
+```
+
+You should see a path ending with:
+
+```
+.../AI_Course/week01
+```
+
+---
+
+# Step 4 — Install Required Packages
+
+### Windows
+
+```bash
+pip install -r requirements.txt
+```
+
+Alternate:
+
+```bash
+py -m pip install -r requirements.txt
+```
+
+### macOS / Linux
+
+```bash
+pip3 install -r requirements.txt
+```
+
+---
+
+# Step 5 — Run the Environment Check
+
+### Windows
+
+```bash
+py check_environment.py
+```
+
+or:
+
+```bash
+python check_environment.py
+```
+
+### macOS / Linux
+
+```bash
+python3 check_environment.py
+```
+
+Expected output:
+
+```
+All core packages imported successfully!
+Environment check passed.
+```
+
+---
+
+# Troubleshooting
+
+### `'pip' is not recognized`
+Python may not be on your PATH. Restart terminal or reinstall with PATH enabled.
+
+### `ModuleNotFoundError`
+You may not be in the same environment where you installed packages.
+
+### File not found
+Ensure you are in the `week01` directory before running commands.
+
+---
+
+# Appendix — Example Files
+
+### Example `requirements.txt`
+```
+pandas
+matplotlib
+scikit-learn
+requests
+seaborn
+```
+
+### Example `check_environment.py`
+```python
+import sys
+
+def main():
+    print("Running environment check...\n")
+    try:
+        import pandas as pd
+        import matplotlib
+        import sklearn
+        import requests
+    except ImportError as e:
+        print("Environment check FAILED.")
+        print("Missing package:", e)
+        sys.exit(1)
+    print("All core packages imported successfully!")
+    print("Environment check passed.")
+
+if __name__ == "__main__":
+    main()
+```
