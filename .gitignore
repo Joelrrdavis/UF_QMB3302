@@ -13,8 +13,6 @@ envs/
 # ignore some materials subfolders
 materials/
 
-# ignore syllabus
-syllabus/
 
 
 .ipynb_checkpoints/
