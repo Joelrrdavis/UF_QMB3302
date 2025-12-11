@@ -5,7 +5,7 @@ content/
 admin/
 
 # ignore data
-data/ 
+data/
 
 # ignore env
 envs/
@@ -24,3 +24,5 @@ textbook_src/
 .Rproj.user/
 __pycache__/
 *.log
+
+/.quarto/
