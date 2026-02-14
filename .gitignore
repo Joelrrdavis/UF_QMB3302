@@ -1,39 +1,57 @@
-# ignore content generation
-content/
-
-# ignore admin
-admin/
-
-# ignore data
-data/
-
-# ignore env
-envs/
-
-# ignore some materials subfolders
-materials/
-
-
-
-.ipynb_checkpoints/
-.Rhistory
-.Rproj.user/
-__pycache__/
-*.log
-
-/.quarto/
+cat > .gitignore <<'EOF'
+# ----------------------------------------------------
+# OS / System
+# ----------------------------------------------------
 .DS_Store
 **/.DS_Store
 
+# ----------------------------------------------------
+# Environments
+# ----------------------------------------------------
 .venv/
 code/.venv/
+envs/
 
+# ----------------------------------------------------
+# Editor / IDE
+# ----------------------------------------------------
 .vscode/
 code/.vscode/
 
-_site/
+# ----------------------------------------------------
+# Python / Notebook noise
+# ----------------------------------------------------
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+*.log
+
+# ----------------------------------------------------
+# R artifacts (if applicable)
+# ----------------------------------------------------
+.Rhistory
+.Rproj.user/
+
+# ----------------------------------------------------
+# Quarto / Render outputs
+# ----------------------------------------------------
 .quarto/
+_site/
 *_files/
 
+# ----------------------------------------------------
+# Syllabus rendered outputs
+# ----------------------------------------------------
 syllabus/*.pdf
 syllabus/*.html
+
+# ----------------------------------------------------
+# Generated / Large folders (NOT source)
+# ----------------------------------------------------
+data/
+content/
+admin/
+materials/
+EOF
+
+
