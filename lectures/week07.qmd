@@ -1,0 +1,3042 @@
+---
+title: Week 7
+subtitle: QMB3302 Foundations of Analytics and AI
+format:
+  metropolis-beamer-revealjs:
+    slide-number: c
+    embed-resources: true
+    # Syntax highlighting theme (pick one: pygments, tango, zenburn, kate, breeze, nord, github, dracula, monokai, etc.)
+    highlight-style: ../materials/assets/highlight_accessible.theme
+    # Nice-to-have code UX for slides
+    code-line-numbers: true      # add line numbers to all code blocks
+    code-overflow: wrap          # wrap long lines (good for projectors)
+    code-copy: true              # copy-to-clipboard button
+    code-block-bg: true          # subtle background behind code blocks
+    code-block-border-left: "#E69F00"  # UF-amber accent; pick your brand color
+author:
+  - name: Joel Davis
+    orcid: 0000-0000-0000-0000
+    email: joel.davis@warrington.ufl.edu
+    affiliations: University of Florida
+date: last-modified
+bibliography: ../materials/assets/shared_references_courses.bib
+---
+
+# 5.0 The Oldest Data Problem
+
+## <!-- 5.0.0 -->Language: The Oldest Data Problem
+
+ <figure>
+  <img src="../materials/assets/images/A_young_boy_listens_to_the_wise_words_of_an_old_man.jpg"
+       alt="**Figure:** Wellcome Collection gallery (2018-03-23): https://wellcomecollection.org/works/sjaw9qaq CC-BY-4.0">
+  <figcaption>**Figure:** Wellcome Collection gallery (2018-03-23): https://wellcomecollection.org/works/sjaw9qaq CC-BY-4.0</figcaption>
+</figure>
+
+::: {.notes}
+### Instructor Notes
+
+- Humans are **pattern-seeking storytellers**. We infer meaning through tone, context, and shared experience.  
+- Computers, by contrast, see only **symbols** — streams of characters with no built-in semantics.  
+- **Natural Language Processing (NLP)** exists to bridge that divide:  
+  - Turning **unstructured language** into **structured representations**.  
+  - Teaching machines to **recognize, reason, and respond** to human meaning. 
+- Start by reminding students that **language predates data science by millennia** — it’s humanity’s original information system.  
+- Position NLP as a way of **making human meaning computationally legible**.  
+- Suggest an analogy:  
+  - *Language is high-dimensional behavioral data* — full of redundancy, noise, and pattern.  
+  - NLP is how we project that into structured space without losing too much meaning.  
+- This framing prepares students for what follows: each method (tokenization, normalization, embeddings) is not arbitrary; it’s a decision about *what meaning to preserve*.
+:::
+
+
+# 5.1 Introduction to NLP
+
+---
+
+## <!-- 5.1.1 --> Why NLP? Humans infer meaning through context, tone, and shared knowledge.
+
+- Computers see only **characters and punctuation**, no inherent meaning.  
+- The same words can mean different things in different contexts:  
+  - “I went to the **bank**.” (finance)  
+  - “I was fishing near the **bank**.” (river)  
+- NLP bridges this gap by giving language **structure** machines can learn from.  
+
+<figure>
+  <img src="../materials/assets/images/riverbank.jpg"
+       alt="**Figure:** Humans understand meaning → machines see raw symbols.">
+  <figcaption>**Figure:** Humans understand meaning → machines see raw symbols.</figcaption>
+</figure>
+
+::: {.notes}
+### Detailed Notes
+- Start by grounding students: *Language is ambiguous, variable, and full of nuance.*  
+- Show that computers have no notion of “context” without structure.  
+- Example: “Apple” as a fruit vs. company — identical string, different meaning.  
+- Lead into: NLP is the process of creating structured meaning representations.
+:::
+
+---
+
+## <!-- 5.1.2 -->Natural Language Processing (NLP) = turning language into structured data. 
+
+- Goal: represent meaning in a form that algorithms can reason about.  
+- Typical steps:  
+  1. **Preprocessing** → clean and segment text.  
+  2. **Representation** → convert words into vectors or features.  
+  3. **Modeling** → train systems to classify, summarize, translate, or predict.  
+- Every step is a **design decision** about what information to keep or discard.  
+
+
+::: {.notes}
+### Detailed Notes
+- Define NLP not as a subfield of computer science, but as a *representation problem*.  
+- Show canonical flow: text → tokens → vectors → models → decisions.  
+- Emphasize: each transformation shapes what the model *can* perceive.  
+- Use this to reframe “preprocessing” as the first act of modeling.
+
+create schematic visual in drawio to show:
+
+1. **Input:** messy human text  
+2. **Preprocessing:** clean, segment, normalize  
+3. **Representation:** map tokens to numbers  
+4. **Modeling:** learn patterns  
+5. **Evaluation:** measure accuracy or coherence  
+
+- How we prepare text so meaning **survives**.  
+  
+
+:::
+
+---
+
+
+## <!-- 5.1.4 -->Representation Design: Raw Text to Structured Tokens
+
+- Reduces **spurious variation** (encoding, casing, punctuation)  
+- Standardizes **linguistic units** for modeling  
+- Balances **signal preservation** vs. **noise removal** (task-dependent)  
+
+::: {.notes}
+
+## Framing: Raw Text to Structured Tokens  
+
+### Detailed Notes  
+- Open by reframing “text preprocessing” as **representation design**, not mere cleaning.  
+- Emphasize that language data contain both *signal* (meaningful variation) and *noise* (encoding artifacts, casing, punctuation irregularities).  
+- Illustrate with examples: “Café,” “CAFE,” and “café” are semantically identical but computationally distinct.  
+- Explain that preprocessing is the foundation of **all NLP pipelines**—it determines what the model will perceive as similar or different.  
+- Encourage students to think in terms of **trade-offs:**  
+  - Aggressive cleaning reduces variance but may destroy nuance.  
+  - Minimal cleaning preserves richness but can increase sparsity and noise.  
+- Frame the slide as the conceptual map for the rest of the module: from messy raw text → standardized tokens → numerical representation.
+- **Speaker Bridge:** Let’s see what that means in practice—how we actually make text consistent enough for models to learn from.
+
+### Deeper Dive  
+At its core, text preprocessing is an exercise in **information theory and linguistic abstraction**.  
+The aim is to transform a high-entropy signal—raw human language—into a structured, lower-entropy representation that a model can efficiently learn from.  
+
+Formally, consider a transformation \( T: X \rightarrow Z \) where \( X \) is raw text and \( Z \) is a structured token sequence.  
+The design goal is to **maximize mutual information** between \( Z \) and the latent meaning \( Y \):  
+\[
+\max_T I(Z;Y) - \lambda H(Z)
+\]
+where \( H(Z) \) is the entropy (complexity) of the transformed representation and \( \lambda \) balances informativeness with simplicity.  
+In practice, every preprocessing choice—normalization, tokenization, stopword removal—implements an implicit value of \( \lambda \).  
+
+Linguistically, this step abstracts away surface variation to reveal **functional equivalence classes** of tokens (e.g., “Café” and “cafe”).  
+Historically, this mirrors Shannon’s (1948) principle: efficient communication requires encoding messages with minimal redundancy while preserving meaning.  
+Modern NLP inherits this tension—between **compression** (simplifying input) and **semantics** (retaining expressive power).  
+
+By grounding preprocessing in this information-theoretic frame, students can appreciate why no single cleaning pipeline is “correct.”  
+Instead, each reflects the epistemic stance of the analyst: what distinctions in language *matter* for the task at hand.  
+
+**References**  
+- Shannon, C. E. (1948). *A Mathematical Theory of Communication*. *Bell System Technical Journal*.  
+- Jurafsky, D., & Martin, J. H. (2023). *Speech and Language Processing* (3rd ed. draft).  
+
+
+
+:::
+
+---
+
+## <!-- 5.1.5 -->Text Hygiene
+
+- **Encoding / Unicode normalization:** normalize characters (é vs. e + ´).  
+- **Case handling:** lowercasing simplifies vocab; case may matter for entities.  
+- **Punctuation, emojis, URLs, HTML:** decide what to strip vs. retain.  
+- **Contractions:** expand “can’t” → “cannot” for clarity.  
+
+<figure>
+  <img src="../materials/assets/images/placeholder.jpg"
+       alt="**Figure:** Example of text normalization effects.">
+  <figcaption>**Figure:** Example of text normalization effects.</figcaption>
+</figure>
+
+::: {.notes}
+
+## Text Hygiene  
+
+#### Detailed Notes  
+- Begin by introducing **text hygiene** as the process of aligning surface form with semantic intent.  
+- Demonstrate normalization using a few short examples: “résumé,” “resume,” and “résumé” all look similar but encode differently in Unicode.  
+- Explain that machine models see bytes, not symbols—so normalization ensures **referential consistency** across equivalent characters.  
+- Discuss **case handling** trade-offs: lowercasing simplifies vocabularies and reduces sparsity, but may remove semantically meaningful distinctions (e.g., *Apple* vs. *apple*).  
+- Highlight **task dependence**—for example:  
+  - In sentiment analysis, emojis may be crucial cues.  
+  - In legal contracts, punctuation can change clause structure.  
+- Show students how preprocessing choices propagate through the pipeline—what’s lost here can never be recovered later.  
+
+### Deeper Dive  
+Text hygiene sits at the intersection of **computational linguistics** and **digital encoding theory**.  
+Natural language is continuous, but computers require discrete, canonical forms.  
+Unicode normalization transforms characters from multiple valid encodings into a standardized form, typically NFC (Normalization Form Composed) or NFKC (Compatibility Composed).  
+
+At the byte level, “é” can be stored either as a single code point (U+00E9) or as two code points (“e” + combining accent U+0301).  
+Without normalization, models treat these as distinct tokens, fracturing word statistics.  
+Normalization thus enforces the equivalence relation  
+$$
+x \sim y \; \text{if and only if they have identical canonical decomposition under NFC/NFKC.}
+$$  
+
+**Case handling** embodies a linguistic compromise between **orthography** and **semantics**.  
+While lowercase normalization reduces the dimensionality of the feature space (lower entropy), it risks erasing pragmatic or domain cues.  
+The optimal choice depends on whether the target task values **lexical economy** (e.g., spam detection) or **semantic fidelity** (e.g., named-entity recognition).  
+
+**Punctuation and emojis** represent *non-lexical meaning channels*—encoding emotion, discourse structure, and rhetorical emphasis.  
+Historically, punctuation marks were reading aids; in digital text, they become **sentiment and intent carriers** (e.g., “!!!” → intensity).  
+Removing them collapses pragmatic nuance.  
+
+Finally, **contraction expansion** aligns text with canonical lexical forms.  
+Expanding “don’t” → “do not” improves token consistency but may disrupt colloquial tone, especially in informal corpora like tweets.  
+Modern LLM tokenizers handle contractions gracefully, but for classic TF-IDF models, expansion still reduces sparsity.  
+
+In sum, text hygiene balances **orthographic normalization** with **semantic preservation**—an optimization problem where linguistic theory meets data engineering.  
+
+**References**  
+- Davis, M. (2012). *The Unicode Standard, Version 6.1*. Unicode Consortium.  
+- Bird, S., Klein, E., & Loper, E. (2009). *Natural Language Processing with Python*. O’Reilly Media.  
+- Jurafsky, D., & Martin, J. H. (2023). *Speech and Language Processing* (3rd ed. draft).  
+
+
+:::
+
+---
+
+## <!-- 5.1.6 -->Sentence Segmentation & Document Structure
+
+- Break text into **sentences** for finer analysis.  
+- Tools: sentence boundary detection (e.g., NLTK, spaCy).  
+- Paragraph and section structure can be used as higher-level features.  
+
+<figure>
+  <img src="../materials/assets/images/5.1.6_Sentence_Segmentation_documentstructure.drawio.svg"
+       alt="**Figure:** Example of sentence segmentation.">
+  <figcaption>**Figure:** Example of sentence segmentation.</figcaption>
+</figure>
+
+::: {.notes}
+
+## Sentence Segmentation & Document Structure  
+
+### Detailed Notes  
+- Begin by defining **sentence segmentation** as the task of identifying boundaries that divide a text into linguistically meaningful units—sentences or clauses.  
+- Explain that segmentation enables analysis at the *right granularity*: readability, sentiment, and syntax often depend on sentence-level structure.  
+- Demonstrate with examples where punctuation is ambiguous: “Dr. Smith went to Washington. He met Sen. Brown.” → note how naive segmentation can split at “Dr.” incorrectly.  
+- Mention tools: `nltk.sent_tokenize` (rule-based) and spaCy’s dependency-informed segmentation.  
+- Discuss **document structure** beyond sentences—paragraphs, sections, and discourse markers (e.g., “however,” “in conclusion”) that signal topic boundaries.  
+- Use a short example text to show how structural cues enhance readability and topic modeling features.  
+- Transition by framing segmentation as the “bridge” between low-level tokenization and high-level discourse representation.  
+
+### Deeper Dive  
+Sentence boundary detection (SBD) formalizes a linguistic intuition: written language is hierarchically organized.  
+At a computational level, segmentation can be viewed as a **sequence labeling problem**, where each token boundary is classified as *sentence boundary* or *non-boundary*.  
+
+Early systems used **handcrafted regular expressions** anchored on punctuation and capitalization.  
+However, these fail for abbreviations (“e.g.”, “Mr.”), decimals (“3.14”), or titles (“Ph.D.”).  
+Statistical and neural approaches model context probabilistically.  
+A common formulation uses conditional probability:  
+$$
+P(b_i = 1 \mid x_{i-k:i+k})
+$$  
+where $b_i$ indicates a boundary after token $i$ and $x_{i-k:i+k}$ is a contextual window.  
+Neural models like spaCy’s segmenter implicitly learn this boundary function over contextual embeddings.  
+
+From a **linguistic perspective**, segmentation aligns with the syntactic notion of the **clause**—a minimal unit expressing a proposition.  
+Computationally, it’s the foundation for downstream parsing, co-reference resolution, and readability scoring.  
+Readability indices such as the Flesch–Kincaid Grade Level depend on accurate sentence counts:  
+$$
+\text{FKGL} = 0.39 \frac{\text{words}}{\text{sentences}} + 11.8 \frac{\text{syllables}}{\text{words}} - 15.59
+$$  
+Errors in segmentation directly bias such metrics.  
+
+**Document structure**, meanwhile, contributes to **discourse coherence**—the macro-level organization of ideas.  
+Paragraphs often function as discourse units reflecting rhetorical relations (e.g., contrast, elaboration, cause).  
+Segmenting at this level supports document-level analytics like topic transitions, argumentation mining, or authorship attribution.  
+
+In deep learning architectures (e.g., hierarchical attention networks), segmentation defines the nesting of representations:  
+tokens → sentences → paragraphs → documents.  
+Poor segmentation therefore cascades upward, distorting higher-level semantics.  
+
+**References**  
+- Hearst, M. A. (1997). *TextTiling: Segmenting text into multi-paragraph subtopic passages*. *Computational Linguistics*, 23(1).  
+- Gillick, D. (2009). *Sentence Boundary Detection and the Problem with Pragmatics*. *NAACL Workshop on Computational Linguistics for Pragmatics*.  
+- Jurafsky, D., & Martin, J. H. (2023). *Speech and Language Processing* (3rd ed. draft).  
+
+
+:::
+
+---
+
+## <!-- 5.1.7 --> Preprocessing summary
+
+- So what did we cover?
+
+---
+
+# 5.2 Tokenization & Lexical Normalization
+
+---
+
+## <!-- 5.2.1 --> Tokenization Approaches
+
+Tokenization: Approaches 
+- **Rule-based:** whitespace/punctuation; fast but brittle.  
+- **NLTK / spaCy:** handles abbreviations and multi-word tokens.  
+- **Subword tokenization:** mitigates OOV issues (BPE, WordPiece, SentencePiece).  
+- **Byte-level tokenization:** robust across languages and emojis.  
+- Transformers *require* subword tokenization.  
+
+Tokenization: Why It Exists 
+
+- **Goal:** map text to learnable units while preserving meaning signals.  
+- **Granularities:** word / subword / byte.  
+- **Languages matter:** morphology & whitespace conventions shape choice.  
+- **Normalization & detokenization:** Unicode, punctuation, emojis, and reversibility.
+
+::: {.notes}
+
+## Tokenization Approaches
+
+### Detailed Notes  
+- Begin by explaining that **tokenization** is the process of dividing text into minimal computational units—tokens—that models can process.  
+- Demonstrate the difference between **rule-based tokenization** (simple whitespace and punctuation splitting) and more advanced library tokenizers such as spaCy and NLTK.  
+- Use an example like: “Dr. Smith lives in the U.S.A.” → show how a naive tokenizer breaks “U.S.A.” incorrectly, while spaCy preserves it as one token.  
+- Highlight that tokenization choices reflect **linguistic assumptions**: what counts as a word? Is “New York” one token or two?  
+- Transition to **subword tokenization**, noting that it’s crucial for modern LLMs. Explain that subword methods (BPE, WordPiece, SentencePiece) help models handle rare or misspelled words by decomposing them into frequent fragments.  
+- Briefly mention **byte-level tokenization** as the extreme case—every byte is a token—making models language-agnostic and robust to emojis or unseen characters.  
+- Frame this slide as the conceptual foundation for LLM vocabulary design (Module 7).  
+
+### Deeper Dive  
+Tokenization sits at the core of computational linguistics: it defines the **mapping between orthography and meaning**.  
+From a formal standpoint, tokenization approximates the segmentation function  
+$$
+f : \text{string of characters} \rightarrow \text{sequence of tokens}
+$$  
+where the definition of a “token” is task-dependent—words, morphemes, subwords, or characters.
+
+#### Rule-based and Statistical Tokenizers  
+Early tokenizers followed deterministic rules—split on whitespace and punctuation, merge common exceptions (e.g., “Mr.”).  
+However, rule-based systems fail in agglutinative or unsegmented languages (e.g., Chinese, Japanese, Korean), where boundaries are not explicitly marked.  
+Statistical and neural approaches (e.g., spaCy) model segmentation probabilistically, often using conditional likelihoods over adjacent characters or embedding-based boundary detection.
+
+#### Subword Models  
+Subword tokenization emerged to address the **out-of-vocabulary (OOV)** problem that plagued word-level models.  
+- **Byte Pair Encoding (BPE)** starts with a character vocabulary and iteratively merges the most frequent adjacent pairs.  
+  After $k$ merges, frequent word fragments like “ing” or “tion” become single tokens.  
+- **WordPiece** (used in BERT) merges pairs that **maximize the log-likelihood** of the corpus under a unigram language model.  
+- **SentencePiece** generalizes tokenization by treating raw text as a byte stream—no need for pre-segmentation or language-specific preprocessing.  
+
+Each approach constructs a compact vocabulary that balances **coverage** (ability to represent all words) with **efficiency** (manageable vocabulary size).  
+Formally, subword tokenization approximates the optimization:  
+$$
+\min_V \; \text{Loss}_{LM}(V) + \lambda |V|
+$$  
+where $V$ is the vocabulary, and $\lambda$ penalizes vocabulary size.
+
+#### Byte-Level Tokenization  
+Byte-level tokenization removes language boundaries entirely by treating each byte (0–255) as a symbol.  
+This ensures universal coverage—no OOVs—but at the cost of longer sequences and reduced interpretability.  
+Modern models like GPT-2 and GPT-3 use **byte-level BPE**, blending byte granularity with subword merges.
+
+#### Linguistic Implications  
+Tokenization implicitly encodes morphological and semantic structure.  
+Languages with rich morphology (e.g., Finnish, Turkish) benefit most from subword models because they capture recurring morphemes.  
+Analytic languages (e.g., English, Chinese) may lean on statistical segmentation to capture multi-word units.  
+The design of a tokenizer is thus both a **linguistic and computational act of abstraction**.
+
+**References**  
+- Sennrich, R., Haddow, B., & Birch, A. (2016). *Neural Machine Translation of Rare Words with Subword Units*. *ACL*.  
+- Kudo, T. (2018). *SentencePiece: A simple and language independent subword tokenizer and detokenizer for Neural Text Processing*. *EMNLP*.  
+- Devlin, J., Chang, M.-W., Lee, K., & Toutanova, K. (2019). *BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding*. *NAACL-HLT*.  
+- Radford, A., et al. (2019). *Language Models are Unsupervised Multitask Learners*. *OpenAI Technical Report*.  
+- Jurafsky, D., & Martin, J. H. (2023). *Speech and Language Processing* (3rd ed. draft).  
+
+:::
+
+---
+
+
+
+## <!-- 5.2.2 -->Applying Tokenization: From Text to Tokens
+
+- **Input:** raw string — "Hello, world! This is NLP."  
+- **Step 1:** Normalize (Unicode, lowercase if needed).  
+- **Step 2:** Split into tokens → ["Hello", ",", "world", "!", "This", "is", "NLP", "."]  
+- **Step 3:** Handle edge cases (contractions, emojis, hyphens).  
+- **Step 4:** Verify reversibility — detokenize to reconstruct text.  
+- **Goal:** obtain consistent, reversible token sequences for modeling.
+
+
+
+::: {.notes}
+### Detailed Notes
+- Demonstrate a concrete example of tokenization using whitespace and punctuation.  
+- Highlight that the same principles apply inside advanced subword tokenizers (the process just uses merge rules instead of spaces).  
+- Reinforce that tokenization is **not a universal truth** but a design choice that defines the model’s linguistic granularity.
+- Use this slide as the visual complement to your earlier theoretical ones.
+:::
+
+
+---
+
+
+## <!-- 5.2.4 -->Conceptual Mechanics: BPE, WordPiece, Unigram
+
+- **BPE:** frequent pair merges → subunits (data-driven morphology).  
+- **WordPiece:** merges chosen to **maximize corpus likelihood** (probabilistic).  
+- **Unigram (SentencePiece):** start with large vocab, prune to best subunits.  
+- **All aim** to balance **coverage**, **compression**, **learnability**.
+
+<figure>
+  <img src="../materials/assets/images/5.2.4_Subword_Mechanics_Creative.drawio.svg"
+       alt="**Figure:** .">
+  <figcaption>**Figure:** .</figcaption>
+</figure>
+
+::: {.notes}
+
+## Conceptual Mechanics: BPE, WordPiece, Unigram
+
+### Detailed Notes
+- BPE intuition: start at characters; iteratively merge the most frequent adjacent pairs; yields common morpheme-like chunks (“token + ization”).
+- WordPiece intuition: choose merges that improve a simple LM’s log-likelihood; more **probability-aware** segmentation.
+- Unigram intuition: assume a candidate vocab, then **prune** tokens that hurt total likelihood (mixture model view).
+- SentencePiece benefit: operates on raw bytes; **language-agnostic**; robust to rare scripts and emojis.
+
+### Deeper Dive
+- Shared objective: minimize encoding loss while constraining |V| (size) → better **statistical efficiency**.
+- These methods differ in **search strategy** but converge on similar subunits in practice given domain data.
+- Explain that exact algorithmic details + training pipeline fit better in the LLM module.
+
+:::
+
+---
+
+## <!-- 5.2.5 --> Tokenization & Tasks: Measuring the Impact (Conceptual Demo)
+
+- **What changes when you switch regimes?**  
+  - OOV rate, average tokens/doc, “meaning granularity.”  
+- **Effects on models:**  
+  - Sparse models: vocab size & sparsity patterns shift.  
+  - Dense/embeddings: neighborhood structure & analogy quality change.
+
+::: {.notes}
+
+## Tokenization & Tasks: Measuring the Impact (Conceptual Demo)
+
+### Detailed Notes
+- Walk a single sentence through word vs subword vs byte tokenization; **count tokens** and note OOV behavior.
+- Show how bigrams like “credit card” survive (word) vs become “credit▁card” (subword) vs multiple bytes (byte-level).
+- Discuss how **lexicon methods** (VADER/NRCLex) depend on word boundaries; subword/byte can complicate direct lexicon lookup.
+- For TF-IDF: subword vocab reduces OOV but may increase features and dilute interpretability; weigh trade-offs by task.
+
+### Deeper Dive
+- **Evaluation coupling:** tokenization influences cross-domain robustness and calibration (e.g., casing policies can swing NER F1).
+- **Fairness angle:** minority languages/scripts fare better with byte/subword tokenizers; but interpretation becomes harder.
+
+:::
+
+---
+
+
+## <!-- 5.2.7 -->Tokenization Is Task-Dependent
+
+- **Spam detection:** lowercase and simplify aggressively.  
+- **NER or contracts:** preserve case and punctuation.  
+- **Transformers:** use subword tokenization.  
+
+::: {.notes}
+
+## Spotlight: Tokenization Is Task-Dependent  
+
+### Detailed Notes  
+- Emphasize that there is **no universal preprocessing pipeline**—tokenization choices depend entirely on the downstream task and model architecture.  
+- Begin with contrasting examples:  
+  - For **spam detection**, case and punctuation rarely matter—lowercase everything, strip symbols, and normalize heavily.  
+  - For **named entity recognition (NER)** or **legal contracts**, capitalization, punctuation, and even section markers carry semantic value; these must be preserved.  
+  - For **transformer-based models**, subword tokenization (e.g., WordPiece or BPE) is required since it aligns with the model’s pretrained vocabulary.  
+- Frame tokenization as a **representation alignment problem**: the preprocessing step should produce the form of text that best matches how the model “understands” language.  
+- Illustrate with a short example comparing three versions of the same sentence processed for different tasks.  
+- Conclude by connecting to the next module—this principle of alignment between data and architecture will reappear when discussing embeddings and transformers.  
+
+### Deeper Dive  
+Tokenization is not a neutral preprocessing choice; it is an **epistemic decision** that shapes the representational granularity of a model.  
+Each tokenization regime defines what counts as a “unit of meaning,” thereby constraining what patterns can be learned.  
+
+Consider the tokenization function  
+$$
+\tau_T(x) : \text{text} \rightarrow \text{tokens}
+$$  
+parameterized by a task $T$.  
+The goal is to maximize the task-specific mutual information $I(\tau_T(X); Y_T)$—the shared information between tokenized text and target label.  
+This implicitly means that the **optimal tokenization differs across tasks**.  
+
+#### Examples of Task-Specific Alignment  
+- **Classification tasks (e.g., spam detection, sentiment):** statistical signals dominate; token boundaries can be coarse. Case folding and stopword removal simplify feature spaces without major semantic loss.  
+- **Information extraction or NER:** boundaries matter; case and punctuation encode entities, so rule-based or statistical tokenization preserving surface cues is optimal.  
+- **Morphologically rich languages:** finer-grained segmentation (subwords or morphemes) reduces vocabulary explosion and captures inflectional patterns.  
+- **LLMs and Transformers:** tokenization must be **architecturally compatible**—the embedding matrix of a model maps token IDs to vectors learned during pretraining. Using an inconsistent tokenizer (different from pretraining) yields severe degradation.  
+
+#### Trade-Offs  
+| Tokenization Type | Strengths | Weaknesses | Best For |
+|-------------------|------------|-------------|-----------|
+| Word-level | Simple, interpretable | OOV issues, ignores morphology | Traditional NLP, BoW/TF–IDF models |
+| Subword (BPE/WordPiece) | Handles rare words, multilingual | Complex, lower interpretability | Transformers, multilingual models |
+| Character/Byte | Universal coverage | Long sequences, high compute cost | Noisy text, multilingual, code data |
+
+#### Conceptual Perspective  
+Tokenization operationalizes the **philosophy of linguistic minimalism**: simplify until meaning loss becomes unacceptable.  
+Aggressive normalization in spam detection exemplifies minimalism; preserving orthography in NER exemplifies fidelity.  
+Both are correct—*for their context*.  
+
+The broader pedagogical insight: **representation design is contextual reasoning.**  
+Good data scientists don’t memorize a “best tokenizer”; they reason backward from task, language, and architecture to select the right abstraction level.  
+
+**References**  
+- Sennrich, R., Haddow, B., & Birch, A. (2016). *Neural Machine Translation of Rare Words with Subword Units*. *ACL*.  
+- Kudo, T. (2018). *SentencePiece: A simple and language independent subword tokenizer and detokenizer for Neural Text Processing*. *EMNLP*.  
+- Eisenstein, J. (2019). *Introduction to Natural Language Processing*. MIT Press.  
+- Jurafsky, D., & Martin, J. H. (2023). *Speech and Language Processing* (3rd ed. draft).  
+
+:::
+
+---
+
+# 5.2b Normalization
+
+---
+
+## <!-- 5.2.8 --> Why We Normalize Language
+
+- Goal: reduce **lexical variance** — map multiple surface forms to a single meaning.  
+- Helps models generalize across inflection, casing, and common words.  
+- Each normalization step trades **semantic nuance** for **statistical efficiency**.  
+
+
+
+::: {.notes}
+
+### Detailed Notes
+- Frame normalization as an intentional act of **linguistic compression** — simplifying input while retaining essential meaning.  
+- Explain that humans recognize “Run,” “running,” “ran” as the same lemma, but models see them as distinct tokens unless normalized.  
+- Use short examples to illustrate why normalization matters for BoW / TF-IDF pipelines.  
+- Transition: “Next, we’ll explore three standard techniques for lexical normalization.”
+:::
+
+---
+
+## <!-- 5.2.9 -->Stopword Filtering
+
+- Removes **function words** that carry grammar but little content.  
+- Examples: *the, and, of, to, but*  
+- **Caution:** keep semantically critical words such as *not, never, no*.  
+- Custom stopword lists improve domain performance (e.g., legal, medical).  
+
+<figure>
+  <img src="../materials/assets/images/Stop_Words_Filtering_Example.drawio.svg"
+       alt="**Figure:** Stopword removal impact on vocabulary size.">
+  <figcaption>**Figure:** Stopword removal impact on vocabulary size.</figcaption>
+</figure>
+
+::: {.notes}
+
+### Detailed Notes
+- Emphasize that stopword filtering reduces dimensionality and sparsity.  
+- Quantify: typical corpora shrink 15–25 % after stopword removal.  
+- Warn against over-filtering — negations drive sentiment polarity.  
+- Recommend building **domain-aware** lists instead of relying solely on NLTK defaults.
+:::
+
+---
+
+## <!-- 5.2.10 -->Stemming
+
+- **Heuristic truncation:** removes suffixes to reach root forms.  
+- Examples: *running → run*, *connected → connect*, *happily → happi*.  
+- Fast but crude — may yield non-words (*comput*).  
+
+
+<figure>
+  <img src="../materials/assets/images/Stemming_Example.drawio.svg"
+       alt="**Figure:** Example stemming transformations.">
+  <figcaption>**Figure:** Example stemming transformations.</figcaption>
+</figure>
+
+::: {.notes}
+
+### Detailed Notes
+- Explain that stemming ignores grammar and meaning — it’s rule-based morphology.  
+- Demonstrate with quick before/after tokens.  
+- Suitable for recall-oriented tasks like search or simple classifiers.  
+- Transition: “When interpretability matters, move from stems to lemmas.”
+:::
+
+---
+
+## <!-- 5.2.11 -->Lemmatization
+
+- Maps words to their **dictionary base form** (lemma).  
+- Uses **part-of-speech tagging** + morphological analysis.  
+- Examples:  
+  - “running” → *run (verb)*  
+  - “better” → *good (adjective)*  
+- Requires lexical resources (e.g., WordNet, spaCy, Stanza).  
+
+<figure>
+  <img src="../materials/assets/images/Lemmatization_Example.drawio.svg"
+       alt="**Figure:** Lemmatization example with POS awareness.">
+  <figcaption>**Figure:** Lemmatization example with POS awareness.</figcaption>
+</figure>
+
+::: {.notes}
+
+### Detailed Notes
+- Contrast with stemming: lemmatization consults dictionaries and grammar.  
+- Show POS-driven disambiguation — “flies” (noun vs verb).  
+- Mention runtime trade-off — slower but linguistically precise.  
+- Ideal for analytics, topic modeling, or explainable NLP.
+:::
+
+---
+
+## <!-- 5.2.12 -->Choosing the Right Level of Normalization
+
+| Technique | Linguistic Awareness | Output Type | Speed | Best Use Case |
+|:-----------|:---------------------|:-------------|:-------|:--------------|
+| Stopword Removal | None | Reduced vocab | Very fast | Simplify BoW / TF-IDF |
+| Stemming | Morphological (surface) | Truncated roots | Fast | Search, indexing |
+| Lemmatization | Morphological + syntactic | True lemmas | Moderate | Analytics / interpretability |
+
+- Each method controls how much **structure** vs. **noise** is kept.  
+- Balance **entropy reduction** with **semantic fidelity**.  
+
+
+::: {.notes}
+
+### Detailed Notes
+- Summarize normalization as a **continuum**, not a checklist.  
+- Explain how vocabulary size, sparsity, and interpretability shift along it.  
+- Encourage comparative testing: run all three and measure model impact.  
+- Transition forward → data-leakage discipline and reproducible pipelines.
+:::
+
+
+
+---
+
+## <!-- 5.2.13 -->Data Leakage Warning
+
+- Fit preprocessing (vectorizers, normalizers) on **training data only**.  
+- Apply learned transformations to validation/test sets.  
+- Example: computing IDF on full corpus leaks test information.  
+
+<figure>
+  <img src="../materials/assets/images/leaking.svg"
+       alt="**Figure:**">
+  <figcaption>**Figure:**</figcaption>
+</figure>
+
+::: {.notes}
+
+## Data Leakage Warning  
+
+### Detailed Notes  
+- Begin by explaining **data leakage** as the unintentional transfer of information from the test or validation set into the training process.  
+- Clarify that leakage can occur *before* modeling—during text preprocessing or feature extraction.  
+- Demonstrate with an example: fitting a TF–IDF vectorizer on the **entire corpus** instead of the training subset; the resulting IDF weights encode statistics from the test data.  
+- Use a simple diagram or sequence:  
+  1. Fit preprocessing (vectorizer, normalizer) on **train** only.  
+  2. Apply the trained transformations to **val/test** sets.  
+- Emphasize that leakage inflates metrics, giving a false sense of model performance.  
+- Connect to scientific integrity: reproducibility depends on isolation between training and evaluation data.  
+- Conclude with the practical guidance—*pipelines must preserve boundaries*.  
+
+### Deeper Dive  
+Data leakage in NLP is subtle because many preprocessing operations compute **corpus-wide statistics**.  
+In supervised settings, any step that estimates parameters using *all data* introduces information from the evaluation set into the model, violating independence assumptions.  
+
+Formally, suppose a preprocessing step $T$ transforms text $x$ using corpus statistics $\theta$:
+$$
+T(x; \theta) = \text{feature representation}, \quad \text{where } \theta = g(\mathcal{D})
+$$
+If $\mathcal{D}$ includes the test data, then model training indirectly conditions on test information, biasing downstream metrics.  
+The correct protocol is:
+$$
+\theta_{\text{train}} = g(\mathcal{D}_{\text{train}}), \quad T_{\text{test}}(x) = T(x; \theta_{\text{train}})
+$$  
+
+Examples of leakage sources in text analysis:  
+1. **Vectorizers:** TF–IDF or CountVectorizer fitted on the full dataset leak document frequency statistics.  
+2. **Normalizers and Scalers:** Mean/variance computed across all data embed test statistics.  
+3. **Tokenizers or vocabulary builders:** When learned from all text, they “see” rare test tokens and encode them into the model vocabulary.  
+4. **Feature selection:** Selecting features based on corpus-level mutual information or chi-square with labels includes test-label information.  
+
+The bias manifests as **optimistic generalization estimates**—evaluation metrics that are systematically higher than true out-of-sample performance.  
+In production, this results in performance collapse when deployed on genuinely unseen data.  
+
+Mitigation strategies:  
+- Implement end-to-end **pipelines** (`sklearn.pipeline` or equivalent) where transformations are fit and applied separately per fold or split.  
+- Use **nested cross-validation** for hyperparameter tuning, ensuring that tuning does not access test folds.  
+- Always log the random seed, data split ratio, and transformation parameters to ensure auditability.  
+
+This concept parallels best practices in experimental design: *never let the test environment inform the experimental procedure.*  
+In NLP, this principle ensures the model learns **language structure**, not **dataset artifacts**.  
+
+**References**  
+- Kaufman, S., Rosset, S., Perlich, C., & Stitelman, O. (2012). *Leakage in data mining: Formulation, detection, and avoidance*. *ACM Transactions on Knowledge Discovery from Data*, 6(4), 1–21.  
+- Raschka, S., & Mirjalili, V. (2020). *Machine Learning with PyTorch and Scikit-Learn*. Packt Publishing.  
+- Jurafsky, D., & Martin, J. H. (2023). *Speech and Language Processing* (3rd ed. draft).  
+
+:::
+
+---
+
+# 5.3 Linguistic Feature Extraction
+
+---
+
+## <!-- 5.3.1 -->Part-of-Speech (POS) Tagging & Dependency Basics
+
+- **POS tagging:** Assigns grammatical roles (noun, verb, adjective, etc.).  
+- **Uses:**  
+  - Feature engineering (e.g., ratio of nouns to verbs).  
+  - Filtering by word type (e.g., adjectives for sentiment).  
+- **Dependency parsing (intro only):** shows grammatical relationships.  
+  - Example: “The dog chased the ball” → subject = dog, object = ball.  
+
+<figure>
+  <img src="../materials/assets/images/5.3.1.Simple_Sentence_Structure.drawio.svg"
+       alt="**Figure:** POS tags and dependency relations in a sample sentence.">
+  <figcaption>**Figure:** POS tags and dependency relations in a sample sentence.</figcaption>
+</figure>
+
+::: {.notes}
+
+## Part-of-Speech (POS) Tagging & Dependency Basics  
+
+### Detailed Notes  
+- Introduce **part-of-speech (POS) tagging** as the process of assigning grammatical categories—noun, verb, adjective, etc.—to tokens.  
+- Use a simple sentence example: “The quick brown fox jumps over the lazy dog.” Show how each word gets a POS tag.  
+- Explain that POS tagging transforms a flat sequence of tokens into a **structured representation**, capturing the grammatical skeleton of a sentence.  
+- Discuss applications in feature engineering:  
+  - The ratio of nouns to verbs can indicate formality or narrative style.  
+  - Extracting only adjectives and adverbs is useful for **sentiment analysis**.  
+- Transition to **dependency parsing**—the process of identifying grammatical relationships (subject, object, modifier).  
+- Demonstrate visually with “The dog chased the ball”: arrows showing `dog → chased` (subject) and `ball → chased` (object).  
+- Emphasize that dependency parsing enriches feature extraction, enabling models to consider syntax and not just word frequency.  
+- Conclude by noting that these linguistic features add interpretability to statistical models—bridging linguistic theory and machine learning.  
+
+### Deeper Dive  
+POS tagging and dependency parsing represent the formal intersection between **syntax** and **computational modeling**.  
+They convert the surface structure of language into a relational graph suitable for downstream analysis.  
+
+#### POS Tagging  
+Formally, POS tagging is a **sequence labeling problem**.  
+Given a sequence of tokens $x_1, x_2, \dots, x_n$, the goal is to find the most probable tag sequence $t_1, t_2, \dots, t_n$:  
+$$
+\hat{t}_{1:n} = \arg\max_{t_{1:n}} P(t_{1:n} \mid x_{1:n})
+$$  
+Early taggers (e.g., Hidden Markov Models) used bigram assumptions and maximum likelihood estimation for transition ($P(t_i \mid t_{i-1})$) and emission probabilities ($P(x_i \mid t_i)$).  
+Modern taggers (e.g., spaCy, Stanza, BERT-based models) use contextual embeddings and neural architectures (biLSTM-CRF, Transformers) to learn $P(t_i \mid x_{1:n})$ directly, improving accuracy through bidirectional context.  
+
+#### Dependency Parsing  
+Dependency parsing constructs a **directed acyclic graph (DAG)** $G = (V, E)$, where each vertex $v_i$ corresponds to a token, and edges $(v_i, v_j)$ represent grammatical dependencies (e.g., *subject*, *object*, *modifier*).  
+Each edge can be labeled with a dependency type (e.g., `nsubj`, `dobj`, `amod`).  
+
+Two major paradigms:  
+1. **Transition-based parsing:** builds dependency trees incrementally using actions (SHIFT, REDUCE, LEFT-ARC, RIGHT-ARC).  
+2. **Graph-based parsing:** scores all possible edges and selects the highest-scoring tree via maximum spanning tree algorithms.  
+
+Dependency relations encode **functional grammar**—the semantic roles words play relative to each other.  
+For example, in “The company launched a new product,” the dependency `nsubj(launched, company)` and `dobj(launched, product)` capture who did what to whom, providing structure absent in bag-of-words models.  
+
+#### Why It Matters for Feature Engineering  
+- **Stylometry and authorship analysis:** POS distribution and syntactic complexity are strong stylistic markers.  
+- **Sentiment analysis:** adjectives and adverbs carry evaluative meaning; dependency paths (e.g., adjective modifying a noun) reveal target-specific sentiment.  
+- **Readability and writing quality:** mean sentence length, noun-verb ratio, and dependency tree depth correlate with syntactic complexity.  
+- **Explainability:** dependency-based features enhance interpretability—e.g., the model associates positive sentiment with *amod* (“good service”) relationships, not arbitrary word co-occurrence.  
+
+From a linguistic standpoint, POS tagging and dependency parsing operationalize Chomsky’s distinction between **surface structure** (word order) and **deep structure** (grammatical relations).  
+From a computational standpoint, they map language into **graph-structured data**, opening the door to modern graph neural network architectures for NLP.
+
+**References**  
+- Toutanova, K., Klein, D., Manning, C. D., & Singer, Y. (2003). *Feature-rich part-of-speech tagging with a cyclic dependency network*. *NAACL-HLT*.  
+- Nivre, J. (2008). *Algorithms for Deterministic Dependency Parsing*. *Computational Linguistics*, 34(4), 513–553.  
+- Manning, C. D. et al. (2014). *The Stanford CoreNLP natural language processing toolkit*. *ACL System Demonstrations*.  
+- Jurafsky, D., & Martin, J. H. (2023). *Speech and Language Processing* (3rd ed. draft).  
+
+
+:::
+
+---
+
+## <!-- 5.3.2 -->Named Entity Recognition (NER)
+
+- Identifies **entities** such as people, organizations, locations, dates, and amounts.  
+- Example: *“Apple acquired Beats for $3B in 2014”* →  
+  - Apple = ORG, Beats = ORG, $3B = MONEY, 2014 = DATE  
+- **Applications:**  
+  - PII redaction (masking names, emails, addresses).  
+  - Business analysis (e.g., counting ORG mentions in financial filings).  
+
+<figure>
+  <img src="../materials/assets/images/NER_Color_Coded_Sentence_Space_Mission.drawio.svg"
+       alt="**Figure:** Highlighted entities in text.">
+  <figcaption>**Figure:** Highlighted entities in text.</figcaption>
+</figure>
+
+::: {.notes}
+
+## Named Entity Recognition (NER)  
+
+### Detailed Notes  
+- Start by explaining that **Named Entity Recognition (NER)** is the process of identifying and classifying spans of text that refer to **real-world entities** such as people, organizations, dates, and monetary values.  
+- Use the example sentence: *“Apple acquired Beats for $3B in 2014.”* Highlight entities with color-coded tags (ORG, MONEY, DATE).  
+- Emphasize that NER operates above the token level—recognizing **multi-token phrases** (e.g., “New York University”).  
+- Connect NER to downstream applications:  
+  - **Privacy and compliance:** automatically redacting PII such as names, addresses, and IDs.  
+  - **Information extraction:** counting company mentions, analyzing acquisition trends, or detecting product references.  
+  - **Data enrichment:** linking text to structured knowledge bases (e.g., “Apple” → entity in a corporate database).  
+- Discuss accuracy trade-offs: dictionary/rule-based vs. statistical vs. transformer-based models.  
+- Encourage students to view NER as a bridge between unstructured and structured data—it transforms narrative text into actionable information.  
+
+### Deeper Dive  
+NER formalizes the concept of **referential grounding**—mapping linguistic expressions to entities in the world.  
+At its core, it’s a **sequence labeling** or **span classification** task.
+
+#### 1. Classical Formulation  
+Given a sequence of tokens $x_1, \dots, x_n$, NER assigns each token a tag $t_i$ from the BIO (Begin, Inside, Outside) scheme:  
+$$
+t_i \in \{\text{B-ORG}, \text{I-ORG}, \text{B-PER}, \text{I-PER}, \text{O}, \ldots \}
+$$  
+The objective is:  
+$$
+\hat{t}_{1:n} = \arg\max_{t_{1:n}} P(t_{1:n} \mid x_{1:n})
+$$  
+Traditional models—Conditional Random Fields (CRFs) and BiLSTM-CRFs—capture local and sequential dependencies between tokens.  
+
+#### 2. Neural and Transformer-Based NER  
+Modern systems (e.g., spaCy, HuggingFace models) use **contextual embeddings** (BERT, RoBERTa) to represent tokens:  
+each embedding $h_i$ encodes bidirectional context, enabling fine-grained disambiguation (e.g., *“Apple”* the company vs. *“apple”* the fruit).  
+These systems treat NER as a classification task over contextual embeddings or as span extraction using start–end token predictions.  
+
+#### 3. Types of Named Entities  
+Common categories:  
+| Category | Examples | Notes |
+|-----------|-----------|-------|
+| PERSON | “Elon Musk”, “Marie Curie” | Requires capitalization and context cues |
+| ORG | “Google”, “United Nations” | Often overlaps with product names |
+| LOC/GPE | “Paris”, “Mount Everest” | Distinguish geopolitical entities (GPE) from natural ones (LOC) |
+| DATE/TIME | “January 2025”, “last Friday” | Includes absolute and relative temporal expressions |
+| MONEY/QUANTITY | “$3B”, “50 kilograms” | Numeric + unit tokens |
+| PRODUCT/EVENT | “iPhone 15”, “World Cup 2022” | Domain- or corpus-specific additions |
+
+#### 4. Domain Adaptation & Limitations  
+NER performance depends heavily on domain.  
+A model trained on newswire (e.g., CoNLL-2003) performs poorly on biomedical or legal text due to **domain shift** in entity types and syntax.  
+Fine-tuning on domain-specific corpora (e.g., SciSpacy for biomedical text, Legal-BERT for contracts) is essential.  
+
+Errors commonly arise from:  
+- **Ambiguity:** “Amazon” (ORG vs. LOC).  
+- **Nested entities:** “Bank of America headquarters in Charlotte.”  
+- **Context drift:** differing capitalization conventions or OCR artifacts.  
+
+#### 5. Ethical and Practical Considerations  
+- **PII Handling:** NER supports compliance (GDPR, HIPAA) but must be paired with redaction and audit controls.  
+- **Bias:** Models can encode cultural or gender biases—e.g., misclassifying certain names or missing non-Western entities.  
+- **Entity Linking:** NER is the first step in connecting entities to knowledge graphs, improving interpretability and traceability in downstream systems.  
+
+In short, NER is the *semantic hinge* between text and structured analytics. It allows organizations to transition from “documents” to “data.”  
+
+**References**  
+- Tjong Kim Sang, E. F., & De Meulder, F. (2003). *Introduction to the CoNLL-2003 Shared Task: Language-Independent Named Entity Recognition*. *CoNLL*.  
+- Lample, G., Ballesteros, M., Subramanian, S., Kawakami, K., & Dyer, C. (2016). *Neural Architectures for Named Entity Recognition*. *NAACL-HLT*.  
+- Devlin, J., Chang, M.-W., Lee, K., & Toutanova, K. (2019). *BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding*. *NAACL-HLT*.  
+- Jurafsky, D., & Martin, J. H. (2023). *Speech and Language Processing* (3rd ed. draft).  
+
+:::
+
+---
+
+## <!-- 5.3.3 -->N-Grams, Frequency, and Co-Occurrence
+
+- **N-grams:** word sequences capturing short context.  
+  - Unigrams: “I”, “love”, “pizza.”  
+  - Bigrams: “love pizza.”  
+  - Trigrams: “I love pizza.”  
+- **Frequency counts:** identify dominant words or phrases.  
+- **Co-occurrence:** detect words appearing together often.  
+  - Example: “fraud” with “card,” “transaction.”  
+
+<figure>
+  <img src="../materials/assets/images/Ngrams_Unigrams_Bigrams_Trigrams.drawio.svg"
+       alt="**Figure:** Frequency distribution and co-occurrence network.">
+  <figcaption>**Figure:** Frequency distribution and co-occurrence network.</figcaption>
+</figure>
+
+::: {.notes}
+
+## N-Grams, Frequency, and Co-Occurrence  
+
+### Detailed Notes  
+- Begin by defining **n-grams** as contiguous sequences of *n* words or tokens that capture short-range context.  
+- Demonstrate interactively:  
+  - Unigram → single words (“pizza”)  
+  - Bigram → two-word phrases (“love pizza”)  
+  - Trigram → three-word expressions (“I love pizza”)  
+- Emphasize that increasing *n* expands context but exponentially grows the vocabulary size.  
+- Show domain contrast examples:  
+  - In banking text, bigrams like “credit card,” “fraud detection,” or “interest rate” are informative.  
+  - In social media, frequent bigrams might include “so happy” or “can’t wait.”  
+- Introduce **frequency analysis** as a diagnostic tool—word clouds, top n-gram lists, or term frequencies visualize topic salience but need normalization (e.g., by document length).  
+- Transition to **co-occurrence**: explain that it measures associative relationships—how often two words appear in the same context window.  
+- Use a small table or network diagram showing related terms like (“fraud,” “card,” “transaction”) or (“happy,” “birthday,” “party”).  
+- Warn against naive interpretation—high co-occurrence doesn’t imply causation or semantic equivalence.  
+- Conclude by noting that these techniques form the foundation of **distributional semantics**, paving the way toward embeddings and vector representations.  
+
+### Deeper Dive  
+N-gram and co-occurrence analysis are the conceptual precursors to modern representation learning—they quantify **distributional structure**, the statistical patterns through which meaning emerges.  
+
+#### 1. Mathematical Framing  
+For a sequence of tokens $x_1, x_2, \dots, x_T$, an n-gram model estimates the conditional probability of the next word given the previous $n-1$:  
+$$
+P(x_t \mid x_{t-n+1:t-1}) = \frac{\text{count}(x_{t-n+1:t})}{\text{count}(x_{t-n+1:t-1})}.
+$$  
+This is the basis of traditional language modeling (Markov assumption).  
+As *n* increases, the model captures more syntactic and semantic structure but suffers from **data sparsity**—most n-grams never appear in small corpora.  
+Smoothing techniques (e.g., Laplace, Kneser–Ney) were developed to handle unseen sequences.
+
+#### 2. Frequency and Zipf’s Law  
+Word frequencies in natural language follow **Zipf’s Law**:  
+$$
+f(r) \propto \frac{1}{r^\alpha}, \quad \alpha \approx 1,
+$$  
+where $r$ is the rank of a word by frequency.  
+This power-law distribution means a few words dominate counts (e.g., “the,” “is”), while most words are rare.  
+Hence, normalization (TF–IDF, log-scaling) is essential to balance representation between common and informative terms.
+
+#### 3. Co-occurrence and Association Strength  
+A co-occurrence matrix $C$ counts how often two words $i$ and $j$ appear within a window $w$:  
+$$
+C_{ij} = \sum_{t} \mathbf{1}\{x_t = i, x_{t+k} = j, |k| \le w\}.
+$$  
+Raw counts are often normalized using **Pointwise Mutual Information (PMI)** to emphasize meaningful associations:  
+$$
+PMI(i, j) = \log \frac{P(i, j)}{P(i) P(j)} = \log \frac{C_{ij} \, N}{C_i \, C_j}.
+$$  
+PMI highlights rare but strongly related pairs (e.g., “credit–fraud”) while downweighting common function-word co-occurrences.  
+However, PMI is unstable for low-frequency pairs, leading to variants like **Positive PMI (PPMI)** or **Shifted PMI** used in Word2Vec and GloVe training.  
+
+#### 4. Conceptual Implications  
+- **Local structure:** N-grams encode syntactic proximity—useful for tasks like speech recognition or predictive text.  
+- **Global structure:** Co-occurrence networks reveal semantic neighborhoods—foundation for **distributional hypothesis** (“You shall know a word by the company it keeps,” Firth, 1957).  
+- **Transition to embeddings:** Dimensionality reduction on co-occurrence matrices (e.g., SVD) gives rise to vector-space models, which later evolved into Word2Vec and GloVe.  
+
+These methods, though simple, express a profound idea: **meaning is emergent from statistical context**.  
+Even before neural embeddings, co-occurrence analysis captured the skeleton of semantics that modern models now flesh out.  
+
+**References**  
+- Firth, J. R. (1957). *A Synopsis of Linguistic Theory, 1930–1955*. Oxford University Press.  
+- Church, K. W., & Hanks, P. (1990). *Word Association Norms, Mutual Information, and Lexicography*. *Computational Linguistics*, 16(1), 22–29.  
+- Manning, C. D., & Schütze, H. (1999). *Foundations of Statistical Natural Language Processing*. MIT Press.  
+- Jurafsky, D., & Martin, J. H. (2023). *Speech and Language Processing* (3rd ed. draft).  
+
+
+
+:::
+
+---
+
+
+## <!-- 5.3.5 -->Lexical Diversity & Readability
+
+- **Type–token ratio (TTR):** unique words ÷ total words.  
+  - Caution: shorter texts appear more diverse.  
+- **Readability metrics:**  
+  - Flesch Reading Ease, Flesch–Kincaid Grade Level.  
+- **Applications:**  
+  - Loan narratives → complexity and literacy.  
+  - Marketing copy → repetition vs. variety.  
+
+
+::: {.notes}
+
+## Lexical Diversity & Readability  
+
+### Detailed Notes  
+- Start by defining **lexical diversity** as a measure of vocabulary richness—how varied the word usage is within a text.  
+- Introduce the **Type–Token Ratio (TTR)** as the simplest metric:  
+  - $TTR = \frac{\text{unique words}}{\text{total words}}$  
+  - Use an example: “The cat sat on the mat” → 5 unique words / 6 total = 0.83.  
+- Emphasize that TTR decreases as text length increases because longer texts naturally repeat words.  
+- Mention more stable alternatives (e.g., *root TTR* or *corrected TTR*) for comparing documents of different lengths.  
+- Transition to **readability metrics**, which estimate how easy a text is to read.  
+  - Introduce **Flesch Reading Ease (FRE)** and **Flesch–Kincaid Grade Level (FKGL)**.  
+  - Explain how these use *average sentence length* and *syllables per word* as proxies for cognitive load.  
+- Discuss applications:  
+  - In **loan narratives**, high complexity may correlate with borrower education or formality.  
+  - In **marketing copy**, moderate complexity and variety correlate with engagement and clarity.  
+- Encourage students to think critically about what these scores measure—syntactic and lexical structure, not necessarily *true comprehension*.  
+- Conclude by connecting these features to stylistic and demographic inference, linking back to earlier discussions on author identification and writing style.  
+
+### Deeper Dive  
+Lexical diversity and readability metrics quantify surface-level linguistic complexity. They are among the oldest quantitative tools in stylometry, psycholinguistics, and education research.
+
+#### 1. Lexical Diversity Measures  
+The **Type–Token Ratio (TTR)** is intuitive but unstable with text length. For two texts with similar style but different lengths, the longer text will appear less diverse simply because word repetition is inevitable.  
+
+To mitigate this, researchers use variants such as:  
+- **Root TTR (RTTR):** $RTTR = \frac{\text{types}}{\sqrt{2 \times \text{tokens}}}$  
+- **Corrected TTR (CTTR):** $CTTR = \frac{\text{types}}{\sqrt{2 \times \text{tokens}}}}$  
+- **Measure of Textual Lexical Diversity (MTLD):** measures how many tokens can be processed before the TTR drops below a threshold, offering stability across lengths.  
+
+High lexical diversity indicates rich vocabulary and stylistic variation; low diversity suggests formulaic or repetitive writing.  
+However, domain context matters—scientific or legal writing intentionally restricts vocabulary for precision.  
+
+#### 2. Readability Metrics  
+Readability formulas arose from educational psychology in the mid-20th century, aiming to estimate the grade level required to comprehend a text.  
+The **Flesch Reading Ease (FRE)** score is defined as:  
+$$
+FRE = 206.835 - 1.015 \frac{\text{words}}{\text{sentences}} - 84.6 \frac{\text{syllables}}{\text{words}}
+$$  
+Higher scores indicate simpler text (e.g., 90–100 = “Very Easy”), while lower scores indicate complex or academic writing.  
+The **Flesch–Kincaid Grade Level (FKGL)** reformulates this as an educational grade estimate:  
+$$
+FKGL = 0.39 \frac{\text{words}}{\text{sentences}} + 11.8 \frac{\text{syllables}}{\text{words}} - 15.59
+$$  
+Other indices—like the **Gunning Fog Index** or **SMOG Grade**—use similar constructs but vary constants and weighting.  
+
+#### 3. Conceptual Limitations  
+- These metrics approximate **syntactic and phonological difficulty**, not actual comprehension.  
+- They ignore semantic coherence, background knowledge, or reader motivation.  
+- Biases arise with **multilingual or non-native corpora**, where longer words do not necessarily imply complexity.  
+
+#### 4. Applications and Interpretive Cautions  
+- **Linguistic profiling:** Readability and lexical diversity can reveal domain differences—regulatory filings vs. consumer reviews.  
+- **Stylometry:** Combining TTR and readability helps distinguish authors or genres.  
+- **Sociolinguistic insight:** Complex phrasing and dense nominalization often indicate institutional or bureauc
+
+:::
+
+---
+
+
+## <!-- 5.3.7 -->Features Are Task-Dependent
+
+- Not all linguistic features are equally valuable.  
+- **Sentiment analysis:** adjectives and adverbs.  
+- **Fraud detection:** money, dates (NER).  
+- **Readability:** sentence length, diversity.  
+
+<figure>
+  <img src="../materials/assets/images/Dumpster_Fire.jpg"
+       alt="**Figure:** Examples of task-specific linguistic features.">
+  <figcaption>**Figure:** Examples of task-specific linguistic features.</figcaption>
+</figure>
+
+::: {.notes}
+
+## Spotlight: Features Are Task-Dependent  
+
+### Detailed Notes  
+- Reinforce the core principle: **linguistic feature selection must align with task objectives and data characteristics.**  
+- Open by revisiting earlier examples—students have now seen POS, NER, n-grams, sentiment, and readability features. Ask: *“Which of these matter for which tasks?”*  
+- Use three short contrasting examples to show the concept of alignment:  
+  - **Sentiment analysis:** adjectives and adverbs carry evaluative meaning (“terrible,” “excellent”).  
+  - **Fraud detection:** entities like MONEY, DATE, and ORG (from NER) are critical signals.  
+  - **Readability or education analytics:** sentence length, lexical diversity, and TTR are more informative than POS tags.  
+- Encourage students to reflect on whether features are **descriptive** (interpretable but sparse) or **predictive** (dense but abstract).  
+- Emphasize efficiency: more features ≠ better model. The right subset improves generalization and interpretability.  
+- End the slide by previewing the next topic—**representation learning**—where feature extraction becomes automated through vectorization and embeddings.  
+
+### Deeper Dive  
+Feature engineering in NLP is fundamentally an exercise in **representational sufficiency**—capturing the information necessary for a specific inference task while minimizing noise and redundancy.  
+The optimal feature set varies across tasks because each linguistic phenomenon contributes differently to the target signal.  
+
+#### 1. Task–Feature Alignment  
+Each NLP task corresponds to a different mapping from linguistic structure to prediction target:  
+| Task | Primary Linguistic Layer | Example Features | Reason |
+|------|---------------------------|------------------|---------|
+| Sentiment Analysis | Lexical / Morphological | Adjectives, adverbs, intensifiers | Encode affective polarity |
+| Fraud / Compliance | Semantic / Named Entities | MONEY, DATE, ORG | Capture transaction or event semantics |
+| Readability / Education | Syntax / Lexicon | Sentence length, TTR, clause depth | Reflect cognitive complexity |
+| Authorship | Function Words / Syntax | POS trigrams, punctuation | Reveal stylistic idiolect |
+| Topic Modeling | Lexical | n-grams, TF–IDF weights | Capture topical content |
+
+This table illustrates that *no single feature type generalizes across all NLP objectives*.  
+The correct feature space $F_T$ for task $T$ is one that maximizes task-specific mutual information:  
+$$
+I(F_T; Y_T) = H(F_T) - H(F_T \mid Y_T)
+$$  
+Selecting features that are uninformative for $Y_T$ (the target variable) only adds noise and increases variance.  
+
+#### 2. The Bias–Variance Trade-off in Feature Design  
+Feature complexity directly interacts with model generalization:  
+- **Under-featured models** (e.g., only bag-of-words) have high bias—they miss nuanced patterns.  
+- **Over-featured models** (e.g., hundreds of overlapping linguistic cues) have high variance—they overfit.  
+Thus, effective feature engineering minimizes expected error:  
+$$
+E[(Y - \hat{Y})^2] = \text{Bias}^2 + \text{Variance} + \text{Irreducible Error}.
+$$  
+This reinforces why feature selection is not about volume but **alignment and parsimony**.  
+
+#### 3. Interpretability vs. Automation  
+Feature-based pipelines offer **interpretability**: each variable (e.g., adjective ratio, Flesch score) has a clear linguistic meaning.  
+However, they require **domain expertise** and manual design.  
+Representation learning (e.g., embeddings, transformers) automates this by learning latent features, but interpretability declines.  
+Understanding traditional feature-task alignment helps practitioners audit and explain model decisions later—critical for fairness and transparency.  
+
+#### 4. Practical Implications  
+When designing applied NLP systems:  
+- Define the **task hypothesis** before feature engineering—what linguistic cues plausibly predict the target?  
+- Prototype with interpretable features first, then compare with learned embeddings.  
+- Validate feature contribution empirically (e.g., via ablation or permutation importance).  
+- Document each feature’s rationale, source, and limitations for reproducibility and governance.  
+
+Ultimately, this slide teaches that **good NLP engineers think like linguists**: they align representational choices with communicative function.  
+That reasoning mindset remains essential even when using automated representation learning.  
+
+**References**  
+- Guyon, I., & Elisseeff, A. (2003). *An introduction to variable and feature selection*. *Journal of Machine Learning Research*, 3, 1157–1182.  
+- Bender, E. M., & Koller, A. (2020). *Climbing towards NLU: On meaning, form, and understanding in the age of data*. *ACL*.  
+- Eisenstein, J. (2019). *Introduction to Natural Language Processing*. MIT Press.  
+- Jurafsky, D., & Martin, J. H. (2023). *Speech and Language Processing* (3rd ed. draft).  
+
+:::
+
+---
+
+## <!-- 5.3.8 --> Bridge: From Linguistic Features to Learned Representations
+
+- What we've learned so far
+
+---
+
+# 5.4 Representations 
+
+---
+
+
+## <!-- 5.4.1 -->Why We Use Embeddings
+
+- Deep learning models **cannot process raw text**.  
+- Embeddings convert **discrete symbols** (words, pixels, notes) into **continuous vectors**.  
+- These vectors encode **semantic and relational structure** that models can learn from.  
+- Every data type—**text, audio, video**—has its own embedding model suited to its modality.  
+
+<figure>
+  <img src="../materials/assets/images/embedding_models.drawio.svg"
+       alt="**Figure:** Illustration of three embedding pipelines for text, audio, and video. Each transforms raw data into numerical vector spaces the network can understand.">
+  <figcaption>**Figure:** Illustration of three embedding pipelines for text, audio, and video. Each transforms raw data into numerical vector spaces the network can understand.</figcaption>
+</figure>
+
+::: {.notes}
+
+## Why We Use Embeddings  
+
+### Detailed Notes  
+- Start with the big picture: neural nets manipulate numbers, not symbols.  
+- Emphasize that embedding = *representation design*—a mapping from discrete objects to points in a continuous space.  
+- Use analogies: pixels → CNN filters → image embeddings; words → token embeddings → language understanding.  
+- Key intuition: embeddings let models reason geometrically—“closeness in space” ≈ “semantic similarity.”  
+- Encourage students to think of embeddings as the **translation layer** between human meaning and mathematical operations.
+
+### Deeper Dive  
+Formally, an embedding is a function  
+$$f: \text{token} \rightarrow \mathbf{v} \in \mathbb{R}^d,$$  
+where $d$ is the embedding dimension.  
+- High-dimensional spaces capture subtle patterns but cost more computation.  
+- In NLP, embeddings make linear algebra express linguistic structure; e.g., dot products approximate similarity, angles encode analogy.  
+- Mention that embeddings generalize across modalities—foundation for multimodal AI.  
+
+:::
+
+
+---
+
+
+## <!-- 5.4.2 -->Bag-of-Words (BoW) & TF-IDF
+
+- **Bag-of-Words:** represents text as simple word counts.  
+  - Intuitive, interpretable, but ignores order and context.  
+- **TF-IDF (Term Frequency–Inverse Document Frequency):**  
+  - Adjusts frequency by informativeness.  
+  - \( \text{IDF} = \log\left(\frac{N}{n_t}\right) \) where *N* = total docs, *nₜ* = docs containing term *t*.  
+  - TF–IDF = TF × IDF.  
+- **Considerations:** vocabulary growth, n-gram ranges, and hashing trick.  
+- **Limitations:** sparse, memory-heavy, no semantic relationships or polysemy handling.  
+
+::: {.notes}
+
+## Bag-of-Words (BoW) & TF-IDF  
+
+### Detailed Notes  
+- Introduce **Bag-of-Words (BoW)** as the foundational idea of converting text into numerical form through word counts.  
+- Use a small corpus example (e.g., two sentences) to build a term–document matrix manually to show how raw counts work.  
+- Emphasize interpretability: each column corresponds to a real word, making feature weights easy to explain to non-technical stakeholders.  
+- Transition to **TF–IDF (Term Frequency–Inverse Document Frequency):** explain how it rebalances BoW by reducing the influence of ubiquitous words (e.g., “the,” “and”) and upweighting domain-specific ones (e.g., “loan,” “fraud”).  
+- Derive or display the formula:  
+  - $TFIDF(t, d) = TF(t, d) \times IDF(t)$, where  
+    $IDF(t) = \log\left(\frac{N}{n_t}\right)$,  
+    $N$ = number of documents, and $n_t$ = number containing term $t$.  
+- Explain intuitively: frequent words within a document are important, but those that appear everywhere are not informative.  
+- Mention the **hashing trick**: allows fixed-length feature vectors without storing vocabularies, trading transparency for memory efficiency.  
+- Note practical considerations:  
+  - Large vocabularies can explode feature space dimensionality.  
+  - N-gram features (bigrams, trigrams) improve context capture but worsen sparsity.  
+- Conclude by clarifying that BoW and TF–IDF are **sparse representations**—they capture frequency, not meaning.  
+
+### Deeper Dive  
+The BoW and TF–IDF models embody the **distributional hypothesis** that meaning is reflected in word frequency patterns, but they do so using explicitly count-based, context-free statistics.  
+
+#### 1. Mathematical Foundation  
+For a corpus of $N$ documents and vocabulary $V = \{t_1, \dots, t_m\}$, each document $d_i$ is represented as a vector:  
+$$
+\mathbf{v}_i = [TFIDF(t_1, d_i), TFIDF(t_2, d_i), \dots, TFIDF(t_m, d_i)].
+$$  
+This creates a high-dimensional **document–term matrix (DTM)**.  
+Such matrices are *sparse* because most words do not occur in most documents, making memory and computation expensive for large corpora.  
+
+#### 2. TF–IDF Rationale  
+TF–IDF can be derived from **information theory**.  
+The IDF term approximates the *inverse probability* of a term appearing in a random document—analogous to self-information:  
+$$
+IDF(t) = \log\frac{1}{P(t)} = \log\frac{N}{n_t}.
+$$  
+Thus, TF–IDF weights terms by their *information gain* relative to their commonness.  
+Common stopwords have low IDF, while distinctive terms carry higher weight.  
+Many libraries (e.g., scikit-learn) use a **smoothed variant**:  
+$$
+IDF_{smooth}(t) = \log\left(\frac{1 + N}{1 + n_t}\right) + 1,
+$$  
+which avoids division by zero and dampens the impact of rare words.  
+
+#### 3. The Hashing Trick  
+The hashing trick maps tokens into a fixed-length vector via a hash function $h(t)$:  
+$$
+v_i[h(t)] \mathrel{+}= \text{TFIDF}(t, d_i).
+$$  
+Collisions occur when two tokens share the same hash index, but with large dimensionality (e.g., $2^{20}$ features), these effects are negligible.  
+This technique enables **streaming vectorization**—useful for large or dynamic corpora where maintaining an explicit vocabulary is impractical.  
+
+#### 4. Limitations and Extensions  
+- **No semantics:** BoW and TF–IDF treat “dog” and “puppy” as unrelated.  
+- **No order or syntax:** “dog bites man” and “man bites dog” are indistinguishable.  
+- **Polysemy and synonymy:** same word, multiple meanings; different words, same meaning.  
+To address these, low-rank approximations (LSA/SVD) and dense embeddings (Word2Vec, GloVe) were developed—topics introduced next.  
+
+#### 5. Interpretability and Practical Relevance  
+Despite their simplicity, TF–IDF features remain competitive baselines for many classification and clustering tasks (e.g., spam detection, topic grouping).  
+They provide transparency—each dimension corresponds to an observable linguistic signal, unlike dense embeddings, where dimensions are latent.  
+In applied NLP, BoW/TF–IDF remains invaluable for audits, model debugging, and explainable AI.  
+
+**References**  
+- Sparck Jones, K. (1972). *A statistical interpretation of term specificity and its application in retrieval*. *Journal of Documentation*, 28(1), 11–21.  
+- Salton, G., & Buckley, C. (1988). *Term-weighting approaches in automatic text retrieval*. *Information Processing & Management*, 24(5), 513–523.  
+- Manning, C. D., Raghavan, P., & Schütze, H. (2008). *Introduction to Information Retrieval*. Cambridge University Press.  
+- Jurafsky, D., & Martin, J. H. (2023). *Speech and Language Processing* (3rd ed. draft).  
+
+:::
+
+---
+
+## <!-- 5.4.3 -->Low-Rank Semantics: LSA / SVD
+
+- **Latent Semantic Analysis (LSA):** applies Singular Value Decomposition (SVD) to TF-IDF.  
+- Compresses sparse vectors into lower dimensions to reveal **latent structure**.  
+- Example: “car” and “automobile” appear close in reduced semantic space.  
+- **Limitation:** context-free; smooths but doesn’t disambiguate meaning.  
+
+
+::: {.notes}
+
+## Low-Rank Semantics: LSA / SVD  
+
+### Detailed Notes  
+- Introduce **Latent Semantic Analysis (LSA)** as a method for uncovering hidden structure in large term–document matrices.  
+- Explain that it starts with a **TF–IDF matrix**, where each document is represented as a high-dimensional vector of word weights.  
+- Demonstrate conceptually with a diagram: high-dimensional TF–IDF space → reduced latent space via **Singular Value Decomposition (SVD)**.  
+- Describe what SVD does: it finds orthogonal axes (latent dimensions) that explain the greatest variance in word usage patterns.  
+- Use an example: the words “car” and “automobile” may never co-occur, yet LSA will place them close in reduced space because they share contextual neighbors (“drive,” “engine,” “road”).  
+- Emphasize the interpretive power: each latent dimension can roughly correspond to a topic or conceptual field.  
+- Acknowledge computational considerations: SVD is expensive for large corpora, but truncated or randomized SVD algorithms make it tractable.  
+- Conclude by connecting LSA to modern word embeddings—it was the **first attempt to capture semantics geometrically**.  
+
+### Deeper Dive  
+Latent Semantic Analysis (LSA) was one of the earliest attempts to move beyond count-based models toward **distributional semantics**—the idea that words occurring in similar contexts share meaning.
+
+#### 1. Mathematical Foundation  
+Given a document–term matrix $A$ (e.g., TF–IDF weighted), LSA performs a **Singular Value Decomposition**:  
+$$
+A = U \Sigma V^T,
+$$  
+where  
+- $U$ contains **word vectors**,  
+- $V$ contains **document vectors**, and  
+- $\Sigma$ is a diagonal matrix of singular values (importance weights for each latent dimension).  
+
+Truncating to the top $k$ singular values gives a rank-$k$ approximation:  
+$$
+A_k = U_k \Sigma_k V_k^T.
+$$  
+This projection minimizes reconstruction error $\|A - A_k\|_F$ (Frobenius norm), capturing the dominant co-occurrence patterns while discarding noise.  
+
+The resulting latent dimensions represent **orthogonal semantic axes**—abstract features that correlate with thematic or topical variation in the corpus.  
+For instance, one axis may correspond to “finance,” another to “technology,” even though no such labels are provided.  
+
+#### 2. Intuition and Connection to Meaning  
+Words that appear in similar contexts will have similar vectors in $U_k$, leading to high cosine similarity between semantically related terms.  
+Thus, LSA operationalizes the *distributional hypothesis* (“You shall know a word by the company it keeps,” Firth, 1957).  
+Unlike raw co-occurrence counts, the reduced space smooths over missing data—two words that never co-occur directly may still be close if they share neighbors.  
+
+However, because LSA uses **linear algebraic structure** rather than context modeling, it cannot disambiguate polysemy.  
+The word “bank” will occupy a position between its financial and river-related senses, reflecting the statistical mixture of contexts.  
+
+#### 3. Computational and Practical Aspects  
+- The full SVD of an $m \times n$ matrix is $O(mn^2)$, which is prohibitive for large corpora.  
+- **Truncated SVD** computes only the top $k$ components (using algorithms like Lanczos or randomized SVD).  
+- Typical values of $k$ range from 100 to 500 for topic-level structure.  
+- The resulting low-dimensional embeddings can be used for document retrieval, clustering, or as features in classical ML models.  
+
+#### 4. Historical Significance and Limitations  
+LSA (Deerwester et al., 1990) laid the groundwork for all subsequent **vector-space models of semantics**.  
+It introduced the notion that meaning could be captured geometrically—by positions and distances in latent space.  
+Yet, LSA is **context-free**: each word has one vector regardless of usage, and dimensions are linear combinations rather than learned from non-linear structures.  
+These limitations motivated later nonlinear embedding methods (Word2Vec, GloVe) and contextual models (BERT).  
+
+In summary, LSA transforms a sparse, lexical representation into a **compressed semantic manifold**—a conceptual precursor to deep neural embeddings.  
+
+**References**  
+- Deerwester, S., Dumais, S. T., Furnas, G. W., Landauer, T. K., & Harshman, R. (1990). *Indexing by Latent Semantic Analysis*. *Journal of the American Society for Information Science*, 41(6), 391–407.  
+- Landauer, T. K., & Dumais, S. T. (1997). *A Solution to Plato’s Problem: The Latent Semantic Analysis Theory of Acquisition, Induction, and Representation of Knowledge*. *Psychological Review*, 104(2), 211–240.  
+- Firth, J. R. (1957). *A Synopsis of Linguistic Theory, 1930–1955*. Oxford University Press.  
+- Jurafsky, D., & Martin, J. H. (2023). *Speech and Language Processing* (3rd ed. draft).  
+
+:::
+
+---
+
+## <!-- 5.4.4-->Static Embeddings (Word2Vec & GloVe)
+
+- **Word2Vec:**  
+  - Learns dense vectors by predicting context (CBOW) or word (Skip-Gram).  
+- **GloVe:**  
+  - Learns embeddings via matrix factorization of word co-occurrence statistics.  
+- **Advantages:** captures analogical and semantic relationships (e.g., *king – man + woman ≈ queen*).  
+- **Limitations:** one vector per word → no contextual differentiation (*bank* = river or finance).  
+
+<figure>
+  <img src="../materials/assets/images/5.4.4_Word2Vec_GloVe_Creative.drawio.svg"
+       alt="**Figure:** Word embeddings plotted in 2D semantic space.">
+  <figcaption>**Figure:** Word embeddings plotted in 2D semantic space.</figcaption>
+</figure>
+
+::: {.notes}
+
+## Static Embeddings (Word2Vec & GloVe)  
+
+### Detailed Notes  
+- Begin by framing **static embeddings** as the next evolutionary step after TF–IDF and LSA: moving from explicit counts to **learned dense representations**.  
+- Explain the key insight: *words used in similar contexts have similar meanings* (distributional semantics).  
+- Introduce **Word2Vec** as a predictive model that learns word vectors based on context:  
+  - **CBOW (Continuous Bag-of-Words):** predicts a target word from its surrounding context.  
+  - **Skip-Gram:** predicts surrounding words from a target word.  
+- Show the vector analogy: $ \text{king} - \text{man} + \text{woman} \approx \text{queen} $, illustrating how linear geometry encodes semantic relationships.  
+- Explain **GloVe (Global Vectors)** as a complementary approach—derived from co-occurrence statistics rather than prediction: it learns embeddings such that vector dot products approximate log co-occurrence probabilities.  
+- Emphasize that both methods create **static word vectors**, meaning each word type (e.g., “bank”) has one representation regardless of context.  
+- Visualize with a 2D plot: semantically related words cluster together (e.g., animals, emotions, countries).  
+- Conclude by highlighting their legacy—these models transformed NLP by proving that **geometry can represent meaning**.  
+
+### Deeper Dive  
+Static embeddings revolutionized NLP by providing **dense, continuous vector spaces** where semantic and syntactic relationships are captured via spatial proximity.  
+They shifted the field from symbolic representations (word counts) to distributed representations grounded in neural computation.  
+
+#### 1. Word2Vec: Predictive Distributional Learning  
+Word2Vec formalizes the intuition that context defines meaning.  
+Given a vocabulary $V$ and a training corpus, the model maximizes the likelihood of observing context words $c$ given a target word $w$.  
+
+For **CBOW**:  
+$$
+P(w_t \mid \text{context}) = \text{softmax}(W' \, h_t), \quad h_t = \frac{1}{2m}\sum_{i=-m, i \neq 0}^{m} W \, x_{t+i}
+$$  
+For **Skip-Gram**:  
+$$
+P(\text{context} \mid w_t) = \prod_{i=-m, i \neq 0}^{m} \text{softmax}(W' \, W \, x_t)
+$$  
+where $W$ and $W'$ are input and output embedding matrices.  
+Training uses **negative sampling** or **hierarchical softmax** to efficiently approximate the full softmax over vocabulary $V$.  
+
+The optimization objective encourages similar vectors for words that share contexts, forming geometric relationships reflecting linguistic regularities.  
+
+#### 2. GloVe: Global Co-occurrence Modeling  
+GloVe combines count-based and predictive paradigms.  
+It starts with a co-occurrence matrix $X$, where $X_{ij}$ is the number of times word $j$ appears in the context of word $i$.  
+The objective minimizes reconstruction error of the log co-occurrence ratio:  
+$$
+J = \sum_{i,j=1}^{|V|} f(X_{ij}) \big(w_i^\top \tilde{w}_j + b_i + \tilde{b}_j - \log X_{ij}\big)^2,
+$$  
+where $f(x)$ is a weighting function that limits the influence of very frequent pairs.  
+This ensures that distances between word vectors encode **semantic similarity** proportional to co-occurrence probabilities:  
+$$
+\frac{P(j \mid i)}{P(k \mid i)} \approx \frac{X_{ij}}{X_{ik}}.
+$$  
+Thus, GloVe bridges the **local context learning** of Word2Vec and the **global co-occurrence structure** of LSA.  
+
+#### 3. Geometric Interpretation  
+The embedding space forms a **semantic manifold** where linear relationships correspond to analogies:  
+- Gender: $\text{king} - \text{man} + \text{woman} \approx \text{queen}$  
+- Verb tense: $\text{walk} - \text{walking} + \text{ran} \approx \text{run}$  
+- Geography: $\text{Paris} - \text{France} + \text{Italy} \approx \text{Rome}$  
+
+This geometry arises because the training objective preserves **vector arithmetic invariances** tied to statistical regularities.  
+
+#### 4. Strengths and Limitations  
+**Strengths:**  
+- Dense, low-dimensional vectors capture rich semantic structure.  
+- Compact representation (100–300 dimensions) improves efficiency over sparse BoW.  
+- Enable transfer learning: pretrained embeddings generalize across tasks.  
+
+**Limitations:**  
+- **Context insensitivity:** one vector per word ignores polysemy (e.g., “bank” as financial vs. river term).  
+- **Static semantics:** cannot adapt to sentence-level meaning.  
+- **Bias propagation:** embeddings encode social and cultural biases present in the training data (e.g., gender–occupation stereotypes).  
+
+#### 5. Legacy and Influence  
+Word2Vec (Mikolov et al., 2013) and GloVe (Pennington et al., 2014) laid the foundation for **neural language modeling** and **transfer learning** in NLP.  
+They inspired modern contextual embeddings (ELMo, BERT) that address polysemy through dynamic context encoding.  
+
+Static embeddings remain valuable as interpretable baselines and for resource-constrained applications, offering a historically critical bridge between classical vector space models and deep contextual representations.  
+
+**References**  
+- Mikolov, T., Chen, K., Corrado, G., & Dean, J. (2013). *Efficient Estimation of Word Representations in Vector Space*. *arXiv preprint arXiv:1301.3781*.  
+- Pennington, J., Socher, R., & Manning, C. D. (2014). *GloVe: Global Vectors for Word Representation*. *EMNLP*.  
+- Goldberg, Y., & Levy, O. (2014). *word2vec Explained: Deriving Mikolov et al.’s Negative-Sampling Word-Embedding Method*. *arXiv preprint arXiv:1402.3722*.  
+- Jurafsky, D., & Martin, J. H. (2023). *Speech and Language Processing* (3rd ed. draft).  
+
+:::
+
+---
+
+## <!-- 5.4.5 -->Contextual Embeddings (Preview)
+
+- **ELMo:** generates context-dependent word vectors (same word → different vectors).  
+- **BERT:** bidirectional transformer model capturing context on both sides.  
+- **Sentence-BERT:** produces sentence-level embeddings for similarity and retrieval.  
+- **Key advancement:** meaning changes dynamically with context; embeddings adapt to task.  
+
+<figure>
+  <img src="../materials/assets/images/5.4.5_Contextual_Embeddings_Creative.drawio.svg"
+       alt="**Figure:** Contextual embedding visualization (same word, different meanings).">
+  <figcaption>**Figure:** Contextual embedding visualization (same word, different meanings).</figcaption>
+</figure>
+
+::: {.notes}
+
+## Contextual Embeddings (Preview)  
+
+### Detailed Notes  
+- Begin by framing **contextual embeddings** as the natural evolution beyond static word vectors.  
+- Revisit the limitation of static embeddings: a single vector for each word cannot distinguish multiple senses (e.g., *“bank”* as a financial institution vs. *“river bank”*).  
+- Introduce the core innovation—**dynamic, context-sensitive representations**: the embedding for a word now depends on its surrounding context.  
+- Outline key models:  
+  - **ELMo (Embeddings from Language Models):** produces embeddings from a bidirectional LSTM language model; same word, different vector depending on sentence context.  
+  - **BERT (Bidirectional Encoder Representations from Transformers):** uses a transformer architecture that reads both left and right context simultaneously.  
+  - **Sentence-BERT:** fine-tuned on semantic similarity tasks to generate embeddings at the sentence (not token) level.  
+- Demonstrate with an example:  
+  - “The **bank** raised interest rates.” (finance)  
+  - “He sat by the **bank** of the river.” (geography)  
+  → two distinct vector representations.  
+- Emphasize that contextual embeddings adapt not only to context but also to downstream tasks when fine-tuned.  
+- Conclude: contextual embeddings are the conceptual bridge to **transformers and LLMs**, which extend these ideas to billions of parameters and longer contexts.  
+
+### Deeper Dive  
+Contextual embeddings mark the shift from **type-level** to **token-level** representation of meaning—each word occurrence (token) gets a unique vector based on its context, resolving the problem of polysemy inherent in static embeddings.
+
+#### 1. ELMo: Context from Deep BiLSTMs  
+ELMo (Peters et al., 2018) introduced deep contextualized word representations derived from a **bidirectional language model**.  
+For each token $w_i$ in a sentence, ELMo computes embeddings as a function of internal LSTM layer activations:  
+$$
+\text{ELMo}(w_i) = \gamma \sum_{k=1}^{L} s_k \, h_{i,k},
+$$  
+where $h_{i,k}$ are hidden states from layer $k$, $s_k$ are learned scalar weights, and $\gamma$ scales the vector magnitude.  
+Because ELMo uses both forward and backward LSTMs, it captures syntactic and semantic dependencies from full context.  
+It was the first architecture to show that **contextualized features** could drastically improve performance across diverse NLP benchmarks (e.g., QA, NER, sentiment).  
+
+#### 2. BERT: Context from Transformers  
+BERT (Devlin et al., 2019) replaced sequential LSTMs with **self-attention**, allowing parallel processing and richer context modeling.  
+BERT learns embeddings via two unsupervised objectives:  
+- **Masked Language Modeling (MLM):** randomly mask tokens and predict the missing word using bidirectional context.  
+- **Next Sentence Prediction (NSP):** predict whether two sentences are consecutive in the original text.  
+
+Each token’s embedding in BERT depends on its attention-weighted relationships with every other token in the input sequence.  
+Formally, for each attention head $h$:  
+$$
+\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V,
+$$  
+where queries ($Q$), keys ($K$), and values ($V$) are learned projections of token embeddings.  
+This mechanism enables **bidirectional context encoding**, distinguishing, for example, *“bass guitar”* vs. *“bass fish”*.  
+
+#### 3. Sentence-BERT: Context Beyond Tokens  
+Sentence-BERT (Reimers & Gurevych, 2019) extends BERT to sentence-level embeddings using a **Siamese network** trained with contrastive loss on semantic similarity tasks (e.g., paraphrase detection).  
+It maps entire sentences into a single dense vector suitable for clustering, retrieval, and semantic search.  
+Cosine similarity between sentence embeddings approximates conceptual similarity in meaning.
+
+#### 4. Conceptual Leap: From Representation to Understanding  
+Contextual models approximate a long-standing linguistic ideal: **meaning as use** (Wittgenstein, 1953).  
+Instead of assigning a fixed meaning to a word, the model derives meaning dynamically from how it is used in context.  
+This contextual flexibility aligns with the philosophy of distributional semantics but scales it to neural, non-linear manifolds.  
+
+#### 5. Broader Implications  
+- **Polysemy resolution:** dynamic context disentangles overlapping meanings.  
+- **Transfer learning:** pretrained contextual embeddings generalize across tasks with minimal fine-tuning.  
+- **Bias amplification:** contextual models still inherit societal biases but can adapt through domain-specific fine-tuning.  
+- **Interpretability challenge:** the very strength of contextuality makes the learned features harder to interpret.  
+
+Contextual embeddings thus represent the conceptual inflection point in NLP—where **meaning becomes dynamic**, computed anew with every input.  
+They form the intellectual and technical bridge from statistical NLP to **transformer-based language models (LLMs)**.  
+
+**References**  
+- Peters, M. E., et al. (2018). *Deep contextualized word representations (ELMo)*. *NAACL-HLT*.  
+- Devlin, J., Chang, M.-W., Lee, K., & Toutanova, K. (2019). *BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding*. *NAACL-HLT*.  
+- Reimers, N., & Gurevych, I. (2019). *Sentence-BERT: Sentence embeddings using Siamese BERT networks*. *EMNLP-IJCNLP*.  
+- Vaswani, A., et al. (2017). *Attention Is All You Need*. *NeurIPS*.  
+- Jurafsky, D., & Martin, J. H. (2023). *Speech and Language Processing* (3rd ed. draft).  
+
+
+:::
+
+---
+
+## <!-- 5.4.6 -->What is an Embedding? (Discrete → Continuous)
+
+- **Purpose:** convert discrete tokens into **continuous vectors** a model can learn from  
+- **Static vs. contextual:** one vector per type (**static**) vs. one per occurrence (**contextual**)  
+- **Interpretability vs. power:** static = more interpretable; contextual = more expressive  
+- **Where used:** features for classic ML, similarity search, clustering, and as inputs to deep models  
+
+<figure>
+  <img src="../materials/assets/images/5.4.6_Embedding_Discrete_to_Continuous_Creative.drawio.svg"
+       alt="**Figure:** Contextual embedding visualization (same word, different meanings).">
+  <figcaption>**Figure:** Contextual embedding visualization (same word, different meanings).</figcaption>
+</figure>
+
+
+::: {.notes}
+
+## What is an Embedding? (Discrete → Continuous)
+
+### Detailed Notes
+- Frame embeddings as the *bridge* from symbols to numbers: models cannot operate on strings, so we map tokens to vectors.
+- Clarify the two broad regimes:
+  - **Static embeddings** (e.g., Word2Vec, GloVe): a single vector per word type; good for intuition and many downstream tasks.
+  - **Contextual embeddings** (e.g., ELMo/BERT): the vector changes with sentence context; solves polysemy (e.g., *bank*).
+- Teaching move: show a small 2D sketch (no code) where semantically similar words cluster; emphasize that real systems use higher dimensions.
+
+### Deeper Dive
+- Think of an embedding layer as a learned **lookup table**: each token ID indexes a row in a matrix; training adjusts those rows so geometry reflects usage.
+- **Static**: captures distributional similarity and simple analogies; limited by one-vector-per-type.
+- **Contextual**: computes token vectors from surrounding words; richer, but harder to interpret and more compute-intensive.
+- Use case guidance:
+  - **Classic pipelines & explainability needed →** start static (or even TF-IDF).
+  - **Nuance/semantics/cross-domain generalization →** contextual.
+
+:::
+
+
+---
+
+## <!-- 5.4.7 -->When to Move from Sparse → Dense
+
+- **Sparse (BoW, TF-IDF):** small/medium datasets, simple tasks, easy to explain.  
+- **Dense (Word2Vec, BERT):** large corpora, semantic or contextual tasks.  
+- **Rule of thumb:**  
+  - Overlap-based tasks → sparse.  
+  - Meaning-driven tasks → dense.  
+
+
+::: {.notes}
+
+## When to Move from Sparse → Dense  
+
+### Detailed Notes  
+- Begin by reminding students that all text representations fall on a **continuum**—from sparse and explicit (BoW, TF–IDF) to dense and implicit (Word2Vec, BERT).  
+- Use this slide as a **decision framework** rather than a new concept. The question isn’t “which is better?” but “which fits my data and task?”  
+- Contrast sparse and dense representations across three dimensions:  
+  - **Data scale:** sparse methods excel on small corpora; dense embeddings need massive data.  
+  - **Interpretability:** sparse = transparent (each feature is a word); dense = opaque (latent dimensions).  
+  - **Task complexity:** sparse handles lexical overlap tasks (e.g., topic classification); dense excels when semantics or polysemy matter (e.g., question answering).  
+- Offer concrete rule of thumb:  
+  - If success depends on **shared vocabulary**, use sparse.  
+  - If success depends on **shared meaning**, use dense.  
+- Encourage students to start simple (TF–IDF + logistic regression) as a **baseline**—then only escalate to dense or contextual embeddings when performance gains justify the added complexity.  
+- Transition forward: this comparison sets up the next discussion on trade-offs between interpretability and performance in representation learning.  
+
+### Deeper Dive  
+Sparse and dense representations can be analyzed through the lens of **information compression and generalization**.  
+Each approach encodes text differently—explicitly vs. implicitly—affecting both expressiveness and computational properties.
+
+#### 1. Sparse Representations  
+Sparse methods (BoW, TF–IDF, n-grams) explicitly encode observed lexical features.  
+Each word corresponds to a distinct dimension, leading to extremely high-dimensional vectors ($10^4$–$10^6$ features).  
+Advantages:  
+- **Transparency:** weights map directly to observable words.  
+- **Simplicity:** easy to compute and explain.  
+- **Stability:** deterministic; retraining doesn’t change representation meaning.  
+Limitations:  
+- **No semantics:** “cat” and “kitten” are orthogonal vectors.  
+- **No robustness to OOVs or typos.**  
+- **Scalability issues:** large vocabularies and sparsity cause memory inefficiency.  
+
+From an information theory view, sparse models retain **high entropy**—they preserve specific details but generalize poorly because they cannot infer unseen relationships.  
+
+#### 2. Dense Representations  
+Dense embeddings (Word2Vec, GloVe, BERT) compress lexical information into low-dimensional vectors (100–1024 dimensions) learned from distributional statistics.  
+Advantages:  
+- Capture **semantic and syntactic regularities**.  
+- Enable **transfer learning**—pretrained embeddings generalize across tasks.  
+- Support semantic similarity, clustering, and analogy reasoning.  
+Limitations:  
+- Require large corpora or pretrained models.  
+- Dimensions are **latent**—interpretation is non-trivial.  
+- Model output depends on random initialization and training context.  
+
+Dense representations reduce **entropy** by abstracting commonalities across contexts, trading specificity for semantic generalization.
+
+#### 3. Decision Framework  
+Let $D$ denote dataset size, $T$ the task type, and $C$ the compute budget.  
+Then, choose representation type based on approximate constraints:  
+| Scenario | Representation | Rationale |
+|-----------|----------------|------------|
+| Small corpus, tabular ML workflow | **Sparse (TF–IDF)** | Stable, interpretable features |
+| Medium corpus, topic or sentiment tasks | **Dense (Word2Vec/GloVe)** | Captures nuance without high compute |
+| Large corpus, multi-domain, or semantic QA | **Contextual (BERT)** | Dynamic meaning, transfer learning |
+| Limited compute or explainability required | **Sparse** | Easy to interpret and deploy |
+| Abundant compute and data, complex semantics | **Dense** | Rich representation, adaptable |
+
+#### 4. Hybrid and Transitional Approaches  
+Many production systems use **hybrid models** combining sparse and dense representations:  
+- **Concatenation:** TF–IDF + embeddings to capture both lexical and semantic cues.  
+- **Cross-validation:** run both approaches and ensemble their outputs.  
+- **Distillation:** pretrain dense embeddings, then train interpretable models on their outputs.  
+
+The conceptual takeaway is that representation choice is a **bias–variance trade-off**:  
+- Sparse models = high bias, low variance (simple, robust, limited expressiveness).  
+- Dense models = low bias, high variance (powerful, data-hungry, less interpretable).  
+
+Ultimately, moving from sparse to dense is not a linear progression of “better models,” but a shift in **representation philosophy**—from explicit counting to implicit meaning construction.  
+
+**References**  
+- Mikolov, T. et al. (2013). *Efficient Estimation of Word Representations in Vector Space*. *arXiv:1301.3781*.  
+- Pennington, J. et al. (2014). *GloVe: Global Vectors for Word Representation*. *EMNLP*.  
+- Eisenstein, J. (2019). *Introduction to Natural Language Processing*. MIT Press.  
+- Jurafsky, D., & Martin, J. H. (2023). *Speech and Language Processing* (3rd ed. draft).  
+
+
+:::
+
+
+---
+
+# 5.5 Sentiment & Emotion Analysis
+
+---
+
+## <!-- 5.5.1 -->VADER (Valence Aware Dictionary and sEntiment Reasoner)
+
+- Designed for **short, social text** such as tweets and product reviews.  
+- Combines **lexicon** and **rules** for handling capitalization, punctuation, and negation.  
+- Outputs: positive, negative, neutral, and **compound** sentiment scores.  
+- **Strengths:** fast, interpretable, effective for informal text.  
+- **Limitations:** brittle on long or domain-specific text.  
+
+
+::: {.notes}
+
+## VADER (Valence Aware Dictionary and sEntiment Reasoner)  
+
+### Detailed Notes  
+- Introduce **VADER** as a rule- and lexicon-based model specifically tuned for **social and informal language** (tweets, reviews, comments).  
+- Explain that it calculates sentiment by matching words to a polarity lexicon augmented with heuristics for capitalization, punctuation, degree modifiers, and negations.  
+- Walk through how the **compound score** (ranging from −1 to +1) is computed as a normalized sum of weighted sentiment values.  
+- Show examples:  
+  - “This is great!!!” → high positive (boosted by exclamation)  
+  - “Not good at all.” → negative (negation handled correctly)  
+  - “I’m fine…” → neutral but contextually ambiguous.  
+- Emphasize VADER’s strengths: real-time performance, interpretability, and ease of use—no training required.  
+- Acknowledge its limits: struggles with long documents, sarcasm, and domain-specific vocabulary.  
+- Encourage use as an **exploratory tool** or as a **feature extractor** feeding larger models.  
+
+### Deeper Dive  
+VADER (Hutto & Gilbert, 2014) represents a hybrid approach in sentiment analysis, blending **linguistic rules** with **empirical calibration** from human-labeled data.
+
+#### 1. Lexicon Design  
+The core lexicon contains ~7,500 words and emoticons, each associated with a valence score from −4 (most negative) to +4 (most positive).  
+These scores were derived through crowd-sourced human ratings, ensuring robust coverage of colloquial expressions, abbreviations, and emojis (e.g., “LOL,” “:-D,” “:-/”).  
+The model also includes **booster words** (intensifiers) and **dampeners** (modifiers):  
+- Intensifiers: “extremely,” “super,” “amazingly.”  
+- Dampeners: “kind of,” “barely.”  
+Each modifier scales the adjacent sentiment magnitude by empirically learned weights.  
+
+#### 2. Rule-Based Adjustments  
+VADER applies deterministic rules to adjust sentiment values based on text structure:  
+- **Punctuation Amplification:** Repeated exclamation marks (“!!!”) or capitalization amplify sentiment by a fixed factor.  
+- **Negation Handling:** A negation word preceding a positive term flips or reduces polarity (“not good” → −0.5 × “good”).  
+- **Contrastive Conjunctions:** The clause after “but” receives higher weight (“The service was poor but the food was excellent”).  
+- **Emoji and Emoticon Parsing:** Emoji are treated as sentiment tokens with predefined polarity values.  
+
+These rules collectively encode **psycholinguistic heuristics** about how humans express emotion in informal writing.
+
+#### 3. Compound Score Computation  
+Each text is tokenized, scored, and combined into an overall **compound score**:  
+$$
+\text{compound} = \frac{\sum_i s_i}{\sqrt{(\sum_i s_i^2) + \alpha}}, \quad \alpha = 15
+$$  
+where $s_i$ are individual token sentiment values.  
+This normalization constrains the score to [−1, +1], making it comparable across documents.  
+
+#### 4. Evaluation and Strengths  
+VADER was validated against multiple social media corpora (tweets, movie reviews, news headlines) and showed strong correlation with human judgments (Spearman’s ρ ≈ 0.88).  
+It performs particularly well on **short, high-affect texts**—tweets, product feedback, or chatbot logs—where context is minimal and expression is explicit.  
+Advantages:  
+- **Interpretable:** Each token’s contribution can be traced.  
+- **Domain-agnostic:** Works without training data.  
+- **Lightweight:** Fast, rule-based—ideal for streaming or dashboards.  
+
+#### 5. Limitations and Edge Cases  
+- **Sarcasm and irony:** “Oh great, another bug.” → falsely positive.  
+- **Domain mismatch:** Financial terms (“loss,” “liability”) can invert sentiment depending on context.  
+- **Compositional semantics:** Multi-clause or nuanced sentences exceed rule-based expressivity.  
+- **Cultural variation:** Slang meanings shift (e.g., “sick” = positive in youth slang).  
+
+Despite these limitations, VADER’s design philosophy—transparent rules grounded in linguistic psychology—makes it a pedagogical exemplar of **explainable NLP**.  
+It remains widely used in applied analytics where interpretability and efficiency outweigh deep contextual nuance.  
+
+**References**  
+- Hutto, C. J., & Gilbert, E. (2014). *VADER: A Parsimonious Rule-Based Model for Sentiment Analysis of Social Media Text*. *Proceedings of ICWSM*.  
+- Liu, B. (2012). *Sentiment Analysis and Opinion Mining*. *Synthesis Lectures on Human Language Technologies*.  
+- Jurafsky, D., & Martin, J. H. (2023). *Speech and Language Processing* (3rd ed. draft).  
+
+:::
+
+---
+
+## <!-- 5.5.2 -->TextBlob
+
+- Provides **polarity** (−1 negative → +1 positive) and **subjectivity** (0 objective → 1 subjective).  
+- **Strengths:** quick implementation, readable API, suitable for beginners.  
+- **Limitations:** not tuned for specialized domains or informal tone.  
+
+
+::: {.notes}
+
+## TextBlob
+
+### Detailed Notes  
+- Introduce **TextBlob** as one of the simplest sentiment analysis tools in Python—ideal for rapid prototyping and teaching sentiment fundamentals.  
+- Explain that it uses a **lexicon- and rule-based approach**, returning two key metrics for each text:  
+  - **Polarity:** degree of positivity or negativity (range: −1 to +1).  
+  - **Subjectivity:** degree of opinion vs. objectivity (range: 0 to 1).  
+- Demonstrate its simplicity with a live coding example:  
+  ```python
+  from textblob import TextBlob  
+  TextBlob("The design is beautiful but overpriced").sentiment  
+  # Output: Sentiment(polarity=0.25, subjectivity=0.6)
+
+## Interpreting TextBlob Results  
+
+### How to Interpret Sentiment Output  
+- The **polarity score** represents sentiment strength and direction (−1 = negative, +1 = positive).  
+- The **subjectivity score** represents how opinionated or factual the text is (0 = objective, 1 = highly subjective).  
+
+**Example Interpretation:**  
+> “The design is beautiful but overpriced.”  
+- **Polarity:** 0.25 → mildly positive sentiment  
+- **Subjectivity:** 0.6 → moderately opinionated tone  
+
+### Contrasting Examples  
+| Example Sentence | Polarity | Subjectivity | Interpretation |
+|------------------|-----------|---------------|----------------|
+| “The phone is black.” | 0.0 | 0.1 | Neutral, factual statement |
+| “I absolutely love this phone!” | 0.9 | 0.95 | Strongly positive, highly opinionated statement |
+
+These contrasts show that **polarity** tracks tone (positive vs. negative), while **subjectivity** tracks personal stance (fact vs. opinion).
+
+### Ease of Use and Practical Role  
+- **Ease of Use:** TextBlob’s API is intuitive and readable—ideal for quick sentiment checks and prototyping.  
+- **Educational Value:** Helps students understand how lexicon-based sentiment scoring works.  
+- **Exploratory Utility:** Suitable for lightweight experiments, sentiment visualization, or as an interpretable baseline model.  
+
+### Limitations  
+- **Outdated Lexicon:** Built from older movie review corpora; lacks modern slang and emojis.  
+- **Weak Context Awareness:** Fails with sarcasm or domain-specific terms (e.g., “unpredictable plot” vs. “unpredictable behavior”).  
+- **No Semantic Understanding:** Treats word meaning as static—cannot adapt to context shifts.  
+
+### Summary  
+TextBlob excels as an **educational and exploratory tool**—clear, fast, and transparent.  
+However, it is not suitable for **domain-sensitive** or **context-dependent** sentiment tasks where neural embeddings or fine-tuned transformers outperform it.
+
+## Deeper Dive  
+
+### 1. Mathematical Formulation  
+Each token $i$ has a polarity score $p_i$ and subjectivity score $s_i$.  
+For a sentence $S$ with $n$ tokens, TextBlob computes:
+
+$$
+\text{Polarity}(S) = \frac{1}{n}\sum_{i=1}^{n} \alpha_i p_i, \qquad
+\text{Subjectivity}(S) = \frac{1}{n}\sum_{i=1}^{n} \beta_i s_i
+$$
+
+where $\alpha_i$ and $\beta_i$ are weights derived from context rules:  
+- **Intensifiers** (“very,” “extremely”) → increase $\alpha_i > 1$.  
+- **Diminishers** (“slightly,” “somewhat”) → reduce $\alpha_i < 1$.  
+- **Negations** invert the polarity of following words (“not good” → −0.5 × “good”).  
+
+This method assumes **additive compositionality**: the sentiment of a sentence equals the average sentiment of its words, adjusted by modifiers.
+
+### 2. Lexicon and Design  
+- The underlying lexicon was built from **movie and product reviews**, emphasizing evaluative adjectives.  
+- Each lemma is mapped to polarity and subjectivity scores in [−1, +1].  
+- This makes TextBlob effective for straightforward opinion language but brittle in technical or specialized contexts  
+  (e.g., “critical hit” → misinterpreted as negative).  
+
+### 3. Comparison with VADER  
+
+| Aspect | **TextBlob** | **VADER** |
+|--------|---------------|-----------|
+| **Domain** | Formal / Reviews | Informal / Social Media |
+| **Handles emojis / punctuation** | No | Yes |
+| **Subjectivity measure** | Yes | No |
+| **Output granularity** | Polarity & Subjectivity | Positive / Negative / Neutral / Compound |
+| **Domain adaptivity** | Weak | Moderate |
+
+- TextBlob captures **stance** (objectivity ↔ subjectivity).  
+- VADER captures **affect** (positive ↔ negative).  
+- **Hybrid approach:** combine both for richer sentiment features—TextBlob’s subjectivity with VADER’s emotional polarity.
+
+
+### 4. Applications and Caveats  
+
+**Educational Use:**  
+- Excellent for teaching sentiment scoring and lexicon-based analysis.  
+
+**Prototyping:**  
+- Ideal for quick, interpretable sentiment checks before deploying advanced models.  
+
+**Limitations:**  
+- Domain shift reduces accuracy outside of reviews or general prose.  
+- Fails with sarcasm, irony, and multi-clause compositional meaning.  
+- Lexicon aging: language evolves faster than static sentiment dictionaries.  
+
+Despite these limitations, TextBlob provides an **elegant conceptual bridge** between human-readable rule-based systems and modern contextual models (e.g., BERT or GPT fine-tuned for sentiment).  
+It shows how language can be translated into **deterministic numeric affect**, offering an early window into computational linguistics.  
+
+### References  
+- De Smedt, T., & Daelemans, W. (2012). *Pattern for Python*. *Journal of Machine Learning Research*, 13, 2031–2035.  
+- Liu, B. (2012). *Sentiment Analysis and Opinion Mining*. *Synthesis Lectures on Human Language Technologies*.  
+- Pang, B., & Lee, L. (2008). *Opinion Mining and Sentiment Analysis*. *Foundations and Trends in Information Retrieval*, 2(1–2), 1–135.  
+- Jurafsky, D., & Martin, J. H. (2023). *Speech and Language Processing* (3rd ed. draft).  
+
+
+
+:::
+
+---
+
+## <!-- 5.5.3 -->NRCLex (Emotion Analysis)
+
+- Classifies words into **emotion categories**: anger, fear, joy, trust, etc.  
+- Extends sentiment beyond positive/negative to multidimensional emotion.  
+- **Strengths:** highly interpretable and explainable for non-technical audiences.  
+- **Limitations:** context-blind; words like “killer app” may trigger incorrect emotions.  
+
+::: {.notes}
+
+## NRCLex (Emotion Analysis)
+
+### Detailed Notes  
+- Introduce **NRCLex** as an implementation of the **NRC Emotion Lexicon**, a widely used resource that maps words to discrete emotional categories.  
+- Explain that while sentiment analysis typically measures polarity (positive vs. negative), NRCLex identifies **multidimensional emotions**—anger, fear, anticipation, trust, surprise, sadness, joy, and disgust.  
+- Show a few examples to make the concept tangible:  
+  - “love” → joy, trust  
+  - “betrayal” → anger, disgust  
+  - “innovation” → anticipation, joy  
+- Demonstrate how NRCLex can analyze the *emotional profile* of a document—e.g., customer reviews, HR surveys, or social media posts—to surface emotional themes rather than mere positivity/negativity.  
+- Emphasize interpretability: emotion categories are intuitive and can be visualized with **emotion wheels or radar charts** easily understood by non-technical audiences.  
+- Discuss limitations:  
+  - Context-blind lexicon (e.g., “killer app” flagged as anger/fear).  
+  - Difficulty with negation (“not happy” still positive).  
+  - Limited handling of metaphors, irony, and domain-specific phrasing.  
+- Conclude that NRCLex bridges computational text analysis and **psychological affect theory**, making it an effective teaching and exploratory tool for emotional nuance.  
+
+### Deeper Dive  
+The **NRC Emotion Lexicon** (Mohammad & Turney, 2013) operationalizes **Plutchik’s Wheel of Emotions**—a model of eight primary human emotions organized as opposing pairs (e.g., joy–sadness, trust–disgust).  
+It expands traditional sentiment analysis from a one-dimensional scale to an **emotion space**.
+
+#### 1. The Lexicon Framework  
+Each word $w_i$ in the NRC lexicon is assigned binary associations with emotion categories $E = \{e_1, e_2, \dots, e_8\}$ and polarity (positive/negative):  
+$$
+L(w_i, e_j) = 
+\begin{cases}
+1 & \text{if } w_i \text{ expresses emotion } e_j, \\
+0 & \text{otherwise.}
+\end{cases}
+$$  
+Given a text corpus $T = \{w_1, w_2, \dots, w_n\}$, the total emotion count for each category is:  
+$$
+\text{EmotionScore}(e_j) = \sum_{i=1}^{n} L(w_i, e_j).
+$$  
+This simple frequency-based aggregation allows for intuitive emotion profiling of text samples.
+
+#### 2. Theoretical Roots  
+The NRC lexicon is grounded in **Plutchik’s psychoevolutionary theory of emotion**, which conceptualizes eight primary emotions arranged by intensity and relationship:  
+
+| Primary Emotion | Opposite Emotion |  
+|-----------------|------------------|  
+| Joy | Sadness |  
+| Trust | Disgust |  
+| Fear | Anger |  
+| Surprise | Anticipation |  
+
+Each can blend into **secondary emotions** (e.g., Joy + Trust = Love).  
+This categorical structure enables analysts to connect linguistic patterns to well-established emotional taxonomies from psychology.  
+
+#### 3. Computational Implementation  
+NRCLex (in Python) wraps the lexicon into a user-friendly API:  
+````python
+from nrclex import NRCLex  
+text_object = NRCLex("I am excited but a little nervous.")  
+text_object.raw_emotion_scores  
+# Output: {'anticipation': 1, 'fear': 1, 'joy': 1, 'trust': 0, ...}
+````
+
+:::
+
+---
+
+## <!-- 5.5.4 -->Critical Caveats in Lexicon-Based Analysis
+
+- **Domain shift:** Lexicons don’t generalize well (e.g., medical vs. financial texts).  
+- **Sarcasm & irony:** Models misread statements like “Great, another bug.”  
+- **Multilingual limitations:** Most sentiment tools focus on English.  
+- **Bias:** Lexicons may encode cultural or linguistic stereotypes.  
+
+<figure>
+  <img src="../materials/assets/images/computerbug_bug.drawio.svg"
+       alt="**Figure:** Illustration of sentiment pitfalls: sarcasm and domain shift.">
+  <figcaption>**Figure:** Illustration of sentiment pitfalls: sarcasm and domain shift.</figcaption>
+</figure>
+
+::: {.notes}
+
+## Critical Caveats in Lexicon-Based Analysis  
+
+### Detailed Notes  
+- Begin by reminding students that **lexicon-based models**—VADER, TextBlob, NRCLex—are rule-driven and static; they do not learn from data.  
+- Use this slide to highlight common **failure modes** and **sources of bias**.  
+- Provide concrete examples:  
+  - **Sarcasm:** “Great, another bug in production!” → lexicon sees “great” as positive, misclassifying the sentiment.  
+  - **Domain shift:** In finance, “liability” or “volatile” may be neutral, but a general lexicon flags them as negative.  
+  - **Ambiguity:** “Unpredictable movie” (positive) vs. “Unpredictable behavior” (negative).  
+  - **Cultural variation:** “Bad” can mean “good” in slang contexts (“That’s a bad car!”).  
+- Emphasize the danger of overconfidence—lexicons provide **estimates**, not ground truth.  
+- Recommend good practice: validate lexicon scores against a labeled subset, tune dictionaries, and document biases.  
+- Transition: explain that modern embeddings and LLMs mitigate some of these issues but introduce new ones (e.g., opacity, alignment).  
+
+### Deeper Dive  
+Lexicon-based sentiment and emotion models rest on a **static mapping** between words and affective categories.  
+This simplicity ensures transparency but introduces several systematic weaknesses that stem from linguistic, cultural, and methodological limitations.
+
+#### 1. Domain Shift and Semantic Drift  
+Lexicons are built from specific corpora—often product reviews or newswire—where word meanings are contextually constrained.  
+When applied to specialized domains, their assumptions fail.  
+Examples:  
+- “Cancer” → negative in general discourse but neutral or even hopeful in oncology research (“cancer treatment progress”).  
+- “Loss” → negative in everyday use, but neutral in accounting.  
+
+Formally, let $f_L(w)$ be the lexicon sentiment function trained on domain $D_1$.  
+When applied to a different domain $D_2$, the expected error increases with **semantic divergence**:  
+$$
+E_{D_2}[(f_L(w) - y(w))^2] \propto \text{KL}(P_{D_1}(w) \,\|\, P_{D_2}(w)).
+$$  
+The greater the difference between word distributions, the worse the generalization.
+
+#### 2. Sarcasm, Irony, and Pragmatics  
+Lexicons ignore **pragmatic intent**—how meaning depends on context, tone, or shared knowledge.  
+Sarcasm violates the literal mapping between words and sentiment polarity:  
+> “Oh, perfect timing!” (after something goes wrong)  
+A lexicon scores “perfect” as positive, missing the sarcastic inversion.  
+Handling sarcasm requires contextual cues, multimodal signals (tone, emoji), or transformer-based models trained on conversational data.
+
+#### 3. Multilingual and Cultural Limitations  
+Most lexicons are English-centric and do not generalize across languages.  
+Direct translation introduces **semantic drift**—words carry cultural and emotional nuances not captured by one-to-one mappings.  
+For instance:  
+- Spanish “pena” translates as both “pity” and “shame.”  
+- Japanese emotion terms map imperfectly to English categories.  
+Cross-lingual sentiment transfer therefore demands retraining or domain-specific lexicons rather than naive translation.
+
+#### 4. Human and Cultural Bias  
+Lexicons reflect the biases of their annotators and source texts.  
+They can encode stereotypes, e.g., associating gendered terms (“bossy,” “emotional”) with negative valence.  
+This bias propagates through models built atop these lexicons, reinforcing cultural prejudices in automated systems.  
+
+#### 5. Validation and Mitigation  
+Good practice involves:  
+- **Domain adaptation:** extend lexicons using term co-occurrence or embedding similarity within the target corpus.  
+- **Empirical validation:** correlate lexicon predictions with human-annotated samples.  
+- **Transparency:** publish data sources, annotator demographics, and annotation methods.  
+- **Bias audits:** inspect whether certain demographic terms skew sentiment unfairly.  
+
+These practices align with the FAIR (Findable, Accessible, Interoperable, Reusable) and **Responsible AI** principles for explainable NLP.  
+
+#### 6. Broader Implications  
+Lexicon-based tools democratized sentiment analysis by prioritizing accessibility and transparency.  
+However, their **deterministic nature** limits robustness, and their simplicity hides latent subjectivity—reflecting the **social construction of emotion** rather than universal truth.  
+Modern contextual models attempt to overcome these issues but introduce new challenges in interpretability and accountability, forming a continuum of trade-offs in NLP ethics.  
+
+**References**  
+- Mohammad, S. M. (2016). *Sentiment Analysis: Detecting Valence, Emotions, and Other Affectual States from Text*. *Emotion Measurement* (pp. 201–237).  
+- Kiritchenko, S., Zhu, X., & Mohammad, S. M. (2014). *Sentiment Analysis of Short Informal Texts*. *Journal of Artificial Intelligence Research*, 50, 723–762.  
+- Sap, M. et al. (2020). *The Risk of Racial Bias in Hate Speech Detection*. *ACL*.  
+- Bender, E. M. (2019). *The #BenderRule: On Naming the Languages We Study and Why It Matters*. *ACL Blog*.  
+- Jurafsky, D., & Martin, J. H. (2023). *Speech and Language Processing* (3rd ed. draft).  
+
+:::
+
+---
+
+## <!-- 5.5.5 -->Sentiment ≠ Ground Truth
+
+- Sentiment scores are **signals**, not objective truth.  
+- Best used as **features** for modeling or exploratory data analysis.  
+- Always validate sentiment against domain-specific benchmarks or labeled examples.  
+
+<figure>
+  <img src="../materials/assets/images/unclear_sentiment.drawio.svg"
+       alt="**Figure:** Comparing sentiment scores with true customer feedback labels.">
+  <figcaption>**Figure:** Comparing sentiment scores with true customer feedback labels.</figcaption>
+</figure>
+
+::: {.notes}
+
+## Spotlight: Sentiment ≠ Ground Truth  
+
+### Detailed Notes  
+- Emphasize that **sentiment analysis is an approximation**, not a measurement of truth or human intent.  
+- Clarify that a sentiment score reflects *how text appears to a lexicon or model*, not necessarily how the author feels.  
+- Use examples to illustrate discrepancies:  
+  - “Thanks a lot for nothing.” → lexicon sees “thanks” as positive, but the phrase is sarcastic.  
+  - “The delivery was delayed, but support was amazing.” → mixed sentiment—models may average to neutral, hiding contrast.  
+- Stress that **sentiment scores are diagnostic signals**, useful for patterns and trends, but unreliable as single-label truth.  
+- Recommend best practices:  
+  - Treat sentiment output as **features** in predictive modeling (e.g., churn, satisfaction, brand perception).  
+  - Validate results against **domain-specific labeled data** or human judgments before making strategic decisions.  
+- Conclude with the conceptual shift: sentiment is not the end result—it’s an input to broader reasoning or decision systems.  
+
+### Deeper Dive  
+Sentiment analysis tools—lexicon-based or neural—estimate affective tone, not factual or psychological truth.  
+This distinction is critical in scientific and applied settings: **sentiment ≠ emotion, and emotion ≠ intent**.  
+
+#### 1. Epistemological Limits  
+Sentiment models operate in the space of **observable language**, not subjective experience.  
+They estimate polarity based on linguistic cues, assuming words map directly to affect.  
+In reality, emotion expression is shaped by context, pragmatics, and culture.  
+The mapping between language and feeling is probabilistic, not deterministic:  
+$$
+P(\text{emotion} \mid \text{text}) \neq 1.0 \text{ even for strongly polarized language.}
+$$  
+For example, “I’m fine” can mean genuine well-being, irritation, or sarcasm depending on tone and context.
+
+#### 2. Sentiment as a Feature, Not a Label  
+Treating sentiment as a **feature** enables more robust modeling.  
+For instance, in customer analytics:  
+- Sentiment trend over time → early signal for churn prediction.  
+- Sentiment distribution by topic → input to quality or product improvement models.  
+Mathematically, if $X_{\text{sent}}$ represents sentiment features (e.g., polarity, emotion ratios), they can be integrated into a predictive model:  
+$$
+P(\text{churn} \mid X_{\text{sent}}, X_{\text{behavioral}}, X_{\text{demographic}}).
+$$  
+Here, sentiment functions as **weak evidence**, complementing behavioral and transactional data.
+
+#### 3. Validation and Calibration  
+Always calibrate sentiment models against empirical benchmarks.  
+- **Labeled ground truth:** Compare model outputs to human annotations using correlation (Spearman’s ρ) or classification accuracy.  
+- **Domain adaptation:** Retrain or adjust lexicons to reflect field-specific tone (e.g., “critical” is positive in medicine).  
+- **Longitudinal validation:** Assess stability of sentiment scores across time and events.  
+
+Without validation, organizations risk **decision bias**—drawing incorrect conclusions from unverified affective proxies.  
+
+#### 4. Ethical and Interpretive Implications  
+- **Overreliance:** Mistaking model output for psychological truth can lead to unfair inferences (e.g., assuming an employee is unhappy from neutral survey text).  
+- **Transparency:** Document what “sentiment” means operationally—lexicon version, thresholding, or training corpus.  
+- **Human-in-the-loop validation:** Combine automated analysis with human review for ambiguous or high-stakes contexts.  
+
+#### 5. The Broader Lesson  
+In applied NLP, sentiment analysis exemplifies a larger theme: **models observe linguistic behavior, not inner states.**  
+Understanding this distinction fosters epistemic humility—valuing models as tools for evidence, not arbiters of truth.  
+When students internalize that sentiment is *signal, not truth*, they learn to integrate NLP responsibly into analytical workflows.  
+
+**References**  
+- Pang, B., & Lee, L. (2008). *Opinion Mining and Sentiment Analysis*. *Foundations and Trends in Information Retrieval*, 2(1–2), 1–135.  
+- Mohammad, S. M. (2016). *Sentiment Analysis: Detecting Valence, Emotions, and Other Affectual States from Text*. *Emotion Measurement*.  
+- Bender, E. M., & Friedman, B. (2018). *Data Statements for NLP: Toward Mitigating System Bias and Enabling Better Science*. *Transactions of the ACL*, 6, 587–604.  
+- Eisenstein, J. (2019). *Introduction to Natural Language Processing*. MIT Press.  
+- Jurafsky, D., & Martin, J. H. (2023). *Speech and Language Processing* (3rd ed. draft).  
+
+:::
+
+---
+
+# 5.6 Quick Modeling Loop (TF-IDF → Logistic Regression)
+---
+
+## <!-- 5.6.1 -->Building a Minimal Text Classification Pipeline
+
+- **Step 1:** Clean text — tokenize, remove stopwords, lemmatize.  
+- **Step 2:** Vectorize — convert text into TF-IDF feature vectors.  
+- **Step 3:** Train — fit a **logistic regression** classifier on TF-IDF features.  
+- **Why logistic regression?**  
+  - Simple and interpretable baseline.  
+  - Produces class probabilities for threshold tuning.  
+  - Reveals most predictive words via coefficient weights.  
+
+::: {.notes}
+
+## Building a Minimal Text Classification Pipeline  
+
+### Detailed Notes  
+- Introduce this slide as the **culmination of all prior preprocessing and feature engineering work**—where cleaned text becomes a predictive model.  
+- Outline the conceptual pipeline in three logical steps:  
+  1. **Preprocessing:** tokenization, stopword removal, and lemmatization standardize the text.  
+  2. **Vectorization:** transform text into TF–IDF representations capturing relative term importance.  
+  3. **Modeling:** fit a **logistic regression** classifier on the vectorized features.  
+- Reinforce why **logistic regression** is the go-to baseline:  
+  - Produces **probabilities**, enabling threshold tuning.  
+  - Linear coefficients are **interpretable**—each word’s weight reveals its predictive contribution.  
+  - Fast to train, simple to validate, and robust for high-dimensional sparse data.  
+- Walk students through the interpretive insight of model coefficients:  
+  - Positive coefficients → words associated with the positive class (“excellent,” “amazing”).  
+  - Negative coefficients → words linked to the negative class (“bad,” “terrible”).  
+- Stress reproducibility and auditability: a pipeline ensures consistent preprocessing and evaluation across datasets.  
+- End by framing logistic regression as a **transparent benchmark**—not the endpoint but a foundation for comparing advanced methods (e.g., SVMs, transformers).  
+
+### Deeper Dive  
+Logistic regression remains one of the most powerful pedagogical models in text classification because it provides both **statistical rigor** and **interpretability**.  
+
+#### 1. Mathematical Foundation  
+Given document feature vectors $\mathbf{x}_i$ (from TF–IDF), logistic regression models the probability of class membership as:  
+$$
+P(y_i = 1 \mid \mathbf{x}_i) = \sigma(\mathbf{w}^\top \mathbf{x}_i + b),
+$$  
+where $\sigma(z) = \frac{1}{1 + e^{-z}}$ is the sigmoid function, $\mathbf{w}$ is the weight vector, and $b$ is the bias term.  
+Model training minimizes **log-loss** (cross-entropy):  
+$$
+J(\mathbf{w}, b) = -\frac{1}{N} \sum_{i=1}^{N} [y_i \log \hat{y}_i + (1 - y_i)\log(1 - \hat{y}_i)].
+$$  
+Regularization (typically $L_2$) prevents overfitting in high-dimensional text data:  
+$$
+J_{\text{reg}} = J + \lambda \|\mathbf{w}\|_2^2.
+$$  
+
+Each word (feature) receives a weight $w_j$ that quantifies its **log-odds contribution** to the predicted class.  
+This interpretability makes logistic regression uniquely suited to **explainable NLP** and regulatory contexts where feature transparency matters.  
+
+#### 2. Why Logistic Regression Fits TF–IDF Data  
+- **Linearity of representation:** TF–IDF vectors are high-dimensional but sparse; linear models scale efficiently.  
+- **Feature interpretability:** direct mapping from words → coefficients.  
+- **Probabilistic output:** provides calibrated probabilities rather than hard class labels.  
+- **Efficient regularization:** allows the model to generalize across tens of thousands of features without overfitting.  
+
+#### 3. Thresholding and Evaluation  
+Logistic regression’s probabilistic output enables threshold tuning for precision–recall balance:  
+- Default threshold = 0.5 → balanced accuracy.  
+- Lower threshold → improved recall (fewer false negatives).  
+- Higher threshold → improved precision (fewer false positives).  
+Plotting ROC or PR curves helps visualize trade-offs.  
+
+#### 4. Interpretability Example  
+For a sentiment classifier trained on TF–IDF vectors:  
+- Top positive weights: “excellent,” “love,” “amazing.”  
+- Top negative weights: “terrible,” “refund,” “worst.”  
+The magnitude of coefficients represents how strongly a word influences class prediction.  
+This transparency allows human experts to validate whether the model’s learned associations make sense.  
+
+#### 5. Limitations and Extensions  
+- **Linearity:** logistic regression can’t model non-linear feature interactions (e.g., negation “not good”).  
+- **Vocabulary dependence:** unseen words at inference time are ignored.  
+- **Bag-of-words constraint:** ignores word order and syntax.  
+- **Scalability:** while fast, retraining can be required as vocabulary shifts.  
+
+Extensions:  
+- **N-gram features:** capture short context.  
+- **Regularization tuning:** optimize $\lambda$ via cross-validation.  
+- **Feature selection:** prune uninformative terms to improve generalization.  
+- **Comparison baselines:** Naive Bayes (for simplicity), SVM (for margin maximization), and fine-tuned transformers (for contextual embeddings).  
+
+Ultimately, logistic regression on TF–IDF serves as the **“sanity check” baseline** for any NLP classification problem—if a complex model can’t beat it, something in the pipeline is likely wrong.  
+
+**References**  
+- Sebastiani, F. (2002). *Machine Learning in Automated Text Categorization*. *ACM Computing Surveys*, 34(1), 1–47.  
+- Manning, C. D., Raghavan, P., & Schütze, H. (2008). *Introduction to Information Retrieval*. Cambridge University Press.  
+- Pedregosa, F. et al. (2011). *Scikit-learn: Machine Learning in Python*. *JMLR*, 12, 2825–2830.  
+- Eisenstein, J. (2019). *Introduction to Natural Language Processing*. MIT Press.  
+- Jurafsky, D., & Martin, J. H. (2023). *Speech and Language Processing* (3rd ed. draft).  
+
+
+:::
+
+---
+
+## <!--5.6.2--> Evaluation for Text Classification 
+
+### Conceptual Overview
+- **Stratified splits:** preserve class ratios in train/val/test.  
+- **Confusion matrix:** summarize TP / FP / FN / TN to reason about errors.  
+- **Precision vs. Recall:** reliability of positives vs. coverage of positives.  
+- **F1 family:**  
+  - **Macro-F1:** unweighted mean across classes (fair to minority).  
+  - **Micro-F1:** global average (tracks overall accuracy).  
+  - **Weighted-F1:** class-size–weighted mean (compromise).  
+- **PR vs. ROC:** prefer **PR** for imbalanced data; **ROC** can be overly optimistic.  
+- **Calibration:** predicted probabilities ≠ true likelihoods  
+  - Use reliability plots; consider **Platt** or **isotonic** calibration.  
+- **Report set:** Confusion matrix + Macro-F1 + PR-AUC (and ROC-AUC for completeness).
+
+### Quick Reference
+| Scenario / Question | Recommended Metric(s) | Why |
+|---|---|---|
+| Classes **imbalanced** | **PR-AUC**, **Macro-F1** | Focuses performance on minority class |
+| Overall performance, balanced data | **Accuracy**, **Micro-F1** | Reflects global correctness |
+| Need to **tune thresholds** | **Precision/Recall**, **F1**, **PR curve** | Make trade-offs explicit |
+| **Risk of false negatives** is costly | **Recall**, **Macro-F1** | Maximize positive coverage |
+| **Limited review capacity** (costly false positives) | **Precision**, **Precision@k** | Prioritize reliability |
+| Use of **probabilities** downstream | **Calibration curves**, **Brier score** | Ensure probability reliability |
+| Model comparison across runs | **Fixed split + seed**, same metrics | Apples-to-apples evaluation |
+
+**F1 Variants (When to Use)**
+- **Macro-F1:** fairness across classes  
+- **Micro-F1:** large, balanced datasets  
+- **Weighted-F1:** mild imbalance, single score
+
+
+
+::: {.notes}
+
+## Evaluation for Text Classification  
+
+### Detailed Notes  
+- Introduce the **purpose of evaluation**: quantifying how well the classifier generalizes to unseen data.  
+- Emphasize **data splitting** first: use stratified train/test splits to maintain class proportions—especially crucial for imbalanced datasets.  
+- Explain the **confusion matrix** conceptually:  
+  - **True Positive (TP):** correctly predicted positives.  
+  - **False Positive (FP):** incorrectly predicted positives.  
+  - **False Negative (FN):** missed positives.  
+  - **True Negative (TN):** correctly predicted negatives.  
+- Walk students through a visual example of a confusion matrix (2×2 for binary classification).  
+- Introduce **precision** and **recall** as complementary measures:  
+  - $Precision = \frac{TP}{TP + FP}$ → How many predicted positives were correct.  
+  - $Recall = \frac{TP}{TP + FN}$ → How many actual positives were found.  
+- Define **F1 score** as the harmonic mean of precision and recall:  
+  $$
+  F1 = 2 \cdot \frac{Precision \cdot Recall}{Precision + Recall}
+  $$  
+  Emphasize that F1 balances the trade-off between precision and recall, penalizing models that perform poorly on either.  
+- Explain **macro vs. micro F1**:  
+  - **Macro-F1:** average F1 per class (treats all classes equally).  
+  - **Micro-F1:** aggregate counts across all classes (weighted by class frequency).  
+  - Demonstrate how Macro-F1 is more informative for **imbalanced datasets** where the majority class dominates accuracy.  
+- Introduce **AUC (Area Under the Curve)** as a threshold-independent metric reflecting the model’s ability to rank positive examples higher than negatives.  
+- Conclude by warning against overreliance on **accuracy**—it can be misleading when one class represents most of the data.  
+
+### Deeper Dive  
+Evaluating text classifiers requires understanding the interaction between **class imbalance**, **decision thresholds**, and **metric selection**.  
+Each metric measures a different dimension of performance.
+
+#### 1. Stratified Splitting  
+In an imbalanced dataset, random splits may exclude minority classes from the test set.  
+**Stratified sampling** ensures that each split preserves the original class proportions:  
+$$
+P(y_k \mid \text{train}) \approx P(y_k \mid \text{test})
+$$  
+This enables fair, consistent performance measurement.
+
+#### 2. Confusion Matrix and Metrics  
+The confusion matrix provides the foundation for most classification metrics.  
+For binary classification:  
+
+|               | **Predicted Positive** | **Predicted Negative** |
+|----------------|------------------------|------------------------|
+| **Actual Positive** | TP | FN |
+| **Actual Negative** | FP | TN |
+
+From this matrix, we derive key metrics:  
+
+- **Precision:** $P = \frac{TP}{TP + FP}$  
+- **Recall (Sensitivity):** $R = \frac{TP}{TP + FN}$  
+- **Specificity:** $S = \frac{TN}{TN + FP}$  
+- **F1 Score:** $F1 = 2 \frac{PR}{P + R}$  
+
+#### 3. Macro vs. Micro Averaging  
+When evaluating multi-class classifiers:  
+- **Macro averaging:** compute F1 per class and average, treating all classes equally.  
+- **Micro averaging:** aggregate all TP, FP, FN before computing F1, emphasizing majority classes.  
+
+Formally:  
+$$
+F1_{\text{macro}} = \frac{1}{K}\sum_{k=1}^K F1_k, \quad 
+F1_{\text{micro}} = \frac{2 \sum_k TP_k}{2 \sum_k TP_k + \sum_k (FP_k + FN_k)}
+$$  
+
+Macro-F1 is robust to imbalance because it gives equal weight to minority classes, whereas micro-F1 approximates overall accuracy.
+
+#### 4. ROC and AUC  
+For probabilistic classifiers (like logistic regression), the **Receiver Operating Characteristic (ROC)** curve plots  
+- **True Positive Rate (TPR)** vs. **False Positive Rate (FPR)** across thresholds.  
+The **Area Under the Curve (AUC)** quantifies how well the model ranks positive examples higher than negative ones:  
+$$
+AUC = P(\text{score}(x_+) > \text{score}(x_-))
+$$  
+An AUC of 0.5 = random guessing; 1.0 = perfect discrimination.
+
+#### 5. Choosing Metrics by Scenario  
+| Scenario | Best Metric | Why |
+|-----------|--------------|-----|
+| Balanced dataset | Accuracy or Micro-F1 | All classes equally represented |
+| Imbalanced classes | Macro-F1, Precision/Recall | Protects minority classes |
+| Ranking importance | AUC-ROC | Evaluates overall ranking quality |
+| Cost-sensitive tasks | Precision@k, Recall@k | Focused on decision relevance |
+
+#### 6. Practical Cautions  
+- Always **report multiple metrics**—no single score tells the whole story.  
+- **Visualize** performance: confusion matrices, ROC, or PR curves communicate intuitions better than raw numbers.  
+- Ensure **consistent data splits** and random seeds for reproducibility.  
+- Discuss **threshold tuning** explicitly: a fixed threshold (0.5) may not yield optimal results in every domain.
+
+Ultimately, rigorous evaluation is as important as modeling itself.  
+A model that performs “well” on paper but fails under real-world imbalance or context shifts can mislead business or research conclusions.  
+
+**References**  
+- Powers, D. M. W. (2011). *Evaluation: From Precision, Recall and F-measure to ROC, Informedness, Markedness & Correlation*. *Journal of Machine Learning Technologies*, 2(1), 37–63.  
+- Saito, T., & Rehmsmeier, M. (2015). *The Precision-Recall Plot Is More Informative than the ROC Plot When Evaluating Binary Classifiers on Imbalanced Datasets*. *PLOS ONE*, 10(3), e0118432.  
+- Manning, C. D., Raghavan, P., & Schütze, H. (2008). *Introduction to Information Retrieval*. Cambridge University Press.  
+- Eisenstein, J. (2019). *Introduction to Natural Language Processing*. MIT Press.  
+- Jurafsky, D., & Martin, J. H. (2023). *Speech and Language Processing* (3rd ed. draft).  
+
+:::
+
+---
+
+
+## <!-- 5.6.4 -->Error Analysis & Robustness (Fast Diagnostics)
+
+- **Inspect errors:** top **false positives/negatives** with short text snippets  
+- **Slice performance:** by length, presence of negation, emoji usage, entity density  
+- **Stress tests:** simple perturbations to test brittleness  
+  - Remove emojis / randomize casing / inject 5% typos → note Δ in F1  
+- **Domain shift check:** train on subset A; test on subset B (e.g., electronics → home goods)
+
+::: {.notes}
+
+
+## Error Analysis & Robustness (Fast Diagnostics)
+
+- **Inspect errors:** top **false positives/negatives** with short text snippets  
+- **Slice performance:** by length, presence of negation, emoji usage, entity density  
+- **Stress tests:** simple perturbations to test brittleness  
+  - Remove emojis / randomize casing / inject 5% typos → note Δ in F1  
+- **Domain shift check:** train on subset A; test on subset B (e.g., electronics → home goods)
+
+:::
+
+
+---
+
+
+
+# 5.7 Reproducibility, Ethics & Bridge to LLMs
+
+---
+
+## <!-- 5.7.1 -->Classic Pipeline vs. LLMs
+
+- **Baseline pipeline:** TF-IDF + Logistic Regression = transparent, efficient, reproducible.  
+- **LLMs:** use embeddings and contextual understanding for greater semantic depth.  
+- **Key contrasts:**  
+  - **Interpretability:** logistic regression > LLM.  
+  - **Accuracy on nuanced tasks:** LLM > logistic regression.  
+  - **Cost & compute:** logistic regression ≪ LLM.  
+- This baseline helps evaluate when the added complexity of LLMs is justified.  
+
+<figure>
+  <img src="../materials/assets/images/classicNLP_vs_modernllm.drawio.svg"
+       alt="**Figure:** Comparison of classic NLP pipeline vs. LLM-based workflows.">
+  <figcaption>**Figure:** Comparison of classic NLP pipeline vs. LLM-based workflows.</figcaption>
+</figure>
+
+::: {.notes}
+
+## Spotlight: Classic Pipeline vs. LLMs  
+
+### Detailed Notes  
+- Frame this slide as the **conceptual bridge** between traditional machine learning (TF–IDF + Logistic Regression) and deep learning approaches (transformers, LLMs).  
+- Reinforce that the classic pipeline serves as the **baseline**—the “control group” for modern NLP research.  
+- Highlight key trade-offs:  
+  - **Interpretability:** Logistic regression is transparent—each coefficient corresponds to a word. LLMs, by contrast, are opaque but capture higher-order meaning.  
+  - **Accuracy and nuance:** LLMs outperform on tasks requiring semantic understanding, disambiguation, or reasoning.  
+  - **Cost and compute:** Traditional models can run on a laptop; LLMs require GPUs and are computationally expensive.  
+- Use this to motivate the question: *“When is the added complexity of LLMs justified?”*  
+- Suggest discussion examples:  
+  - Spam detection → TF–IDF may suffice.  
+  - Legal contract summarization → LLMs required for context and logic.  
+- Conclude with the theme of **comparative evaluation**: students should learn to test LLMs against interpretable baselines rather than assuming superiority.  
+
+### Deeper Dive  
+The contrast between classic and modern NLP pipelines reflects the **evolution from symbolic statistics to contextual semantics**.  
+Both paradigms share the same goal—extract meaning from text—but differ fundamentally in how they represent and learn that meaning.
+
+#### 1. The Classic Pipeline (TF–IDF + Logistic Regression)  
+This approach exemplifies **explicit, linear modeling**:  
+- Text is represented as a high-dimensional, sparse vector ($10^4$–$10^6$ features).  
+- Logistic regression learns a linear decision boundary that separates classes.  
+Advantages:  
+- **Transparency:** weights correspond directly to interpretable features (words or n-grams).  
+- **Speed:** training scales linearly with feature count.  
+- **Reproducibility:** results are deterministic given preprocessing.  
+Limitations:  
+- **Context-blind:** ignores syntax, word order, and polysemy.  
+- **Manual feature engineering:** performance depends on human-curated preprocessing.  
+- **Limited generalization:** cannot capture unseen phrasing or idioms.
+
+Mathematically, the model estimates:  
+$$
+P(y=1 \mid x) = \sigma(w^\top x + b),
+$$  
+where $x$ is the TF–IDF vector and $w$ the learned weights.  
+
+#### 2. The LLM Pipeline (Contextual Embeddings + Transformers)  
+LLMs (Large Language Models) employ **deep contextualized embeddings** derived from transformer architectures.  
+Instead of fixed vectors, each token representation dynamically depends on surrounding context:  
+$$
+h_i = \text{TransformerEncoder}(x_1, x_2, \dots, x_n).
+$$  
+These contextual vectors encode syntax, semantics, and long-range dependencies.  
+
+LLMs leverage pretraining on massive corpora via next-word or masked-word prediction, then fine-tune on downstream tasks.  
+Advantages:  
+- **Contextual understanding:** handles polysemy, co-reference, and long-range dependencies.  
+- **Zero-/few-shot learning:** generalizes across tasks without labeled data.  
+- **Emergent reasoning:** captures relationships and analogies beyond explicit training.  
+Limitations:  
+- **Opacity:** internal representations are difficult to interpret.  
+- **High compute cost:** pretraining requires millions of GPU-hours.  
+- **Reproducibility challenges:** stochasticity and version drift complicate replication.  
+
+#### 3. Comparative Summary  
+
+| Criterion | Classic Pipeline (TF–IDF + LR) | LLM-Based Pipeline (e.g., BERT, GPT) |
+|------------|-------------------------------|--------------------------------------|
+| **Representation** | Sparse, explicit word counts | Dense, contextual embeddings |
+| **Interpretability** | High (weights = words) | Low (latent representations) |
+| **Computation** | Lightweight (CPU) | Heavy (GPU / TPU) |
+| **Data Requirement** | Low (100–10k samples) | High (pretrained on billions of tokens) |
+| **Performance** | Excellent for simple tasks | Superior for semantic / reasoning tasks |
+| **Deployment** | Easy, deterministic | Complex, versioned, costly |
+| **Ethical Risk** | Low (transparent) | High (bias, hallucination, opacity) |
+
+This comparison demonstrates that *complexity is not free*—LLMs expand capability but also expand risk.  
+
+#### 4. When to Use Each  
+- **Classic pipelines:** ideal for tasks with limited data, narrow scope, or explainability requirements (e.g., risk scoring, compliance reports).  
+- **LLMs:** suitable for tasks involving abstraction, context understanding, or natural interaction (e.g., summarization, question answering).  
+- **Hybrid models:** combine interpretable features (TF–IDF, sentiment) with LLM embeddings to balance performance and explainability.  
+
+#### 5. Pedagogical Takeaway  
+Encourage students to see NLP as an **ecosystem** rather than a ladder.  
+Classic models and LLMs are not replacements for each other—they represent different points on the trade-off frontier between **simplicity, interpretability, and expressive power**.  
+Understanding both empowers practitioners to design fit-for-purpose systems rather than defaulting to complexity.  
+
+**References**  
+- Jurafsky, D., & Martin, J. H. (2023). *Speech and Language Processing* (3rd ed. draft).  
+- Devlin, J., Chang, M.-W., Lee, K., & Toutanova, K. (2019). *BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding*. *NAACL-HLT*.  
+- Bommasani, R. et al. (2021). *On the Opportunities and Risks of Foundation Models*. *Stanford CRFM Report*.  
+- Eisenstein, J. (2019). *Introduction to Natural Language Processing*. MIT Press.  
+- Bender, E. M., & Koller, A. (2020). *Climbing towards NLU: On Meaning, Form, and Understanding in the Age of Data*. *ACL*.  
+
+
+:::
+
+---
+
+## <!-- 5.7.2 -->Pipeline Discipline & Artifacts (Reproducible Baseline)
+
+- **Pipelines:** fit on **train only**, transform **val/test** (discipline via `Pipeline`/`ColumnTransformer` concept)  
+- **Persist artifacts:** vectorizer, vocab/IDF, model, splits, seeds  
+- **Version & hash:** record library versions and dataset checksums  
+- **Comparability:** reuse the same artifacts when benchmarking LLM approaches later
+
+
+- Set **random seeds** for tokenizers, splits, and classifiers.  
+- Track **dataset and pipeline versions** for consistent results.  
+- Maintain **prompt logs** (in later modules) for transparency and auditing.  
+- Reproducibility builds scientific and operational credibility.  
+
+::: {.notes}
+
+## Pipeline Discipline & Artifacts (Reproducible Baseline)  
+
+### Detailed Notes  
+- Use this slide to emphasize **scientific rigor in NLP experiments**—the difference between reproducible baselines and irreproducible prototypes.  
+- Begin by restating the principle: **fit on training data only**, then **transform validation/test data** with the fitted preprocessing objects.  
+  - Reinforce this concept using the `Pipeline` and `ColumnTransformer` structures in scikit-learn, which encapsulate preprocessing and modeling steps into one reproducible object.  
+  - Example:  
+    ```python
+    from sklearn.pipeline import Pipeline
+    model = Pipeline([
+        ('tfidf', TfidfVectorizer(max_features=10000)),
+        ('clf', LogisticRegression(class_weight='balanced'))
+    ])
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    ```  
+- Highlight the importance of **artifact persistence**:  
+  - Save vectorizers (`.vocab_`, `.idf_`) and trained models (`.pkl` files) using joblib or pickle.  
+  - Log the random seed, data splits, and model hyperparameters.  
+- Discuss **version control** for reproducibility:  
+  - Pin versions of libraries (`requirements.txt` or `environment.yml`).  
+  - Record dataset hashes (e.g., MD5/SHA256) to verify data consistency.  
+  - Store configuration metadata—use YAML or JSON—to make experiments re-runnable.  
+- Explain **comparability**: when benchmarking against new models (e.g., LLMs), reuse the same TF–IDF features, dataset splits, and evaluation metrics.  
+  - This ensures fair, apples-to-apples comparisons between classic baselines and modern architectures.  
+- Conclude by emphasizing that reproducibility is not bureaucracy—it’s what turns a single experiment into **science**.  
+
+### Deeper Dive  
+Reproducibility is the cornerstone of trustworthy machine learning.  
+In NLP, even small deviations—different tokenization, random seeds, or package versions—can yield significantly different results.
+
+#### 1. The Problem of Hidden Variance  
+Many published models are **irreproducible** due to undocumented randomness and configuration drift.  
+Sources of nondeterminism include:  
+- **Random initialization:** affects logistic regression solvers and neural network weights.  
+- **Shuffled data splits:** changes train/test composition.  
+- **Floating-point operations:** GPU vs. CPU differences in numerical precision.  
+- **External libraries:** spaCy, NLTK, and scikit-learn tokenizer updates alter preprocessing outcomes.  
+
+Formally, if $f_{\theta, s}(X)$ is a model function parameterized by $\theta$ with random seed $s$, then reproducibility requires controlling both $\theta$ and $s$ such that:  
+$$
+f_{\theta, s}(X) = f_{\theta, s'}(X) \; \text{for all } s, s' \text{ under fixed data and code}.
+$$  
+
+#### 2. Artifact Management  
+Artifacts are the **frozen states** of a model pipeline at training time.  
+They include:  
+| Artifact | Purpose | Recommended Tool |
+|-----------|----------|------------------|
+| Vectorizer / Tokenizer | Preserve vocab and transformations | `joblib`, `pickle` |
+| Trained Model | Enable inference consistency | `joblib`, `MLflow`, `Weights & Biases` |
+| Data Splits | Maintain consistent evaluation partitions | Save index arrays or hashes |
+| Random Seed | Guarantee deterministic results | Log all random states (`numpy`, `random`, `torch`) |
+| Configurations | Record hyperparameters, thresholds | YAML / JSON metadata |
+
+Versioning artifacts ensures that identical experiments yield identical results across systems and collaborators.
+
+#### 3. Version Pinning and Checksums  
+- **Library Versions:**  
+  - Use fixed dependency versions (`pip freeze > requirements.txt`).  
+  - Example: differences between `scikit-learn 0.22` and `1.0` can alter TF–IDF normalization defaults.  
+- **Dataset Hashing:**  
+  - Compute and log dataset checksums (MD5 or SHA256) to detect subtle file changes.  
+  - Example: `hashlib.md5(open("data.csv", "rb").read()).hexdigest()`.  
+- **Containerization:**  
+  - Use Docker or conda environments to isolate dependencies and runtime configurations.  
+
+#### 4. Experiment Tracking  
+To ensure transparency across multiple experiments, maintain a **run log** capturing:  
+| Attribute | Description |
+|------------|-------------|
+| Dataset ID | File name or hash |
+| Preprocessing choices | Tokenizer, normalization, stopword settings |
+| Random seed | Ensures deterministic splits |
+| Model hyperparameters | Regularization strength, n-gram range |
+| Performance metrics | Accuracy, F1, PR-AUC |
+| Notes | Observations or issues |
+
+Frameworks like **MLflow**, **Weights & Biases**, or even structured spreadsheets can automate logging.  
+
+#### 5. Comparability and Scientific Fairness  
+When introducing new architectures (e.g., fine-tuned BERT or GPT models), reuse the **exact same** datasets, splits, and evaluation metrics used in the baseline TF–IDF pipeline.  
+Without this control, performance gains cannot be attributed to model improvement—they may simply arise from different preprocessing or sampling.  
+This discipline enables *scientifically valid benchmarking*.  
+
+#### 6. Pedagogical Reflection  
+Teaching reproducibility early establishes habits essential for research integrity.  
+Encourage students to see **reproducibility as credibility**—every experiment should be traceable, explainable, and replicable by others.
+
+**References**  
+- Pineau, J., et al. (2021). *Improving Reproducibility in Machine Learning Research (A Report from the NeurIPS 2019 Reproducibility Program)*. *JMLR*, 22(164), 1–20.  
+- Sculley, D. et al. (2015). *Hidden Technical Debt in Machine Learning Systems*. *NeurIPS*.  
+- Drummond, C. (2009). *Replicability is Not Reproducibility: Nor is it Good Science*. *Evaluation Methods for Machine Learning Workshop*.  
+- Eisenstein, J. (2019). *Introduction to Natural Language Processing*. MIT Press.  
+- Jurafsky, D., & Martin, J. H. (2023). *Speech and Language Processing* (3rd ed. draft).  
+
+
+:::
+
+
+## <!-- 5.7.6 -->Bridge to LLMs: What Changes vs. What Stays
+
+- **Changes:** subword/byte tokenization, **contextual embeddings**, attention over long sequences  
+- **Stays the same:** hygiene (Unicode, casing), leakage discipline, **evaluation & calibration**, error analysis, artifact versioning  
+- **In LLMs:** compare TF-IDF/logistic baseline vs **prompting**, **fine-tuning**, and **RAG** on the **same task**
+
+::: {.notes}
+
+## In LLMs: What Changes vs. What Stays
+- Frame continuity: students already understand tokenization and representation—LLMs scale these ideas with attention and context.  
+- Set expectation: we will reuse the same datasets and metrics to make the comparison meaningful.
+
+:::
+
+
+
+
+
+
+
+
+
+
+# 5.x Hands-On Exercise
+
+## Hands-On Exercise Overview
+
+- Two datasets provided:  
+  - `customer_reviews.csv`: product/service reviews with star ratings.  
+  - `loan_text.csv`: loan narratives with approval/denial outcomes.  
+- Goal: build an end-to-end text classification pipeline.  
+- Each group chooses one dataset and follows all steps from cleaning → modeling → evaluation.  
+
+
+::: {.notes}
+
+## Hands-On Exercise Overview
+- Introduce both datasets and clarify objectives: apply full NLP workflow learned so far.  
+- Encourage teams to document decisions (e.g., what cleaning choices they made and why).  
+- Suggest starting small: 500–1000 records to ensure quick experimentation.  
+
+:::
+
+---
+
+## Step 1: Full Cleaning Pipeline
+
+- Normalize text (Unicode NFC/NFKC).  
+- Handle URLs, emojis, and contractions.  
+- Tokenize + lemmatize using spaCy or NLTK.  
+- Apply stopword filtering when appropriate.  
+
+
+::: {.notes}
+
+## Step 1: Full Cleaning Pipeline
+- Remind students this step standardizes linguistic structure.  
+- Note the importance of domain-aware cleaning — emojis might matter for reviews but not for loan narratives.  
+- Encourage testing multiple tokenization/lemmatization options and comparing results.  
+
+:::
+
+---
+
+## Step 2: POS & NER Features
+
+- Extract **part-of-speech (POS)** distribution (e.g., % adjectives, % verbs).  
+- Use **Named Entity Recognition (NER)** to identify MONEY, ORG, DATE, etc.  
+- Optional: engineer numeric features such as entity counts, text length, lexical diversity.  
+
+::: {.notes}
+
+## Step 2: POS & NER Features
+- Explain how linguistic features provide interpretable signals.  
+- In financial or legal text, named entities can be predictive (e.g., MONEY, ORG).  
+- Highlight how combining structured linguistic metrics with text vectors can improve model performance.  
+
+:::
+
+---
+
+## Step 3: Sentiment & Emotion Features
+
+- Apply **VADER** → compound polarity.  
+- Apply **TextBlob** → polarity and subjectivity.  
+- Apply **NRCLex** → emotion scores (anger, joy, trust, etc.).  
+- Store all outputs as numeric features for classification.  
+
+::: {.notes}
+
+## Step 3: Sentiment & Emotion Features
+- Show how each lexicon produces distinct but complementary emotional signals.  
+- Compare polarity distributions across classes to build intuition.  
+- Discuss limitations of lexicon-based methods when text is domain-specific or sarcastic.  
+
+:::
+
+---
+
+## Step 4: Vectorization
+
+- Create **BoW** and **TF-IDF** matrices from cleaned text.  
+- Optionally apply **LSA (SVD)** for dimensionality reduction.  
+- Discuss vocabulary size, sparsity, and interpretability trade-offs.  
+
+::: {.notes}
+
+## Step 4: Vectorization
+- Demonstrate vocabulary growth and feature sparsity visually.  
+- Emphasize that LSA smooths co-occurrence relationships but may blur fine distinctions.  
+- Encourage students to compare model performance with and without dimensionality reduction.  
+
+:::
+
+---
+
+## Step 5: Train Logistic Regression
+
+- Train **logistic regression** on TF-IDF features.  
+- Evaluate using:  
+  - Accuracy  
+  - Precision, recall, and F1 (macro-F1 emphasized)  
+  - Confusion matrix visualization  
+
+::: {.notes}
+
+## Step 5: Train Logistic Regression
+- Reinforce that logistic regression serves as a transparent, baseline classifier.  
+- Explain how macro-F1 penalizes poor performance on minority classes.  
+- Have students identify which words contribute most to each class via model coefficients.  
+
+:::
+
+---
+
+## Step 6: Compare Patterns & Visualize
+
+- Compare sentiment/emotion distributions across predicted classes.  
+- Visualize frequent words, entity mentions, and emotion trends.  
+- (Generally speaking) Prefer bar plots over word clouds for clarity and comparability.  
+- Emphasize correct labeling, scales, and context for interpretability.  
+
+
+::: {.notes}
+
+## Step 7: Compare Patterns & Visualize
+- Encourage critical evaluation of visual outputs: “Does the chart really support the insight?”  
+- Demonstrate both good and bad visualization practices.  
+- Discuss how misleading scaling or omission of context can distort interpretation.  
+
+:::
+
+---
+
+## Discussion
+
+
+*When are sparse models (TF-IDF + logistic regression) good enough?*  
+
+*When might you need embeddings or deep learning models?*  
+
+- Discuss trade-offs among interpretability, complexity, and compute resources.  
+
+
+
+::: {.notes}
+
+## Reflection & Discussion
+- Facilitate open discussion; capture key insights on whiteboard or shared doc.  
+- Guide students toward recognizing that model choice depends on data scale, resources, and interpretability needs.  
+- Bridge to next module: dense embeddings and LLMs extend these same principles.  
+
+:::
+
+---
+
+
+
+# 5.x Appendix additonal slides 
+
+
+
+## Word2Vec: Example of a Word Embedding Algorithm
+
+- Learns word meaning from **context** using simple neural objectives:  
+  - **CBOW:** predict word from context.  
+  - **Skip-Gram:** predict context from word.  
+- Produces vectors where **semantic similarity = geometric proximity**.  
+- Classic analogies emerge: *king – man + woman ≈ queen*.  
+- Visualization: words cluster by meaning in 2D space.  
+
+
+::: {.notes}
+
+## Word2Vec: Example of a Word Embedding Algorithm  
+
+### Detailed Notes  
+- Introduce Word2Vec (Mikolov et al., 2013) as the first scalable algorithm to operationalize the **distributional hypothesis**—“You shall know a word by the company it keeps.”  
+- Describe intuition: words co-occurring in similar contexts acquire similar vector representations.  
+- Two training styles:  
+  - **CBOW:** input = neighboring words → output = central word.  
+  - **Skip-Gram:** input = central word → output = surrounding words.  
+- Use the 2D cluster image to show “semantic neighborhoods.”  
+- Point out that dimensionality is arbitrary—visuals use 2D for intuition, but models often use 100–300 D.
+
+### Deeper Dive  
+- Word2Vec embeds co-occurrence statistics into geometry by optimizing a log-likelihood objective over local context windows.  
+- Resulting vectors preserve linear relationships because log-probability ratios approximate vector offsets.  
+- Limitations: one vector per word type → cannot distinguish multiple senses (polysemy).  
+- This sets the stage for **contextual embeddings** later in the module.  
+
+:::
+
+## Side Note: LLMs Learn Their Own Embeddings
+
+- LLMs include **trainable embedding layers** optimized during pretraining.  
+- These embeddings adapt to the **task and data**, not fixed like Word2Vec.  
+- Embedding dimensionality grows with model size:  
+  - GPT-2 Small (117 M params): 768 dims  
+  - GPT-3 (175 B params): 12 288 dims  
+- Trade-off → higher dimension = richer representation but greater cost.  
+
+
+
+::: {.notes}
+
+## Side Note: LLMs Learn Their Own Embeddings  
+
+### Detailed Notes  
+- Explain that modern transformers no longer rely on external embeddings; they *learn them jointly* with model weights.  
+- This means the embedding matrix is updated via backpropagation—tailored to the model’s objectives.  
+- Emphasize dimensionality as a design parameter controlling capacity and compute.  
+- Example contrast:  
+  - Word2Vec = pretrained static 300-D vectors.  
+  - GPT-like = end-to-end learned embeddings (768–12 288 D).  
+- Key pedagogical bridge: **LLMs internalize Word2Vec’s idea but scale it massively**.  
+
+### Deeper Dive  
+- The embedding layer’s weight matrix size = *vocabulary × embedding dimension*.  
+- Each token’s row becomes its vector; training aligns geometry with prediction objectives.  
+- Note the efficiency trade-off: doubling embedding dimension quadruples compute in attention layers.  
+- Reinforce that understanding embeddings here makes transformer input embeddings intuitive later.  
+
+:::
+
+# 5.x Stylometry
+
+
+## Stylometry & Author Identification (Mini-Segment)
+
+- **Goal:** identify likely author by writing style (not content)  
+- **Features:** function-word ratios, punctuation patterns, sentence length variance, **character n-grams**, POS trigrams  
+- **Protocol cautions:**  
+  - Split data by **author** (avoid cross-document leakage)  
+  - Control topical cues; prefer style markers over content words  
+
+::: {.notes}
+
+## Stylometry & Author Identification (Mini-Segment)  
+
+### Detailed Notes  
+- Open by defining **stylometry** as the quantitative study of writing style, emphasizing that it focuses on *how* something is written, not *what* is written.  
+- Explain that author identification relies on features of linguistic **habit**—choices authors make unconsciously and consistently.  
+- Present the most common stylometric features:  
+  - **Function-word ratios:** relative frequencies of articles, prepositions, conjunctions.  
+  - **Punctuation patterns:** comma, semicolon, dash usage; sentence length variation.  
+  - **Character n-grams:** subword fragments that capture orthographic and stylistic habits.  
+  - **POS trigrams:** syntactic rhythm (e.g., DET–ADJ–NOUN).  
+- Illustrate how content words can “cheat” by revealing topic rather than author. Use an example comparing essays on different subjects—topic words differ, but stylistic features remain stable.  
+- Stress proper evaluation design:  
+  - Train/test splits must be **author-disjoint**—no documents from the same author in both sets.  
+  - Random document splits inflate accuracy via topical overlap.  
+- Discuss applications and ethics: authorship attribution in forensic linguistics, plagiarism detection, and historical authorship studies (e.g., *The Federalist Papers*).  
+- Transition by linking this to previous slides: stylometry extends lexical and syntactic metrics into **behavioral linguistic profiling**.  
+
+### Deeper Dive  
+Stylometry operationalizes **idiolect**—the unique, measurable fingerprint of an author’s language use.  
+It draws on both linguistic theory and statistical modeling to infer identity from stylistic regularities that are difficult to consciously manipulate.
+
+#### 1. Theoretical Foundations  
+The assumption of stylometry rests on two principles:  
+1. **Style consistency:** Authors exhibit stable linguistic habits across texts.  
+2. **Style distinctiveness:** Those habits differ measurably between individuals.  
+Early studies (Mosteller & Wallace, 1964) used Bayesian word-frequency models to identify authors of *The Federalist Papers*, marking the start of computational authorship analysis.
+
+#### 2. Stylometric Feature Families  
+| Feature Type | Example | Captures | Notes |
+|---------------|----------|-----------|-------|
+| **Lexical** | Function-word ratios, average word length | Vocabulary choice | Topic-independent |
+| **Syntactic** | POS tag distributions, parse tree depth | Grammatical preference | Needs tagging accuracy |
+| **Structural** | Paragraph length, punctuation density | Formatting & rhythm | Medium-dependent |
+| **Character n-grams** | “th”, “ion”, “_t” | Spelling, morphology | Robust to tokenization |
+| **Semantic / Pragmatic** | Discourse markers (“however”, “in conclusion”) | Argumentation style | Can overlap with topic |
+
+Character n-grams are especially powerful because they combine lexical, orthographic, and morphological cues.  
+For example, an author’s preference for contractions (“can’t” vs. “cannot”) or spacing conventions appears in these patterns.  
+
+Mathematically, feature extraction yields a high-dimensional vector $x_a$ representing author $a$.  
+Classification typically uses cosine similarity or linear models:
+$$
+\hat{a} = \arg\max_a \cos(x_a, x_{\text{unknown}})
+$$  
+For multi-author corpora, supervised classifiers (e.g., logistic regression, SVM, Random Forests) or even unsupervised clustering (for open-set problems) can be applied.
+
+#### 3. Cross-Validation and Leakage Prevention  
+A major methodological challenge is **topic confounding**.  
+If each author writes about a unique topic, models learn topical rather than stylistic signals.  
+To mitigate this:  
+- Use **topic-balanced corpora** or **cross-topic validation**, training on one topic and testing on another.  
+- Always ensure **author-disjoint splits**.  
+- Use *function words only* as features to minimize topical bias.
+
+#### 4. Ethical and Practical Dimensions  
+Stylometry intersects with privacy and surveillance.  
+De-anonymization research demonstrates that style-based models can identify authors even in anonymized datasets, posing ethical concerns under GDPR and academic codes of conduct.  
+When teaching or deploying these methods:  
+- Obtain informed consent for authorship analysis.  
+- Avoid use on sensitive, personal, or whistleblower communications.  
+- Treat stylometric insights as probabilistic, not definitive—no model can “prove” authorship.  
+
+#### 5. Contemporary Developments  
+Recent advances integrate **neural embeddings** (e.g., BERT, RoBERTa) fine-tuned for style, capturing higher-order syntactic and pragmatic cues.  
+Hybrid approaches combine traditional stylometric features with contextual representations, bridging explainability and accuracy.  
+Emerging work explores **cross-domain and cross-lingual stylometry**, highlighting style invariants independent of language.  
+
+In short, stylometry shows that even in the age of deep learning, **linguistic fingerprinting** remains a uniquely interpretable lens on authorship—one where style, not semantics, tells the story.  
+
+**References**  
+- Mosteller, F., & Wallace, D. L. (1964). *Inference and Disputed Authorship: The Federalist*. Addison-Wesley.  
+- Koppel, M., Schler, J., Argamon, S. (2009). *Computational Methods in Authorship Attribution*. *Journal of the American Society for Information Science and Technology*, 60(1), 9–26.  
+- Stamatatos, E. (2018). *Authorship Attribution Using Text Distortion*. *Journal of the Association for Information Science and Technology*, 69(3), 555–568.  
+- Brennan, M., Afroz, S., & Greenstadt, R. (2012). *Adversarial Stylometry: Circumventing Authorship Recognition to Preserve Privacy and Anonymity*. *ACM TISSEC*.  
+
+:::
+
+---
+
+
+## <!-- 5.6.5 -->Handling Class Imbalance
+
+- **Weighted loss:** `class_weight="balanced"` adjusts penalties by class frequency.  
+- **Resampling strategies:**  
+  - Oversample minority class (e.g., SMOTE).  
+  - Undersample majority class to rebalance.  
+- **Trade-offs:** improves fairness and recall but may reduce accuracy or stability.  
+
+::: {.notes}
+
+## Handling Class Imbalance  
+
+### Detailed Notes  
+- Start by defining **class imbalance**: a scenario where one class heavily outweighs others (e.g., 90% negative reviews vs. 10% positive).  
+- Explain the **problem**: imbalanced data biases models toward predicting the majority class because minimizing overall error favors the dominant category.  
+  - Example: if 90% of examples are “non-fraud,” a model predicting “non-fraud” for all inputs achieves 90% accuracy but is useless for detection.  
+- Present two main strategies to handle imbalance:  
+  1. **Algorithmic adjustments (weighted loss):** penalize misclassification of minority class more heavily.  
+     - In scikit-learn: `class_weight="balanced"` scales the loss inversely to class frequency.  
+  2. **Data-level adjustments (resampling):**  
+     - **Oversampling:** duplicate or synthesize minority class samples (e.g., **SMOTE**).  
+     - **Undersampling:** remove samples from the majority class.  
+- Emphasize **trade-offs**:  
+  - Oversampling → higher recall, risk of overfitting.  
+  - Undersampling → faster training, but may lose information.  
+  - Weighted loss → stable, often best starting point for linear models like logistic regression.  
+- Conclude by linking back to evaluation: imbalance requires **macro-F1 or PR-AUC**, not accuracy, to measure performance fairly.  
+
+### Deeper Dive  
+Class imbalance is ubiquitous in real-world NLP: toxic comment detection, fraud classification, or rare disease diagnosis.  
+Ignoring it leads to misleading performance metrics and poor generalization to minority cases.  
+
+#### 1. Mathematical View of Weighted Loss  
+In logistic regression, standard cross-entropy loss for sample $i$ is:  
+$$
+L_i = -[y_i \log \hat{p}_i + (1 - y_i)\log(1 - \hat{p}_i)].
+$$  
+With **class weighting**, each loss term is scaled by the inverse of class frequency:  
+$$
+L_i = -w_{y_i} [y_i \log \hat{p}_i + (1 - y_i)\log(1 - \hat{p}_i)], \quad 
+w_{y_i} = \frac{N}{2 N_{y_i}}.
+$$  
+Here, $N$ = total samples, $N_{y_i}$ = samples of class $y_i$.  
+This ensures that each class contributes equally to total loss regardless of size.  
+
+#### 2. Oversampling and Synthetic Data (SMOTE)  
+**SMOTE (Synthetic Minority Oversampling Technique)** generates new minority examples by interpolating between existing ones:  
+$$
+x_{\text{new}} = x_i + \lambda (x_{nn} - x_i), \quad \lambda \sim U(0, 1)
+$$  
+where $x_i$ is a minority class instance and $x_{nn}$ is a randomly chosen nearest neighbor from the same class.  
+This preserves feature diversity while balancing class counts.  
+
+Benefits:  
+- Increases minority representation without mere duplication.  
+- Encourages decision boundaries that generalize better.  
+
+Cautions:  
+- Works poorly with highly overlapping classes.  
+- Can create unrealistic feature combinations if class distributions are non-linear.  
+
+#### 3. Undersampling  
+Undersampling reduces majority samples to match minority size.  
+While computationally efficient, it risks discarding informative examples and decreasing variance coverage.  
+Used effectively when the majority class is extremely large (e.g., millions of neutral tweets).  
+
+#### 4. Hybrid and Ensemble Methods  
+Modern systems combine techniques:  
+- **SMOTE + Tomek Links:** oversample minority and remove borderline majority examples.  
+- **Bagging or boosting ensembles:** resample subsets per model iteration (e.g., Balanced Random Forest, XGBoost with scale_pos_weight).  
+- **Cost-sensitive learning:** modify the algorithm’s internal objective rather than manipulating data.  
+
+#### 5. Choosing the Right Approach  
+| Situation | Recommended Method | Why |
+|------------|--------------------|-----|
+| Small minority class (rare events) | **Oversampling / SMOTE** | Expands minority examples |
+| Large dataset, memory concern | **Undersampling** | Reduces data volume |
+| Linear model (logistic regression, SVM) | **Weighted loss** | Simplest and stable baseline |
+| Tree-based models (XGBoost, LightGBM) | **scale_pos_weight / balanced subsampling** | Native imbalance handling |
+| Streaming or real-time systems | **Dynamic reweighting** | Adapts to evolving class ratios |
+
+#### 6. Metric Alignment  
+Always align evaluation metrics with task goals:  
+- **Recall** → critical for risk-sensitive tasks (fraud, medical diagnosis).  
+- **Precision** → important for limited intervention capacity (moderation systems).  
+- **Macro-F1** → balances minority and majority classes fairly.  
+
+Ignoring this alignment leads to models that appear “good” on paper but fail operationally when false negatives carry high cost.  
+
+In sum, managing imbalance is not just a preprocessing step—it’s part of designing **fair, reliable, and context-aware** NLP systems.  
+
+**References**  
+- Chawla, N. V., Bowyer, K. W., Hall, L. O., & Kegelmeyer, W. P. (2002). *SMOTE: Synthetic Minority Over-sampling Technique*. *Journal of Artificial Intelligence Research*, 16, 321–357.  
+- He, H., & Garcia, E. A. (2009). *Learning from Imbalanced Data*. *IEEE Transactions on Knowledge and Data Engineering*, 21(9), 1263–1284.  
+- Japkowicz, N., & Stephen, S. (2002). *The Class Imbalance Problem: A Systematic Study*. *Intelligent Data Analysis*, 6(5), 429–449.  
+- Eisenstein, J. (2019). *Introduction to Natural Language Processing*. MIT Press.  
+- Jurafsky, D., & Martin, J. H. (2023). *Speech and Language Processing* (3rd ed. draft).  
+
+:::

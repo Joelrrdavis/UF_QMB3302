@@ -1,0 +1,173 @@
+---
+title: "Concept: Train - Test - Split"
+subtitle: "One idea. One mental model. No workflow."
+format:
+  revealjs:
+    theme: default
+    slide-number: true
+    embed-resources: true
+    Highlight-style: ../materials/assets/highlight_accessible.theme
+    # Nice-to-have code UX for slides
+    code-line-numbers: true      # add line numbers to all code blocks
+    code-overflow: wrap          # wrap long lines (good for projectors)
+    code-copy: true              # copy-to-clipboard button
+    code-block-bg: true          # subtle background behind code blocks
+    code-block-border-left: "#E69F00"  # UF-amber accent; pick your brand color
+execute:
+  echo: false
+---
+
+## What problem are we solving?
+
+:::: {.columns}
+::: {.column width="50%"}
+- Models can **appear to work** even when they are not learning anything real
+- Evaluating a model on the same data it learned from is misleading
+- We need a way to separate **learning** from **judgment**
+:::
+
+::: {.column width="50%"}
+:::
+::::
+
+---
+
+## The core idea
+
+:::: {.columns}
+::: {.column width="50%"}
+- Use **different data** for learning and evaluation
+- One portion is used to *fit* the model
+- Another portion is used to *judge* the model
+- These roles must stay separate
+:::
+
+::: {.column width="50%"}
+:::
+::::
+
+---
+
+## The mental model
+
+:::: {.columns}
+::: {.column width="50%"}
+- Think of a **closed-book exam**
+- You study from one set of materials
+- You are evaluated on questions you have not seen
+- Performance only matters on the unseen questions
+:::
+
+::: {.column width="50%"}
+:::
+::::
+
+---
+
+## What “training data” means
+
+:::: {.columns}
+::: {.column width="50%"}
+- Data the model is allowed to learn from
+- Used to detect patterns and relationships
+- Errors here are *part of learning*
+- Good performance here is not meaningful by itself
+:::
+
+::: {.column width="50%"}
+:::
+::::
+
+---
+
+## What “test data” means
+
+:::: {.columns}
+::: {.column width="50%"}
+- Data the model has **never seen**
+- Used only for evaluation
+- Errors here reflect real-world performance
+- This is the only performance that counts
+:::
+
+::: {.column width="50%"}
+:::
+::::
+
+---
+
+## Why the split matters
+
+:::: {.columns}
+::: {.column width="50%"}
+- Models are very good at memorizing
+- Memorization looks like intelligence on training data
+- Only unseen data reveals whether learning generalized
+- Without a split, performance numbers are meaningless
+:::
+
+::: {.column width="50%"}
+:::
+::::
+
+---
+
+## A common misconception
+
+:::: {.columns}
+::: {.column width="50%"}
+- High training accuracy does **not** mean a good model
+- Poor test performance means the model did not generalize
+- The goal is not to fit the data
+- The goal is to perform well on new cases
+:::
+
+::: {.column width="50%"}
+:::
+::::
+
+---
+
+## What the split protects against
+
+:::: {.columns}
+::: {.column width="50%"}
+- Fooling yourself with inflated accuracy
+- Accidentally building models that memorize
+- Making decisions based on misleading evidence
+- Overconfidence in model capability
+:::
+
+::: {.column width="50%"}
+:::
+::::
+
+---
+
+## What this is *not*
+
+:::: {.columns}
+::: {.column width="50%"}
+- Not a modeling technique
+- Not an optimization method
+- Not a guarantee of good performance
+- Simply a rule for honest evaluation
+:::
+
+::: {.column width="50%"}
+:::
+::::
+
+---
+
+## Check point: 
+
+:::: {.columns}
+::: {.column width="50%"}
+- **A model should be judged only on data it did not learn from**
+:::
+
+::: {.column width="50%"}
+:::
+::::
+

@@ -1,0 +1,3708 @@
+---
+title: Week 9 Plus
+subtitle: QMB3302 Foundations of Analytics and AI
+format:
+  metropolis-beamer-revealjs:
+    slide-number: c
+    embed-resources: true
+    # Syntax highlighting theme (pick one: pygments, tango, zenburn, kate, breeze, nord, github, dracula, monokai, etc.)
+    highlight-style: ../materials/assets/highlight_accessible.theme
+    # Nice-to-have code UX for slides
+    code-line-numbers: true      # add line numbers to all code blocks
+    code-overflow: wrap          # wrap long lines (good for projectors)
+    code-copy: true              # copy-to-clipboard button
+    code-block-bg: true          # subtle background behind code blocks
+    code-block-border-left: "#E69F00"  # UF-amber accent; pick your brand color
+author:
+  - name: Joel Davis
+    orcid: 0000-0000-0000-0000
+    email: joel.davis@warrington.ufl.edu
+    affiliations: University of Florida
+date: last-modified
+bibliography: ../materials/assets/shared_references_courses.bib
+---
+
+# Foundations and Architecture
+
+---
+
+# 7.0 Module orientation: large language models
+
+
+## <!--7.0.1--> Why this module matters
+
+- Large language models (LLMs) and foundation models mark a major shift in how we build and deploy AI systems.  
+- Instead of training narrow models for specific tasks, we now adapt massive pretrained models for a wide variety of uses.  
+- Understanding these models is essential for both technical work and strategic decision-making in organizations.  
+
+::: {.notes}
+Briefly define “foundation model” and contrast it with task-specific models.  
+Mention examples: GPT-4, Claude, Gemini, Mistral.  
+Set expectations that the next sections move from model internals → adaptation → alignment → deployment.
+:::
+
+---
+
+## <!--7.0.2--> Guiding questions
+
+As we go through this module, keep these things in mind:  
+
+1. What makes foundation models different from traditional task-specific models?  
+2. How do Transformers enable scale and emergent capabilities?  
+3. What are the main strategies to adapt LLMs to new tasks?  
+   - Prompting  
+   - Fine-tuning  
+   - Retrieval-augmented generation (RAG)  
+4. How do we balance performance and cost concerns in practice?  
+5. Where are the boundaries of current technology, and what challenges remain?  
+
+::: {.notes}
+Use this slide interactively—ask students to pick one question they are most curious about.  
+
+:::
+
+---
+
+# 7.1 What are foundation models and LLMs?
+
+---
+
+# 7.1a What are foundation models and LLMs? Definitions and Core Concepts
+
+---
+
+## <!--7.1.1--> From task-specific models to foundation models
+
+- Traditional AI built one model per task (e.g., sentiment classifier, translator, summarizer).  
+- Each required unique data, architecture, and retraining.  
+- **Foundation models** emerged as general-purpose systems: trained once on diverse data, adapted many times.
+
+::: {.notes}
+Open by reminding students how each NLP model used to have its own architecture.  
+Contrast this with a unified Transformer backbone reused for many tasks.  
+Set tone: foundation models = new abstraction layer in AI development.
+:::
+
+---
+
+## <!--7.1.2--> Defining foundation models
+
+- A **foundation model** is a large-scale pretrained model trained on **massive, diverse, and unlabeled** data.  
+- Acts as a **base layer** for downstream applications via prompting, fine-tuning, or retrieval-augmented generation (RAG).  
+- Provides **transferable representations** that generalize across domains.
+
+<figure>
+  <img src="../materials/assets/images/7.1.2_Foundation_model_flow.drawio.svg"
+       alt="**Figure:**">
+  <figcaption>**Figure:**</figcaption>
+</figure>
+
+::: {.notes}
+Clarify that “foundation” refers to *reusability*, not simply size.  
+Briefly mention examples beyond language (vision, multimodal).  
+This visual will be reused in later decks to reinforce adaptation pathways.
+:::
+
+---
+
+## <!--7.1.4--> Defining large language models (LLMs)
+
+- LLMs are **language-focused foundation models** trained on massive text corpora.  
+- Objective: predict the next token `$p(x_t \mid x_{<t})$` (causal) or fill masked tokens `$p(x_i \mid x_{\neg i})$` (masked).  
+- Enable tasks such as summarization, Q&A, translation, and reasoning — often without retraining.
+
+<figure>
+  <img src="../materials/assets/images/7.1.4_LLM_objectives_comparison.drawio.svg"
+       alt="**Figure:** Comparison of masked vs. causal prediction objectives.">
+  <figcaption>**Figure:** Comparison of masked vs. causal prediction objectives.</figcaption>
+</figure>
+
+::: {.notes}
+Show minimal math to differentiate objectives; no derivation needed.  
+Remind students of tokenization concepts from Module 5.  
+Keep the visual simple — text sequence with shaded mask vs. causal arrow.
+:::
+
+---
+
+
+
+## <!--7.1.6--> Why pretrained general-purpose models changed everything
+
+- Pretraining replaces costly labeled data with **self-supervision** on raw text.  
+- Massive scale → richer internal representations and emergent abilities.  
+- One model now supports many downstream tasks with minimal additional effort.  
+
+<figure>
+  <img src="../materials/assets/images/7.1.6_Scaling_laws_concept.drawio.svg"
+       alt="**Figure:** Scaling law curve showing performance improving with data and parameters.">
+  <figcaption>**Figure:** Scaling law curve showing performance improving with data and parameters.</figcaption>
+</figure>
+
+::: {.notes}
+Highlight qualitative relationship: more data + more parameters → smoother generalization.  
+Set up upcoming “Scale and Pretraining” deep dive in later slides.  
+:::
+
+---
+
+# 7.1b What are foundation models and LLMs? (Contrast, Examples, and Scale)
+
+---
+
+## <!--7.1.7--> How LLMs differ from task-specific models
+
+| Traditional NLP (pre-2018) | Foundation / LLM Era |
+|-----------------------------|----------------------|
+| Model per task (e.g., sentiment, NER, translation) | One model, many tasks |
+| Limited labeled data | Massive unlabeled data |
+| Distinct architectures | Shared Transformer backbone |
+| Narrow generalization | Broad cross-task generalization |
+
+::: {.notes}
+Use this as an anchor table to compare old vs. new paradigms.  
+Stress “shared representations” and “transferability.”  
+Mention that this change democratized model building — you no longer need massive custom datasets for each task.
+:::
+
+---
+
+## <!--7.1.9a--> Major foundation models: architectures and objectives
+
+| Model Family | Architecture | Objective | Core Contribution | Successors / Variants |
+|---------------|--------------|------------|--------------------|------------------------|
+| **GPT** | Decoder-only | Causal LM | Open-ended generation and reasoning | InstructGPT → ChatGPT → GPT-4 |
+| **BERT** | Encoder-only | Masked LM | Deep bidirectional representations | RoBERTa → DeBERTa |
+| **T5** | Encoder–decoder | Text-to-text | Unified text-in/text-out framework | Flan-T5 |
+| **PaLM** | Decoder-only | Causal LM | Large-scale multilingual reasoning | Gemini family |
+| **Claude** | Decoder-only | Causal LM + alignment | Conversational helpfulness and safety | Constitutional AI lineage |
+| **LLaMA** | Decoder-only | Open-weight general model | Democratized large-model research | Llama 2 / Llama 3 |
+| **Mistral** | Decoder-only | Efficient dense + Mixture-of-Experts | Compact, fast open models | Mixtral series |
+
+::: {.notes}
+Display this table first to establish architectural diversity and objectives.  
+Highlight the three major architectures: **encoder-only**, **decoder-only**, and **encoder–decoder**.  
+Prompt: “Which of these model types seems best suited for reasoning vs. retrieval vs. generation?”
+:::
+
+---
+
+## <!--7.1.9b--> Evolution and research lineages across foundation models
+
+- Foundation model development follows **interconnected research families**:  
+  - **GPT → InstructGPT → ChatGPT → GPT-4** (scaling + instruction-tuning)  
+  - **BERT → RoBERTa → DeBERTa** (representation depth)  
+  - **T5 → FLAN-T5** (task-unified, instruction-tuned)  
+  - **PaLM → Gemini** (multilingual, multimodal expansion)  
+  - **Claude** (alignment-driven, “Constitutional AI”)  
+  - **LLaMA → Mistral → Mixtral** (open-weight efficiency movement)  
+
+
+**Key takeaways:**
+- **Shared architecture patterns** accelerate iteration and cross-pollination.  
+- **Instruction-tuning and alignment** transform base LMs into assistants.  
+- **Open-weight ecosystems** (LLaMA, Mistral) now drive accessibility and experimentation.
+
+::: {.notes}
+Use this as a storytelling slide — walk through the model “family tree.”  
+Emphasize that innovation now spreads horizontally (through open weights) as much as vertically (through scaling).  
+:::
+
+
+---
+
+## <!--7.1.12--> How pretraining works
+
+- Uses **self-supervised learning** — models learn from raw text without labels.  
+- Objective functions: next-token prediction, masked-token prediction, contrastive learning.  
+- Produces embeddings that encode syntax, semantics, and context.
+
+<figure>
+  <img src="../materials/assets/images/7.1.12_Pretraining_flow.drawio.svg"
+       alt="**Figure:** Flowchart — raw text → tokenization → training objective → pretrained model.">
+  <figcaption>**Figure:** Flowchart — raw text → tokenization → training objective → pretrained model.</figcaption>
+</figure>
+
+::: {.notes}
+Link this back to Module 5’s tokenization material.  
+Mention efficiency: unlabeled data is abundant; labeling is costly.  
+:::
+
+---
+
+# 7.1c What are foundation models and LLMs? Taxonomy, Ecosystem, and Governance
+
+---
+
+## <!--7.1.15--> Taxonomy: Architecture & Modality (...by architecture role)
+
+
+| Category | Example Models | Typical Use |
+|-----------|----------------|--------------|
+| **Encoder-only** | BERT, RoBERTa | Representation, extraction |
+| **Decoder-only** | GPT, Claude, PaLM | Generation, reasoning |
+| **Encoder–decoder** | T5, FLAN-T5 | Text-to-text tasks |
+
+## <!--7.1.15--> Taxonomy: Architecture & Modality (...by modality)
+
+
+| Modality | Example Foundation Models | Core Input |
+|-----------|---------------------------|-------------|
+| **Text** | GPT, Claude, Gemini-1.5 | Tokens |
+| **Vision** | CLIP, DINOv2 | Pixels |
+| **Audio/Speech** | Whisper, Bark | Waveforms |
+| **Multimodal** | Gemini, LLaVA, Kosmos-2 | Mixed input (text + vision + audio) |
+
+
+::: {.notes}
+Reinforce architecture symmetry and reuse of attention mechanisms.  
+This is the same taxonomy introduced earlier but now visualized in detail.  
+Keep this slide reusable for other courses (fundamental structure rarely changes).
+:::
+
+---
+
+## <!--7.1.16a--> Productization tiers of foundation models
+
+| **Tier** | **Description** | **Example Models** |
+|-----------|-----------------|--------------------|
+| **Base model** | Pretrained only. Raw model without task or safety alignment | GPT-3, PaLM, Llama-2 Base |
+| **Instruction-tuned** | Fine-tuned on task instructions and examples for better following behavior | Flan-T5, InstructGPT |
+| **Chat-optimized** | Alignment via RLHF / DPO and safety filters for conversational use | ChatGPT, Claude |
+| **Reasoning-optimized** | Extended context, tool use, multi-step reasoning, or reflection capabilities | o1, Gemini 1.5, DeepSeek-R1 |
+
+
+::: {.notes}
+
+### Progression Insight:  
+Each tier builds on the last:  
+- *Base → Instruct → Chat → Reasoning* mirrors the shift from *text prediction → task compliance → dialogue → reasoning & action.*
+
+
+Explain the commercial evolution from research models to consumer-ready assistants.  
+Highlight that “reasoning-optimized” marks the entry point for tool use and multimodal integration.  
+:::
+
+---
+
+## <!--7.1.16b--> Access models and licensing landscape
+
+| **Access Type** | **Characteristics** | **Example Providers** | **Implications** |
+|-----------------|---------------------|------------------------|------------------|
+| **Closed API** | Proprietary weights; usage via hosted endpoints only | OpenAI, Anthropic | Limited transparency; strong safety layers |
+| **Open weights** | Downloadable and modifiable weights; community fine-tuning possible | Meta (LLaMA), Mistral | Enables research, customization; requires governance |
+| **Fully open** | Weights + training data + scripts available | Falcon, Pythia | Maximizes reproducibility; raises IP & security concerns |
+
+
+::: {.notes}
+**Governance dimensions:**  
+- **IP & licensing:** defines what organizations can legally modify or redistribute.  
+- **Transparency:** determines auditability and trust.  
+- **Safety control:** trade-off between openness and misuse prevention.
+
+
+
+Use color cues (Deep Blue = closed, Warm Amber = open weights, Teal = fully open).  
+Connect licensing choices to enterprise policy and compliance constraints.  
+:::
+
+
+---
+
+
+
+## <!--7.1.19--> The evolving LLM ecosystem
+
+<figure>
+  <img src="../materials/assets/images/7.1.19_Ecosystem_layers.drawio.svg"
+       alt="**Figure:** Overview of the contemporary large-language-model (LLM) ecosystem, illustrating three interconnected layers: frontier/API providers, open-weight model families, and supporting ecosystem tools.">
+  <figcaption>**Figure:** Overview of the contemporary large-language-model (LLM) ecosystem, illustrating three interconnected layers: frontier/API providers, open-weight model families, and supporting ecosystem tools.</figcaption>
+</figure>
+
+::: {.notes}
+Show this as a layered diagram.  
+Discuss practical relevance: model routing, benchmarking, cost trade-offs.  
+Optional: highlight UF’s own accessible models or APIs if applicable.
+:::
+
+---
+
+## <!--7.1.20--> Model choice as a portfolio decision
+
+<figure>
+  <img src="../materials/assets/images/7.1.20_model_choice_portfolio_quadrant.drawio.svg"
+       alt="**Figure:** Quadrant framework for evaluating model choice as a portfolio decision across four dimensions: capability, cost and latency, governance, and integration.">
+  <figcaption>**Figure:** Quadrant framework for evaluating model choice as a portfolio decision across four dimensions: capability, cost and latency, governance, and integration.</figcaption>
+</figure>
+
+
+::: {.notes}
+Frame this as *strategic selection*, not “best model wins.”  
+Preview upcoming evaluation (7.8) where metrics like latency and policy violations appear.  
+:::
+
+
+---
+
+# 7.1d What are foundation models and LLMs? Decision Preview and Misconceptions
+
+---
+
+## <!--7.1.23a--> Three main strategies for adapting foundation models
+
+Large language models can be customized or extended through **three complementary approaches**:
+
+1. **Prompting** – steer the model’s behavior through natural language instructions.  
+   - No retraining, immediate iteration.  
+2. **Fine-tuning / PEFT** – retrain or lightly adjust parameters for domain- or task-specific use.  
+   - Higher control, higher cost.  
+3. **Retrieval-Augmented Generation (RAG)** – connect the model to external, updateable knowledge sources.  
+   - Keeps responses current and grounded.
+
+::: {.notes}
+Introduce this as the “adaptation surface” — the three major levers available once a model is pretrained.  
+Emphasize that these are not mutually exclusive; most enterprise systems combine them.  
+Preview that later sections (7.4–7.8) unpack each strategy in depth.  
+:::
+
+---
+
+## <!--7.1.23b--> Comparing adaptation strategies: cost, control, and scalability
+
+| **Method** | **Retraining Required?** | **Control over Output** | **Cost / Complexity** | **Scalability** | **Best For** |
+|-------------|--------------------------|--------------------------|------------------------|------------------|---------------|
+| **Prompting** | ❌ None | Low–Moderate | 💲 Low |  High | Rapid experimentation, changing tasks |
+| **Fine-tuning / PEFT** | ✅ Partial or full | High | 💲💲–💲💲💲 |  Moderate | Stable, domain-specific applications |
+| **RAG** | ❌ None (external data link) | Moderate | 💲💲 |  High | Knowledge-grounded or dynamic data systems |
+
+
+::: {.notes}
+
+### **Key takeaway:**  
+- **Prompting** gives *speed and flexibility.*  
+- **Fine-tuning** gives *precision and control.*  
+- **RAG** gives *currency and factual grounding.*  
+Modern systems often **combine them** for balanced performance.
+
+
+Use this slide to help students categorize methods mentally.  
+Encourage them to think of adaptation as a design decision — what matters most: *speed, control, or currency?*  
+This table will be revisited in detail during Modules 7.4–7.8.  
+:::
+
+
+---
+
+
+## <!--7.1.26--> Foundational Truths Behind Common LLM Misconceptions
+
+<figure>
+  <img src="../materials/assets/images/7.1.26_misconception_pillars.drawio.svg"
+       alt="**Figure:** Illustrating common misconceptions about LLMs—scale, knowledge, alignment, and safety—and the grounded realities that correct each misunderstanding.">
+  <figcaption>**Figure:** Illustrating common misconceptions about LLMs—scale, knowledge, alignment, and safety—and the grounded realities that correct each misunderstanding.</figcaption>
+</figure>
+
+
+## <!--7.1.26b--> Why misconceptions persist
+
+
+- **Anthropomorphism:** humans ascribe intent and memory to models.  
+- **Opacity:** model internals are complex and poorly understood.  
+- **Marketing and hype:** narratives of “understanding” and “reasoning.”  
+- **Rapid iteration:** models change faster than documentation.
+
+--
+
+<figure>
+  <img src="../materials/assets/images/human_face_bot.drawio.svg"
+       alt="**Figure:**">
+  <figcaption>**Figure:**</figcaption>
+</figure>
+
+
+
+::: {.notes}
+Highlight human tendencies to overinterpret.  
+Relate to AI adoption literature: confidence vs. trust.  
+Briefly connect to your later ethics and alignment sections.
+:::
+
+
+
+---
+
+
+## <!--7.1.29--> Closing reflection: the new paradigm
+
+- Foundation models have changed (some) of the AI pipeline:  
+  - From **model-building** → to **model-adaptation and evaluation**.  
+  - From **data labeling** → to **data curation and governance**.  
+  - From **research silos** → to **ecosystem collaboration**.  
+
+::: {.notes}
+Conclude Section 7.1 with this reflection.  
+Revisit roadmap slide (“You are here” indicator at 7.1).  
+Segue verbally to 7.2, where we open the Transformer architecture and mechanics.
+:::
+
+---
+
+# 7.2a Transformers: From RNNs to Transformers — Why They Matter
+
+---
+
+## <!--7.2.1--> Why Transformers changed everything
+
+- Transformers replaced RNNs and LSTMs as the dominant architecture for sequence modeling.  
+- They overcame key limitations: sequential bottlenecks, vanishing gradients, and difficulty modeling long dependencies.  
+- Parallel attention enabled both **scaling** and **generalization**—the foundation of LLMs.
+
+::: {.notes}
+Use this as the opening motivator for Section 7.2.  
+Highlight “parallelism” and “attention” as the two words that define the revolution.  
+Invite recall from Module 6: “What were RNNs good and bad at?”
+:::
+
+---
+
+## <!--7.2.2--> The limitations of RNNs and LSTMs
+
+- **Sequential processing:** must handle tokens one at a time → slow for long inputs.  
+- **Vanishing/exploding gradients:** long dependencies fade or explode during training.  
+- **Memory bottlenecks:** fixed-length hidden states can’t capture global context.  
+- Even LSTMs and GRUs could only **approximate** long-range dependencies.
+
+<figure>
+  <img src="../materials/assets/images/7.2.2_rnn_fading_gradients.drawio.svg"
+       alt="**Figure:** Gradient decay in RNN over long sequences.">
+  <figcaption>**Figure:** Gradient decay in RNN over long sequences.</figcaption>
+</figure>
+
+::: {.notes}
+Include schematic: RNN unrolled across time showing fading gradient.  
+Explain that gradient clipping helped but didn’t solve core structural issues.  
+:::
+
+---
+
+
+## <!--7.2.4--> Parallelization: the performance breakthrough
+
+- **RNNs:** process one token at a time → time steps cannot overlap.  
+- **Transformers:** process all tokens simultaneously through attention matrices.  
+- Enables **GPU parallelism**, leading to major speedups and scalability.
+
+<figure>
+  <img src="../materials/assets/images/7.2.1_RNN_vs_Transformer.drawio.svg"
+       alt="**Figure:** Parallelization schematic: all tokens processed in one step vs sequential RNN chain.">
+  <figcaption>**Figure:** Parallelization schematic: all tokens processed in one step vs sequential RNN chain.</figcaption>
+</figure>
+
+::: {.notes}
+Explain that attention converts sequence processing from O(n) sequential to O(1) in time depth (but O(n²) in compute).  
+This trade-off is acceptable given GPU architecture.  
+:::
+
+---
+
+## <!--7.2.5a--> Attention: enabling long-range context and global connections
+
+
+<figure>
+  <img src="../materials/assets/images/7.2.5a_attention_tokenized_sentence_fixed.drawio.svg"
+       alt="**Figure:** Self-attention allows every token in a sequence (e.g., The cat sat on the mat) to compute weighted relationships with all other tokens, replacing recurrent propagation with global contextual access.">
+  <figcaption>**Figure:** Self-attention allows every token in a sequence (e.g., The cat sat on the mat) to compute weighted relationships with all other tokens, replacing recurrent propagation with global contextual access.</figcaption>
+</figure>
+
+::: {.notes}
+
+- The **attention mechanism** allows every token to reference *any* other token directly.  
+- Captures **long-range dependencies** that RNNs and LSTMs struggled to preserve.  
+- Replaces recurrence and fixed memory with **global contextual lookup.**  
+- Enables understanding across **hundreds or thousands of tokens** — essential for reasoning, document analysis, and conversation.  
+
+
+
+Tokens with strongest attention from “sat”
+1. “cat” (subject)
+The verb sat depends on its subject for semantic completeness.
+In English, verbs strongly bind to nearby nouns that serve as agents.
+Attention models frequently show the verb attending to the subject.
+2. “on” (preposition linking verb to location)
+Sat on is a syntactic unit.
+The verb often attends strongly to the preposition that begins its argument structure.
+⚖️ Medium strength attention
+3. “the mat” (object of the prepositional phrase)
+These tokens complete the meaning, so attention exists—
+but it’s usually less than the subject or the immediate preposition.
+🔽 Low attention
+4. “The” (first determiner)
+5. The determiner in “the mat”
+Determiners tend to attract much less attention unless the model is doing fine-grained parsing. 
+Describe Q, K, and V intuitively: query = what I need, key = what others offer, value = what I take away.  
+:::
+
+---
+
+## <!--7.2.5b--> Transformers are inherently **modular and composable**, allowing clean scaling across three axes
+
+| **Scaling Axis** | **What Increases** | **Effect** |
+|------------------|--------------------|-------------|
+| **Depth** | Number of layers | Improves reasoning and hierarchical abstraction |
+| **Width** | Size of hidden dimensions and attention heads | Increases representational richness |
+| **Data** | Training tokens and diversity | Enhances generalization and robustness |
+
+- **larger models ≠ just more parameters**, but *better synergy* between depth, width, and data.  
+- This structural scalability opened the way for **foundation models** and later **scaling laws**.
+
+::: {.notes}
+Frame this as the *engineering breakthrough*: Transformers scale predictably without fundamental redesign.  
+Use this slide as a bridge — “Scaling this architecture leads us into the world of foundation models and scaling laws (7.3).”  
+:::
+
+
+---
+
+# 7.2b Transformers: Core Building Blocks of the Architecture
+
+---
+
+## <!--7.2.7a--> Inside the Transformer block: attention and feedforward paths
+
+- Each Transformer layer combines two key subsystems:  
+  1. **Multi-head self-attention** — integrates context across tokens.  
+  2. **Feedforward network (FFN)** — transforms those contextual representations independently per token.  
+- These two modules are connected by **Add & Norm steps** (residual + normalization, detailed later).  
+- Together they form a repeatable “block” that can be stacked dozens or hundreds of times.
+
+<figure>
+  <img src="../materials/assets/images/7.2.7_Transformer_block.drawio.svg"
+       alt="**Figure:** Simplified Transformer block showing attention → add & norm → feedforward → add & norm.">
+  <figcaption>**Figure:** Simplified Transformer block showing attention → add & norm → feedforward → add & norm.</figcaption>
+</figure>
+
+::: {.notes}
+Use this slide to introduce the modular “sandwich” pattern: Attention, Add & Norm, FFN, Add & Norm.  
+Emphasize that this modularity enables scaling depth without reengineering.  
+Note that *we’ll explore residuals and normalization mechanics in Slide 7.2.12.*  
+:::
+
+
+---
+
+## <!--7.2.8--> Self-attention: modeling contextual relationships
+
+- Each token creates three vectors: **query (Q)**, **key (K)**, and **value (V)**.  
+- The model computes similarity between $Q$ and $K$ to determine how much each token attends to others.  
+- The weighted sum of $V$ vectors forms the output representation.
+
+$$
+\text{Attention}(Q,K,V) = \text{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right)V
+$$
+
+<figure>
+  <img src="../materials/assets/images/7.2.9_attention_Q_K_V_matrix1.drawio.svg"
+       alt="**Figure:** Illustration of self-attention for a single query token (sat). The model computes how strongly sat attends to every token in the sequence, with attention weights visualized by arrow thickness and matrix opacity.">
+  <figcaption>**Figure:** Illustration of self-attention for a single query token (sat). The model computes how strongly sat attends to every token in the sequence, with attention weights visualized by arrow thickness and matrix opacity.</figcaption>
+</figure>
+
+::: {.notes}
+Walk through the flow: tokens → QKV projections → similarity → weighting → new representation.  
+Emphasize how all tokens interact in parallel.  
+:::
+
+---
+
+## <!--7.2.9--> Interpreting attention weights
+
+- Attention weights reflect **relative importance** of tokens for a given context.  
+- Patterns often align with syntax or semantics (e.g., subject-verb links).  
+- Visualization of attention maps reveals how meaning is distributed.
+
+<figure>
+  <img src="../materials/assets/images/7.2.9_attention_Q_K_V_matrix2.drawio.svg"
+       alt="**Figure:** Full self-attention map showing how every token attends to every other token in the sequence. Rows correspond to query tokens, columns to key tokens, and the opacity of each cell reflects the magnitude of the attention weight.">
+  <figcaption>**Figure:** Full self-attention map showing how every token attends to every other token in the sequence. Rows correspond to query tokens, columns to key tokens, and the opacity of each cell reflects the magnitude of the attention weight.</figcaption>
+</figure>
+
+
+::: {.notes}
+
+
+Explain that interpretability here is limited — patterns are often heuristic.  
+Mention that modern research explores sparse attention and probe analysis (to foreshadow interpretability later).  
+
+
+Attention matrices are not symmetric.
+Meaning:
+attention
+(sat→cat)≠attention(cat→sat)
+These two values can — and usually do — differ.
+Let’s unpack why.
+🧠 Why attention is not symmetric
+An attention head computes:
+
+The softmax is applied row-wise, not across the whole matrix
+This means:
+✔ Each row is normalized separately
+→ Row i represents:
+How much token i attends to every other token.
+✔ Each column is not normalized
+→ Column j represents:
+How much all tokens attend to token j.
+Because normalization happens across rows only, the matrix is not symmetric.
+🔥 Concrete example from your table
+From your matrix:
+sat → cat = 1.00
+cat → sat = 0.80
+And this makes sense:
+When “sat” is the query:
+It strongly attends to “cat” (subject–verb relationship)
+When “cat” is the query:
+It attends strongly to “sat” too — but also to “The”
+So the row is normalized differently
+Result: cat → sat is strong, but not identical to sat → cat
+So asymmetry is expected and correct.
+📚 Pedagogical way to explain this to students
+You can say:
+“Attention is directional.
+When one token is the query, it decides what matters to it.
+The reverse direction is a different question with a different answer.”
+It’s an intuitive concept:
+“Cat” cares about “The” as its determiner.
+“Sat” doesn’t care about “The” that much — it cares most about “cat” and “on.”
+So the asymmetry exactly reflects syntax.
+✔️ Should any pairs ever match?
+Sometimes, yes — but only coincidentally, never by rule.
+Examples where they might be similar:
+In symmetric patterns like “A and B and C”
+In positions where the model heavily uses positional encodings
+In some early layers before specialization happens
+In heads that focus on positional relationships (e.g., “the next token”)
+But fundamentally:
+👉 There is no requirement or expectation of symmetry.
+Attention is not correlation.
+
+:::
+
+---
+
+## <!--7.2.10--> Multi-head attention: learning multiple relationships
+
+
+<figure>
+  <img src="../materials/assets/images/7.2.10_Multi_head_attention.drawio.svg"
+       alt="**Figure:** Diagram showing multiple parallel attention heads merging into one output.">
+  <figcaption>**Figure:** Diagram showing multiple parallel attention heads merging into one output.</figcaption>
+</figure>
+
+::: {.notes}
+
+- Instead of a single attention head, the Transformer uses **multiple heads**.  
+- Each head learns a different relational pattern — syntax, position, entity, etc.  
+- Outputs from all heads are concatenated and projected into a combined vector.
+
+
+Use analogy: each head = a different “lens” on meaning.  
+Helps build intuition for how diverse contextual cues coexist.  
+:::
+
+---
+
+## <!--7.2.11--> Feedforward networks (FFN)
+
+- Apply non-linear transformations to each token independently.  
+- Typical structure: two linear layers with ReLU or GELU activation.  
+- Expands and contracts dimensionality — allowing richer feature mixing.
+
+$$
+\text{FFN}(x) = \text{GELU}(xW_1 + b_1)W_2 + b_2
+$$
+
+<figure>
+  <img src="../materials/assets/images/7.2.11_ffn_variant_structure.drawio.svg"
+       alt="**Figure:** Two-layer FFN operating on each token representation.">
+  <figcaption>**Figure:** Two-layer FFN operating on each token representation.</figcaption>
+</figure>
+
+::: {.notes}
+Clarify that FFNs act on tokens *individually* after attention integrates context.  
+Highlight computational efficiency: parallelizable across tokens.  
+:::
+
+---
+
+## <!--7.2.12--> Stabilizing training: residuals, normalization, and why they matter
+
+- Deep Transformers stay stable and trainable thanks to two key mechanisms:  
+  1. **Residual (skip) connections** – feed each layer’s input directly into its output  
+     - Preserve base information across layers  
+     - Keep gradients flowing to prevent vanishing  
+  2. **Layer normalization** – re-scales activations within each layer  
+     - Keeps signal magnitudes consistent  
+     - Speeds convergence and improves generalization  
+
+- **Together:** enable stacking **hundreds of layers** without collapse — making large-scale LLMs feasible.  
+- **Intuition:** residuals act as *express lanes* for gradients, while normalization keeps activations *balanced and steady*.  
+- **Checkpoint question:** *What would happen to training if we removed these stabilizers?*
+
+
+::: {.notes}
+- Explain residuals and normalization as complementary stability mechanisms.  
+- Optionally mention **RMSNorm** or **Pre-Norm** variants in modern LLMs.  
+- Use the checkpoint question for a brief pause and reflection before moving to the full encoder block.  
+:::
+
+
+---
+
+## <!--7.2.14--> Putting it together: the Transformer encoder block
+
+<figure>
+  <img src="../materials/assets/images/7.2.14_transformer_encoder_block.drawio.svg"
+       alt="**Figure:** Structure of a Transformer encoder block. Input embeddings pass through multi-head attention, followed by a residual Add & Norm operation, then a feedforward network, and a second Add & Norm step. This modular block is stacked repeatedly to form deep encoder architectures.">
+  <figcaption>**Figure:** Structure of a Transformer encoder block. Input embeddings pass through multi-head attention, followed by a residual Add & Norm operation, then a feedforward network, and a second Add & Norm step. This modular block is stacked repeatedly to form deep encoder architectures.</figcaption>
+</figure>
+
+
+::: {.notes}
+
+
+- **Flow:**  
+  1. Input embeddings  
+  2. Multi-head attention  
+  3. Add & norm  
+  4. Feedforward network  
+  5. Add & norm → output to next layer  
+- This block is the repeating unit in encoder or decoder stacks.
+
+
+Why?
+
+- Highly parallelizable — all operations vectorized.  
+- Extensible — same architecture works for text, vision, audio, multimodal.  
+- Efficient reuse — same block replicated across layers and models.
+
+
+Use this slide as a “checkpoint” before moving into 7.2c (architecture patterns).  
+Prompt students: “Which component do you think contributes most to scaling?”  
+:::
+
+---
+
+# 7.2c Transformers: Architecture Patterns — Encoder, Decoder, and Encoder–Decoder
+
+---
+
+
+## <!--7.2.17--> Encoder-only models (e.g., BERT)
+
+- Best for **understanding** tasks — classification, entity extraction, retrieval.  
+- **Bidirectional attention:** each token attends to tokens on both sides.  
+- Outputs contextual embeddings used for downstream models.
+
+<figure>
+  <img src="../materials/assets/images/7.2.17_encoder_only_model.drawio.svg"
+       alt="**Figure:** Encoder stack with bidirectional attention arrows.">
+  <figcaption>**Figure:** Encoder stack with bidirectional attention arrows.</figcaption>
+</figure>
+
+::: {.notes}
+Note that BERT is not generative — it outputs contextual embeddings.  
+Mention masked-language modeling objective briefly.  
+Optional: show schematic sentence “The cat [MASK] on the mat.”  
+:::
+
+---
+
+## <!--7.2.18--> Decoder-only models (e.g., GPT)
+
+- Best for **generation** tasks — text completion, code, creative writing.  
+- **Causal masking** ensures the model only attends to previous tokens.  
+- Enables left-to-right autoregressive prediction.
+
+<figure>
+  <img src="../materials/assets/images/7.2.17_encoder_only_model.drawio.svg"
+       alt="**Figure:** Decoder stack showing causal mask triangle.">
+  <figcaption>**Figure:** Decoder stack showing causal mask triangle.</figcaption>
+</figure>
+
+::: {.notes}
+Illustrate masking visually: attention matrix lower-triangular.  
+Mention that GPT-style models are ideal for open-ended generation and reasoning.  
+Connect to equation from earlier: $p(x_t \mid x_{<t})$.  
+:::
+
+---
+
+
+## <!--7.2.20--> Checkpoint: Matching architecture to task
+
+- **Encoder-only** models (like BERT) **understand** text — best for analysis and retrieval.  
+- **Decoder-only** models (like GPT) **generate** text — best for reasoning and creation.  
+- **Encoder–decoder** models (like T5) **translate** between input and output forms.  
+- The right architecture depends on whether you need **representation**, **generation**, or **transformation.**
+
+
+::: {.notes}
+- Pause briefly and ask: “If you were designing a system for sentiment analysis, which model family fits best—and why?”  
+- This slide reinforces practical intuition before moving into positional encoding (7.2d).  
+- Keep delivery short (30–45 seconds) — it’s a comprehension checkpoint, not a new topic.
+:::
+
+
+
+---
+
+# 7.2d Transformers: Spotlight Concepts — Positional Encoding and Scaling Laws
+
+---
+
+## <!--7.2.21--> Why positional encoding is needed
+
+- Transformers lack built-in notion of order — all tokens are processed in parallel.  
+- **Positional encoding** injects sequence information into token embeddings.  
+- Without it, the model treats input as a “bag of words.”
+
+<figure>
+  <img src="../materials/assets/images/7.1.12_Pretraining_flow.drawio.svg"
+       alt="**Figure:** Visualization comparing unordered vs. position-aware token embeddings.">
+  <figcaption>**Figure:** Visualization comparing unordered vs. position-aware token embeddings.</figcaption>
+</figure>
+
+::: {.notes}
+Introduce the problem: unlike RNNs, Transformers need explicit position signals.  
+Show simple example where word order changes meaning (“dog bites man” vs “man bites dog”).  
+:::
+
+
+---
+
+## <!--7.2.23-->  From architecture to scale
+
+- Transformers provide the **template**: attention, residuals, normalization, and positional encoding.  
+- Training at scale turns that template into a **foundation model**.  
+- Scaling = adding **data, layers, and compute** → emergent capabilities.  
+- Next, we explore **how large models are trained**, stabilized, and governed in practice.
+
+<figure>
+  <img src="../materials/assets/images/7.2.24_From_architecture_to_scale.drawio.svg"
+       alt="**Figure:**">
+  <figcaption>**Figure:**</figcaption>
+</figure>
+
+::: {.notes}
+- Reinforce that *architecture enables scaling*, but *engineering makes it real.*  
+- Segue verbally: “Now that we know how Transformers work, let’s see what it takes to train them at massive scale.”
+:::
+
+
+
+---
+
+# 7.3 Training at Scale & Scaling Laws
+
+---
+
+# 7.3a Training at Scale & Scaling Laws: Pretraining Objectives and Data Pipeline
+
+---
+
+## <!--7.3.1--> Why pretraining matters for adaptation
+
+- Fine-tuning, PEFT, and RAG all depend on **what the base model already learned**.  
+- Pretraining choices determine:  
+  - How “promptable” or controllable a model is.  
+  - Which layers are sensitive to later adaptation.  
+  - How safely and efficiently models generalize.  
+- Understanding pretraining = knowing the *starting point* for all adaptation methods.
+
+<figure>
+  <img src="../materials/assets/images/7.3.1_Pretraining_for_adaptation.drawio.svg"
+       alt="**Figure:** Concept map showing pretraining feeding into fine-tuning, PEFT, and RAG.">
+  <figcaption>**Figure:** Concept map showing pretraining feeding into fine-tuning, PEFT, and RAG.</figcaption>
+</figure>
+
+::: {.notes}
+Open the section by emphasizing: pretraining defines the model’s “prior.”  
+Students should see it as the foundation for every later customization step.  
+:::
+
+---
+
+
+## <!--7.3.8--> Recap: objectives and data define the foundation
+
+- Pretraining = the **base skillset** of the model.  
+- Data pipeline = the **curriculum** it learns from.  
+- Together they determine promptability, safety, and downstream efficiency.  
+
+<figure>
+  <img src="../materials/assets/images/7.3.8_Objectives_and_data_foundation.drawio.svg"
+       alt="**Figure:** Concept map linking objectives → data pipeline → downstream adaptation.">
+  <figcaption>**Figure:** Concept map linking objectives → data pipeline → downstream adaptation.</figcaption>
+</figure>
+
+::: {.notes}
+Close the cluster by summarizing links to next topic (distributed optimization).  
+Ask: “Which stage—objective or data—most influences model behavior?”  
+:::
+
+---
+
+# 7.3b Training at Scale & Scaling Laws: Distributed Optimization and Stability
+
+---
+
+## <!--7.3.9a--> Training at scale: parallelism and synchronization basics
+
+
+<figure>
+  <img src="../materials/assets/images/7.3.9a_parallelism_diagram.drawio.svg"
+       alt="**Figure:** Summary diagram linking optimization, parallelism, and stability.">
+  <figcaption>**Figure:** Summary diagram linking optimization, parallelism, and stability.</figcaption>
+</figure>
+
+
+::: {.notes}
+
+- Modern foundation models train across **hundreds or thousands of GPUs** in parallel.  
+- Goal: divide computation and memory so that many processors collaborate efficiently.  
+- **Parallelism strategies:**  
+  1. **Data parallelism** – each GPU processes a different data batch; gradients are averaged.  
+  2. **Model (tensor) parallelism** – split model layers or weights across devices.  
+  3. **Pipeline parallelism** – divide layers into sequential stages across machines.  
+- Requires precise **synchronization** to keep weights and gradients consistent across all devices.
+
+
+Explain that large-model training is limited less by algorithm design and more by how efficiently computation is distributed.  
+Use the diagram to differentiate data, model, and pipeline parallelism visually.  
+Transition by noting that parallelism introduces new *stability* and *coordination* problems during long runs.
+:::
+
+---
+
+## <!--7.3.9b--> Training stability challenges at massive scale
+
+
+<figure>
+  <img src="../materials/assets/images/7.3.9a_parallelism_diagram_stability.drawio.svg"
+       alt="**Figure:** Summary diagram linking optimization, parallelism, and stability.">
+  <figcaption>**Figure:** Summary diagram linking optimization, parallelism, and stability.</figcaption>
+</figure>
+
+::: {.notes}
+
+- Coordinating large-scale training creates new **optimization and reliability challenges**:  
+  - **Gradient synchronization:** delayed or lost updates can destabilize convergence.  
+  - **Optimizer state management:** billions of parameters require sharded or compressed states (e.g., ZeRO, Adafactor).  
+  - **Mixed-precision arithmetic:** improves speed but risks numerical overflow or underflow.  
+  - **Training drift:** small instabilities amplify across multi-week runs.  
+
+ 
+:::
+
+---
+
+## <!--7.3.15--> Optimization enables scaling
+
+- Large-scale training requires the right blend of:  
+  - **Optimizer choice** (AdamW / Adafactor).  
+  - **Parallelism strategy** (data, tensor, pipeline).  
+  - **Precision control** and **stability monitoring**.  
+- These engineering advances make foundation model pretraining tractable.
+
+::: {.notes}
+notes  
+:::
+
+# 7.3c Training at Scale & Scaling Laws: Compute-Optimality and Curricula
+
+---
+
+## <!--7.3.16--> Scaling laws: the empirical discovery
+
+- As model parameters, dataset size, and compute increase, **test loss decreases predictably**.  
+- Relationship follows a **power law**—each doubling of scale yields smaller but consistent gains.  
+- This predictability enables *planned scaling* rather than trial-and-error.
+
+<figure>
+  <img src="../materials/assets/images/hestness_scaling_laws.png"
+       alt="**Figure:** Shape of a scaling law, from @hestnessDeepLearningScaling2017">
+  <figcaption>**Figure:** Shape of a scaling law, from @hestnessDeepLearningScaling2017</figcaption>
+</figure>
+
+::: {.notes}
+Introduce the Kaplan et al. (2020) findings.  
+Emphasize empirical nature — derived from extensive experiments, not theory.  
+:::
+
+---
+
+
+## <!--7.3.17--> Scaling Laws and the *Chinchilla* Principle
+
+- **Scaling laws:** test loss decreases predictably as data, parameters, and compute grow...*until bottlenecks appear*.  
+- **Breakdown signals:** poor data quality, unstable optimization, or insufficient compute.  
+- **The *Chinchilla* insight** @hoffmannTrainingComputeOptimalLarge2022: for fixed compute, **smaller models trained on more data** outperform larger undertrained ones.   
+- **Takeaway:** scaling helps *only while fundamentals hold*, beyond that, you’re just burning compute.
+
+
+::: {.notes}
+Keep emphasis on trade-offs: cost, efficiency, and sustainability.  
+Prompt: “When does scaling stop buying you real capability?”  
+:::
+
+---
+
+## <!--7.3.20--> Data Curricula, Mixtures, and Domain Adaptation
+
+<figure>
+  <img src="../materials/assets/images/7.3.20_data_curriculum_staircase.drawio.svg"
+       alt="**Figure:** Illustration of a data curriculum: early exposure to clean data stabilizes training, broader data enhances generalization, mixture weighting shapes capabilities, and domain-adaptive pretraining provides targeted specialization.">
+  <figcaption>**Figure:** Illustration of a data curriculum: early exposure to clean data stabilizes training, broader data enhances generalization, mixture weighting shapes capabilities, and domain-adaptive pretraining provides targeted specialization.</figcaption>
+</figure>
+
+
+::: {.notes}
+Use the human-learning analogy to anchor intuition: structured exposure builds robust understanding.  
+Highlight that most modern LLM gains now come from **data strategy**, not just scale.  
+:::
+
+---
+
+## <!--7.3.23--> Recap: scaling laws and curriculum design
+
+We scale models. Scaling creates limits. Optimization & compute balance solve those limits.
+
+- **Scaling laws:** describe predictable performance improvements.  
+- **Chinchilla principle:** balance compute, parameters, and data.  
+- **Curriculum design:** optimize data ordering and weighting for efficiency.  
+- Together, these define **training strategy** before any downstream adaptation.
+
+
+
+
+::: {.notes}
+Use this slide to close the conceptual loop on “training strategy.”  
+Transition to the next cluster (7.3d): risk, cost, and downstream effects of pretraining.  
+:::
+
+---
+
+# Adaptation and Control 
+
+---
+
+## Adaptation & Control: Overview
+
+In this sub-module, we will cover four complementary ways to steer and specialize LLMs:
+
+1. **Fine-Tuning Foundations**
+  - Supervised Fine-Tuning (SFT)
+  - Preference Modeling & RLHF
+  - Domain Adaptation (DAPT)
+
+2. **Parameter-Efficient Fine-Tuning (PEFT)**
+  - LoRA · Adapters · Prefix Tuning · QLoRA
+
+3. **Prompting & Instruction Tuning**
+  - Prompt design · Token efficiency
+  - Instruction tuning · Structured outputs
+  - Guardrails & evaluation
+
+4. **Retrieval-Augmented Generation (Preview)**
+  - External grounding and freshness
+
+::: {.notes}
+Explain that “Adaptation and Control” includes internal model changes (fine-tuning, RLHF, DAPT, PEFT) and external steering (prompting, instruction tuning).   
+:::
+
+
+---
+
+<!-- # 7.4a Fine-Tuning Foundations: Supervised Fine-Tuning (SFT) -->
+
+## <!--7.4.1--> Why fine-tuning matters
+
+- Pretraining gives broad capability; **fine-tuning gives task precision**.  
+- Organizations use SFT to enforce tone, structure, policy compliance, and domain language.  
+- SFT is the first step in many alignment pipelines.
+
+
+<figure>
+  <img src="../materials/assets/images/placeholder.jpg"
+       alt="**Figure:** Supervised fine-tuning builds a task-specific policy on top of a pretrained model.">
+  <figcaption>**Figure:** Supervised fine-tuning builds a task-specific policy on top of a pretrained model.</figcaption>
+</figure>
+
+
+---
+
+## <!--7.4.2--> What supervised fine-tuning is
+
+SFT = **learning from labeled demonstrations.**  
+The model is trained to imitate high-quality examples provided by a human.
+
+### Workflow:
+1. Sample a prompt.  
+2. A human produces the desired output.  
+3. The model is trained to reproduce this behavior.
+
+
+::: {.notes}
+Clarify that SFT corresponds to **Step 1** of the RLHF diagram the students will see later.  
+Mention that for many real-world tasks, SFT alone is enough.  
+:::
+
+---
+
+## <!--7.4.3--> Supervised Fine-Tuning (SFT): When and Why It Works
+
+### **Benefits**
+- Needs **far less data** than pretraining.  
+- Produces **stable, predictable behavior**.  
+- Ideal for **consistent formatting**, **policy-aligned style**, and **structured tasks**.  
+- Effective for **classification**, **extraction**, **templates**, and **controlled tone**.
+
+### **Use SFT when**
+- You have **labeled demonstrations**.  
+- The task is **stable**, repeated, and well-defined.  
+- You need the model to follow **specific formats or policies**.
+
+### **Avoid SFT when**
+- The task changes frequently.  
+- You lack labeled data.  
+- **PEFT** or **RAG** provides sufficient adaptation.
+
+---
+
+<!--# 7.4b Fine-Tuning Foundations: Preference Modeling & RLHF -->
+
+## <!--7.4.5--> From SFT to RLHF
+
+- SFT teaches *task behavior*, but not **preference alignment**.  
+- SFT alone may produce:  
+  - Overly literal outputs  
+  - Missed safety boundaries  
+  - Unhelpful but technically correct answers  
+- RLHF adds **human preference learning** on top of SFT.
+
+---
+
+## <!--7.4.6--> Step 1: Supervised Fine-Tuning (SFT)
+
+- Collect human-written demonstrations:
+  - Prompt → labeler writes the ideal answer
+  - High-quality examples across many tasks
+  - Train an initial supervised policy to imitate these demonstrations.
+
+<figure>
+  <img src="../materials/assets/images/7.panel1_SFT_PPO_finetuning1.drawio.svg"
+       alt="**Figure:** SFT imitates demonstrations.">
+  <figcaption>**Figure:** SFT imitates demonstrations.</figcaption>
+</figure>
+
+::: {.notes}
+Distinguish RM from SFT: SFT = demonstrations, RM = rankings.  
+Emphasize cost: RM is expensive but essential for preference learning.
+:::
+
+
+---
+
+## <!--7.4.6--> Step 2: Reward Modeling (RM)
+
+- Collect **ranked outputs**:  
+  - Prompt → multiple model answers  
+  - Human judges rank best to worst  
+- Train a **reward model** to predict rankings.
+
+<figure>
+  <img src="../materials/assets/images/7.panel2_SFT_PPO_finetuning1.drawio.svg"
+       alt="**Figure:** Model samples, humans rank">
+  <figcaption>**Figure:** Model samples, humans rank</figcaption>
+</figure>
+
+
+::: {.notes}
+Distinguish RM from SFT: SFT = demonstrations, RM = rankings.  
+Emphasize cost: RM is expensive but essential for preference learning.
+:::
+
+---
+
+## <!--7.4.7--> Step 3: RLHF (PPO or similar)
+
+- Use the reward model to **reinforce** desired behavior:  
+  - Generate answer  
+  - Score with reward model  
+  - Update policy with PPO  
+- Result: a model aligned to **human preferences**, not just demonstrations.
+
+
+<figure>
+  <img src="../materials/assets/images/7.panel3_SFT_PPO_finetuning1.drawio.svg"
+       alt="**Figure:** Model optimizes based on policy.">
+  <figcaption>**Figure:** Model optimizes based on policy.</figcaption>
+</figure>
+
+
+::: {.notes}
+Clarify: PPO is common but not required—DPO is an alternative covered in 7.5.  
+Explain that RLHF = *preference optimization*, not task learning.  
+:::
+
+---
+
+## <!--7.4.8--> Where SFT, RM, and RLHF fit together
+
+
+<figure>
+  <img src="../materials/assets/images/7.panel123_SFT_PPO_finetuning1.drawio.svg"
+       alt="**Figure:** Combined pipeline—Pretraining → SFT → RM → RLHF.">
+  <figcaption>**Figure:** Combined pipeline—Pretraining → SFT → RM → RLHF.</figcaption>
+</figure>
+
+---
+
+<!-- # 7.4b Fine-Tuning Foundations: Domain Adaptation -->
+
+
+## <!--7.4.9--> Domain Adaptation: Supervised vs. DAPT
+
+- SFT = task-specific + labeled  
+- **DAPT = continue pretraining on domain text** (no labels needed)  
+- Most enterprise systems: **DAPT → SFT** pipeline
+
+
+<figure>
+  <img src="../materials/assets/images/7.4.9_domain_adaptation.drawio.png"
+       alt="">
+  <figcaption></figcaption>
+</figure>
+
+
+---
+
+## <!--7.4.10--> Sector Caselets & Evaluation
+
+- **Healthcare**: clinical summarization  
+- **Finance**: report analysis  
+- **Law**: statute summarization  
+
+How would we evaluate? (Metrics, human review, what baselines?)
+
+
+<figure>
+  <img src="../materials/assets/images/7.4.10_lawbooks.jpg"
+       alt="">
+  <figcaption></figcaption>
+</figure>
+
+---
+
+<!-- 7.4c Fine-Tuning Pipeline & Best Practices -->
+
+## <!--7.4.18--> Fine-tuning pipeline at a glance
+
+1. Prepare data  
+2. Configure training  
+3. Train & monitor  
+4. Evaluate & compare  
+5. Deploy & version  
+6. Monitor drift  
+7. Document (model card, data card)
+
+
+<figure>
+  <img src="../materials/assets/images/7.4.18_finetuningpipeline.jpg"
+       alt="">
+  <figcaption></figcaption>
+</figure>
+
+
+---
+
+<!-- 7.4d Pitfalls and Go/No-Go Decisions -->
+
+
+## <!--7.4.28--> Pitfalls & mitigation
+
+Use a risk matrix:
+
+- Data integrity  
+- Annotation quality  
+- Over/underfitting  
+- Ethical/legal  
+- Cost & maintenance  
+- Strategic alignment  
+
+<figure>
+  <img src="../materials/assets/images/7.4.28_pitfalls_mitigation.jpg"
+       alt="">
+  <figcaption></figcaption>
+</figure>
+
+
+---
+
+<!-- 7.5 Advanced Fine-Tuning: How models are tuned efficiently (parameter-efficient methods) -->
+
+<!-- 7.5a Parameter-Efficient Fine-Tuning (PEFT) Families at a Glance -->
+
+## Transition: From Full Fine-Tuning → Parameter-Efficient Fine-Tuning
+
+- We’ve seen **full internal adaptation** methods:
+  - **SFT**: model imitates labeled demonstrations
+  - **RLHF**: model learns human preferences
+  - **DAPT**: model absorbs domain language and style
+- These methods are powerful but **expensive**:
+  - Large compute
+  - Full weight updates
+  - Costly to retrain for each domain
+
+**Parameter-Efficient Fine-Tuning (PEFT)** solves this by:  
+  - Freezing the base model
+  - Training only small, modular components
+  - Enabling multi-domain use with one shared model
+
+---
+
+## PEFT at a glance
+
+PEFT allows large models to be adapted efficiently by freezing the base weights and training only small, targeted modules.  
+
+Each method inserts parameters at a different *depth* in the Transformer architecture:
+
+  * **LoRA** → inside attention layers
+  * **Adapters** → between Transformer blocks
+  * **Prefix / Prompt Tuning** → at input embeddings
+
+
+::: {.notes}
+Narrate conceptually: all PEFT methods freeze the pretrained model but add small learnable deltas.
+LoRA tweaks attention weights, Adapters act in feedforward layers, and Prefix tuning prepends learned vectors to inputs.
+Each balances compute, flexibility, and control.
+:::
+
+---
+
+## <!-- 7.5b --> QLoRA: Scaling PEFT with Quantization
+
+* Combines **4-bit quantization (NF4)** + **LoRA adapters** to train efficiently on large models.
+* Base model frozen in quantized form; only LoRA matrices train.
+* Typical results:
+
+  * Memory ↓ up to 75%
+  * Accuracy within ~1–2% of full LoRA
+  * Enables fine-tuning 65B+ models on a single high-end GPU.
+
+<figure>
+  <img src="../materials/assets/images/lightweight_feather.jpg"
+       alt="">
+  <figcaption></figcaption>
+</figure>
+
+::: {.notes}
+Frame QLoRA as an evolution, not a separate method—it merges compression with selective training.
+Stress that NF4 quantization preserves precision better than static int4.
+Optional discussion: “Why does quantizing before tuning make sense for efficiency?”
+:::
+
+---
+
+## <!-- 7.5c -->Choosing the Right PEFT Strategy
+
+* **LoRA** → Balanced performance and modular adapters.
+* **Adapters** → Reusable layers for multi-task models.
+* **Prefix / Prompt Tuning** → Fastest, smallest footprint.
+* **QLoRA** → Best for large-scale tuning under tight hardware limits.
+
+<figure>
+  <img src="../materials/assets/images/decision_signpost.jpg"
+       alt="">
+  <figcaption></figcaption>
+</figure>
+
+
+::: {.notes}
+Encourage students to locate their organization’s needs on the triangle.
+If compute is scarce, Prefix or QLoRA dominate; for multi-domain workflows, Adapters excel.
+Conclude with takeaway: *adapt fewer parameters to gain scalability without losing precision.*
+:::
+
+---
+
+<!--  7.5d Advanced Fine-Tuning: Deploying and Governing PEFT Systems -->
+
+
+## <!--7.5.26--> Deploying PEFT adapters efficiently
+
+- Store adapters as **lightweight deltas** separate from base model weights.  
+- Load adapters dynamically at runtime for specific tasks or users.  
+- Framework support:  
+  - Hugging Face `peft` library  
+  - `transformers`’ `load_adapter()` APIs  
+- Enables “multi-tenant” serving (different adapters share one frozen base model.)
+
+<figure>
+  <img src="../materials/assets/images/placeholder.jpg"
+       alt="**Figure:** Diagram showing shared base model serving multiple adapter modules.">
+  <figcaption>**Figure:** Diagram showing shared base model serving multiple adapter modules.</figcaption>
+</figure>
+
+::: {.notes}
+Highlight modular deployment as a major operational advantage.  
+Mention adapter routing—task-specific selection at inference.  
+:::
+
+---
+
+
+## <!--7.5.27--> Monitoring fine-tuned adapters
+
+- Track **adapter usage and performance drift**:  
+  - Response quality degradation  
+  - Latency or token inefficiency  
+  - Bias or tone shift over time  
+- Automate alerts for retraining thresholds (e.g., drop >5% on eval set).  
+- Maintain audit logs linking adapter version → dataset → config.
+
+<figure>
+  <img src="../materials/assets/images/placeholder.jpg"
+       alt="**Figure:** Dashboard concept showing adapter versions and drift metrics.">
+  <figcaption>**Figure:** Dashboard concept showing adapter versions and drift metrics.</figcaption>
+</figure>
+
+
+---
+
+<!-- 7.6a Prompting and Instruction Tuning: How humans steer models (external adaptation) -->
+
+## Transition: From Internal Adaptation → External Control
+
+- We’ve now seen how to **adapt the model itself**:
+  - Full tuning (SFT, RLHF, DAPT)
+  - Efficient tuning (PEFT: LoRA, Adapters, Prefix, QLoRA)  
+
+But models don’t need to be retrained for every task.
+
+- **Prompting** provides an alternative:
+  - No weight changes
+  - Express intent through instructions
+  - Fast, flexible, inexpensive
+  - Works across tasks without modifying the model
+
+**Key idea:**  
+**Prompting steers behavior externally;  
+instruction tuning internalizes prompt patterns inside the model.**
+
+---
+
+## <!--7.6.1--> Why prompting matters
+
+- Prompts are the **interface** between humans and large language models.  
+- Good prompting converts *intent* into *clear instructions*.  
+- Effective prompts define:  
+  - **What** to produce (task).  
+  - **How** to produce it (format/style).  
+  - **What to avoid** (constraints).  
+- Prompt design = applied communication science for AI.
+
+<figure>
+  <img src="../materials/assets/images/keyboard1.jpg"
+       alt="">
+  <figcaption></figcaption>
+</figure>
+
+::: {.notes}
+Open the module by reframing prompting as a “language for instructing AI.”  
+Remind students: better prompts = fewer errors, lower cost, faster insight.  
+:::
+
+---
+
+
+## <!--7.6.7--> Multi-turn prompting
+
+- Maintain **conversation context** across multiple exchanges.  
+- Flow:  
+  - User: “Summarize this policy.”  
+  - Model: “Here’s a summary.”  
+  - User: “Now focus only on the financial section.”  
+- Requires careful context management to avoid token bloat and drift.
+
+<figure>
+  <img src="../materials/assets/images/conversation.svg"
+       alt="">
+  <figcaption></figcaption>
+</figure>
+
+::: {.notes}
+Discuss prompt history and truncation strategies for long chats.  
+Introduce concept of context window reuse (to be detailed in 7.6b).  
+:::
+
+---
+
+## <!--7.6.8--> Prompt reproducibility and versioning
+
+- Prompts evolve. Treat them as **artifacts**, not ad hoc inputs.  
+- Maintain:  
+  - Versioned prompt templates.  
+  - Success/failure logs.  
+  - Test datasets for regression checks.  
+  - Efficient LLM use = **prompt lifecycle management**.
+
+<figure>
+  <img src="../materials/assets/images/postitnotes.jpg"
+       alt="**Figure:** Flow diagram showing prompt creation → testing → versioning → reuse.">
+  <figcaption>**Figure:** Flow diagram showing prompt creation → testing → versioning → reuse.</figcaption>
+</figure>
+
+::: {.notes}
+Encourage students to maintain prompt libraries as shared team resources.  
+Mention prompt A/B testing for quality assurance.  
+:::
+
+---
+
+## <!--7.6.9--> Recap so far: prompting as the LLM interface
+
+- Prompting converts *human intention* into *machine-readable guidance.*  
+- Good prompts are structured, contextual, and reproducible.  
+- Mastery of prompting reduces need for fine-tuning in many use cases.  
+
+
+::: {.notes}
+Wrap up by connecting to the next topic—design patterns, efficiency, and token budgeting.  
+Invite students to share examples of prompt success/failure from their own experience.  
+:::
+
+---
+
+<!-- # 7.6 Prompting and Instruction Tuning -->
+
+<!-- # 7.6b Prompting and Instruction Tuning: Prompt Design Patterns and Token Management -->
+
+
+## <!--7.6.10--> Prompt Design Principles & Patterns:  Reduce ambiguity · Improve consistency · Control output · Cut token cost.
+
+| **Pattern** | **Use Case** | **Example** | **Watch For** |
+|--------------|--------------|--------------|----------------|
+| **Instructional** | Direct task / summary | “Summarize this report for executives.” | Vague goals |
+| **Few-Shot** | Learn from examples | “Example A… Example B… Now do C.” | High token cost |
+| **Chain-of-Thought** | Multi-step reasoning | “Let’s reason step by step.” | Verbosity |
+| **Reflexive** | Self-check output | “Explain where your last answer may be wrong.” | Redundancy |
+| **Role / Meta** | Constrain style or persona | “You are a compliance officer…” | Token inflation |
+
+
+::: {.notes}
+Explain prompting as a communication discipline: *clear structure → predictable behavior.*  
+Encourage documenting effective patterns as shared team assets.  
+:::
+
+
+---
+
+## <!--7.6.12--> Managing Tokens and Prompt Efficiency
+
+- **Every token costs:** longer prompts → higher latency and API expense.  
+- Goal: keep prompts concise without losing intent or context.  
+
+### Core Strategies
+- **Reuse context:** rely on persistent **system prompts** for role and rules.  
+- **Compress examples:** summarize or reference (“Use Example A”) instead of embedding full text.  
+- **Structure over length:** turn verbose instructions into concise schema tags or short templates.  
+- **Balance:** too vague = inconsistency · too rigid = loss of creativity → find the “just right” zone.
+
+**Example:**  
+> *System:* “You are a research assistant in finance.”  
+> *User:* “Summarize the Q3 market outlook in three key insights.”
+
+::: {.notes}
+Stress “clarity per token” as the optimization goal.  
+Show cost scaling with context length; emphasize brevity without losing specificity.  
+:::
+
+---
+
+## Transition: From Prompt Engineering → Instruction Tuning
+
+Prompting = steer behavior externally in real time.  
+
+
+Instruction tuning = teach the model to internalize those patterns.
+
+
+---
+
+
+<!-- 7.6c Prompting and Instruction Tuning: Instruction Tuning and Model Behavior -->
+
+
+## <!--7.6.17--> From Prompting to Instruction Tuning
+
+- **Prompting:** external control — the model adapts behavior per input.  
+- **Instruction tuning:** internalized control — the model *learns* from curated instruction–response data.  
+- Shifts objective from **next-token prediction** → **instruction following**, forming the base of modern chat models (GPT-3.5, Claude, FLAN-T5).  
+- Reduces the need for elaborate prompt engineering—models already “understand” task framing.
+
+**Example (instruction–response pair):**  
+> **Instruction:** “Explain reinforcement learning simply.”  
+> **Response:** “It’s how a model learns from rewards and penalties to improve decisions.”
+
+
+::: {.notes}
+Explain that instruction tuning embeds prompting principles directly into model weights.  
+Highlight that this evolution simplified human–LLM interaction and improved reliability.  
+:::
+
+---
+
+## <!--7.6.18--> Instruction-Tuned Models in Practice
+
+| **Model Family** | **Method** | **Training Emphasis** |
+|------------------|-------------|------------------------|
+| **OpenAI (GPT-3 → GPT-3.5)** | SFT + RLHF | Conversational helpfulness |
+| **Anthropic Claude** | Constitutional AI | “Helpful, Honest, Harmless (HHH)” alignment |
+| **Google FLAN-T5** | Multi-task SFT (1,800+ tasks) | Broad generalization |
+| **Llama-2-Chat / Mistral-Instruct** | Open instruction tuning | Balanced, controllable dialogue |
+
+**Why they behave differently:**  
+- **Raw LLMs:** predict next tokens → verbose, inconsistent outputs.  
+- **Instruction-tuned models:** follow explicit directives like *“List,” “Summarize,”* or *“Explain.”*  
+→ Produce concise, context-aware responses.
+
+::: {.notes}
+Use side-by-side examples (GPT-3 vs. GPT-3.5) to show improved control and tone.  
+Conclude that instruction tuning is the bridge from pretraining to alignment (RLHF).  
+:::
+
+---
+
+
+## <!--7.6.25--> Recap so far: instruction tuning internalizes prompting principles
+
+- **Instruction tuning** = teaching models *how to follow instructions natively.*  
+- **Prompting** = steering them externally in real time.  
+- Together they define the human–model interface:  
+- Structured, context-aware, and controllable.  
+- Next: **7.6d – Structured Outputs and Verification Prompts** for enterprise-grade reliability.
+
+
+::: {.notes}
+Summarize the continuum: pretraining → fine-tuning → instruction tuning → alignment.  
+Transition naturally to the next cluster (7.6d) focusing on structured and verified outputs.  
+:::
+
+---
+
+<!-- # 7.6d Prompting and Instruction Tuning: Structured Outputs and Verification Prompts -->
+
+## <!--7.6.26--> Why structured outputs matter
+
+- Many enterprise tasks need **consistent, machine-readable responses.**  
+- Examples: data extraction, classification, content moderation, API pipelines.  
+- Unstructured text adds cost and risk in downstream automation.  
+- **Solution:** design prompts that constrain structure and enforce schema.
+
+<figure>
+  <img src="../materials/assets/images/structured_output_option1.drawio.svg"
+       alt="**Figure:** Flowchart showing model output feeding into downstream structured pipeline.">
+  <figcaption>**Figure:** Flowchart showing model output feeding into downstream structured pipeline.</figcaption>
+</figure>
+
+::: {.notes}
+Start with motivation—structured outputs are critical for integration and compliance.  
+Mention how JSON/XML formats support automation and analytics.  
+:::
+
+---
+
+## <!--7.6.27--> Prompting for structured responses
+
+- Always specify **format and schema** explicitly.  
+- Example:  
+Respond only in this JSON format:
+{"sentiment": "positive/negative", "confidence": 0–1}
+
+- Use clear delimiters and examples to prevent drift.  
+- Combine with schema validation tools for robust pipelines.
+
+<figure>
+  <img src="../materials/assets/images/blurry_code.jpg"
+       alt="">
+  <figcaption></figcaption>
+</figure>
+
+::: {.notes}
+Demonstrate how structure instructions can be embedded in system prompts.  
+Encourage explicit typing of expected fields for consistency.  
+:::
+
+---
+
+## <!--7.6.28--> Schema validation and enforcement
+
+- **Schema enforcement tools:**  
+- **Pydantic / JSONSchema:** validate output shape and types.  
+- **Guardrails AI / Rebuff / Instructor:** libraries for prompt-level output validation.  
+- Benefits:  
+- Prevent malformed outputs.  
+- Provide automatic error handling.  
+- Enable safe, deterministic integrations.
+
+
+::: {.notes}
+Emphasize “trust but verify”—validation sits between LLM output and application logic.  
+Mention that validators can trigger repair prompts if structure fails.  
+:::
+
+---
+
+## <!--7.6.29--> Self-reflection and verification prompts
+
+- Encourage models to **check and revise their own work.**  
+- Example:  
+  - “Review your previous answer and explain any errors.”  
+  - “Double-check calculations and fix inconsistencies.”  
+- Used in multi-pass and agentic workflows.  
+- Improves factual reliability and reasoning quality.
+
+
+::: {.notes}
+Demonstrate live: have a model critique and correct its own summary.  
+Explain how this pattern mimics quality assurance through self-reflection.  
+:::
+
+---
+
+## <!--7.6.30--> Guardrails and enterprise best practices
+
+- **Prompt guardrails:** pre- and post-processing filters to detect risky content.  
+- **Prompt logging:** record every prompt–response pair for auditability.  
+- **Prompt libraries:** maintain version-controlled templates with metadata.  
+- **Success metrics:** define accuracy, adherence, and latency KPIs.  
+
+<figure>
+  <img src="../materials/assets/images/guardrails1.jpg"
+       alt="">
+  <figcaption></figcaption>
+</figure>
+
+::: {.notes}
+Connect to earlier governance discussions (7.3d, 7.5d).  
+Stress that prompt reliability is a governance and safety function.  
+:::
+
+---
+
+## <!--7.6.31--> Recap: prompting for reliability
+
+- Structured prompts = predictable outputs.  
+- Schema validation = safety net for automation.  
+- Self-reflection and guardrails = reliability enhancements.  
+
+<figure>
+  <img src="../materials/assets/images/right_wrong_bottons.jpg"
+       alt="**Figure:** Concept map linking structured outputs, self-verification, and guardrails.">
+  <figcaption>**Figure:** Concept map linking structured outputs, self-verification, and guardrails.</figcaption>
+</figure>
+
+::: {.notes}
+Close by emphasizing that good prompt design merges engineering precision and ethical responsibility.  
+Transition into applied activity cluster (7.6e).  
+:::
+ 
+---
+
+# Prompting and Instruction Tuning: Reflection and Practice Activity 
+
+---
+
+## <!--7.6.32--> Practice: crafting and debugging prompts
+
+- **Goal:** test and refine prompt clarity, structure, and reproducibility.  
+- Step 1: Choose a short task (e.g., summarize, classify, extract data).  
+- Step 2: Design two prompts for the same task:  
+  - **Baseline:** minimal or vague instruction.  
+  - **Improved:** structured, contextual, directive prompt.  
+- Step 3: Compare model responses:  
+  - Accuracy · tone · structure · token length.  
+- Step 4: Diagnose failures and revise:  
+  - Was the task ambiguous?  
+  - Was key context missing?  
+  - Was the prompt too rigid or too verbose?
+
+
+::: {.notes}
+Have students work in pairs or small groups using the same task but different prompt designs.  
+Ask them to record: (1) baseline prompt, (2) improved prompt, (3) observed differences in output, and (4) token cost if applicable.  
+Reinforce the idea that prompting is an iterative design discipline, not a one-shot guess.
+:::
+
+---
+
+## <!--7.6.33--> Choosing adaptation strategies: prompting, tuning, and RAG
+
+| **Approach** | **Best For** | **Strengths** | **Limitations** |
+|--------------|--------------|---------------|------------------|
+| **Prompting** | Rapid prototyping & flexible tasks | No retraining · Fast iteration | Inconsistent results · Limited control |
+| **PEFT / Adapters** | Domain tone, style, and safety | Efficient · Modular · Reversible | Requires tuning setup · Moderate cost |
+| **Full Fine-Tuning** | Stable, narrow, high-accuracy tasks | Maximum control · High precision | Expensive · Hard to update |
+| **RAG (Retrieval-Augmented Generation)** | Dynamic, knowledge-grounded systems | Fresh data · Transparent sources | Infrastructure overhead |
+
+**Design trade-offs:**  
+- **Prompting →** highest flexibility, lowest control.  
+- **PEFT →** balanced control and efficiency.  
+- **Full fine-tuning →** high precision, high cost.  
+- **RAG →** freshness and grounded knowledge.
+
+
+::: {.notes}
+Guide a short discussion: which lever—cost, control, or freshness—matters most in different organizational settings?  
+Highlight hybrid strategies as the modern norm: *train for tone and safety (PEFT/full FT), retrieve for truth (RAG), and prompt for experimentation.*
+:::
+
+---
+
+## <!--7.6.34--> Mini-discussion: choosing your adaptation mix
+
+- **Scenario A:** Small internal chatbot, low budget, frequent updates.  
+  - Likely mix: **Prompting + light PEFT**; RAG optional.  
+- **Scenario B:** Legal summarization assistant, high precision required.  
+  - Likely mix: **DAPT + PEFT or full FT + strong guardrails**; RAG for statutes/case law.  
+- **Scenario C:** Market research bot needing up-to-date news data.  
+  - Likely mix: **Prompting + RAG**, optional PEFT for tone.
+
+**Prompt:**  
+> For one scenario, justify your mix of **Prompting**, **PEFT**, **Full FT**, and **RAG**.  
+> What are you optimizing for: cost, control, or freshness?
+
+
+::: {.notes}
+Use this as a capstone discussion across the whole Adaptation & Control block.  
+Encourage students to connect back to earlier content: SFT/RLHF (behavior), DAPT (domain language), PEFT (efficiency), and prompting/guardrails (external control and safety).  
+This slide sets up the transition into 7.7 – RAG, where “freshness” and knowledge grounding become the primary concerns.
+:::
+
+---
+
+# Alignment, RAG, Operations
+
+---
+
+<!-- # 7.7a RLHF and Model Alignment: Motivation and Core Process -->
+
+
+## <!--7.7.0--> Orientation: from capability to alignment
+
+- So far, we’ve focused on **what models can do**:
+  - Pretraining for broad capability.  
+  - Fine-tuning (SFT, RLHF, DAPT) for task and domain adaptation.  
+- But capability alone is not enough for real-world use.  
+- **Alignment** asks a different question:  
+  > *Does the model behave in ways that match human values, norms, and expectations?*
+- In this section, we treat RLHF not as a training trick, but as part of a broader **alignment toolkit**.
+
+::: {.notes}
+Anchor this as a conceptual shift: we’re moving from *optimization of performance* to *optimization of behavior and values*.  
+Remind them they’ve already seen SFT and RLHF as tuning processes; now we care about **why** these processes were needed and how they relate to safety and governance.
+:::
+
+---
+
+## <!--7.7.1--> Why alignment matters
+
+- Pretrained LLMs optimize **likelihood**, not **intent**:
+  - They predict plausible next tokens, not what is safest, most helpful, or most honest.  
+- Without alignment, models can be:
+  - Fluent but **unsafe** (toxic, error prone, or harmful content).
+  - Fluent but **unreliable** (hallucinations, overconfidence).
+  - Fluent but **unhelpful** (ignoring user intent).  
+- **Alignment** shifts behavior toward:
+  - *Helpfulness* – responds to the actual task.
+  - *Harmlessness* – avoids unsafe or disallowed content.
+  - *Honesty* – acknowledges uncertainty, avoids fabrication when possible.
+
+
+::: {.notes}
+Use simple before/after examples: a raw model giving a toxic or unhelpful answer vs. an aligned model refusing or reframing the response.  
+Make clear: alignment is about **behavior under ambiguity and risk**, not just accuracy.
+:::
+
+---
+
+## <!--7.7.2--> RLHF again - as alignment, not mechanics
+
+- You’ve already seen the **technical process** of RLHF:  
+  - **SFT** → learn from curated demonstrations.  
+  - **Reward modeling** → learn human preferences from rankings.  
+  - **Policy optimization (e.g., PPO)** → push behavior toward those preferences.  
+- In alignment terms, RLHF is:
+  - A way to **encode human judgments** about *better vs. worse* answers.
+  - A way to turn messy, qualitative feedback into a **training signal**.
+  - One major approach (but not the only one) for training **“HHH” models** (helpful, honest, harmless).  
+- Key idea:
+  > RLHF here is *behavioral alignment*. Tuning the model toward how humans want it to answer, not just what it can say.
+
+
+::: {.notes}
+Explicitly say: “We’re not re-deriving the math or the loop here—you already saw that. Now we’re treating RLHF as one **alignment instrument** among several.”  
+:::
+
+---
+
+## <!--7.7.3--> Alignment beyond RLHF: why this matters for practice
+
+- **RLHF is powerful but not sufficient:**
+  - It can still encode **errors** from raters and guidelines.  
+  - It can fail under distribution shift or adversarial prompting.  
+  - It is expensive and hard to reproduce across organizations.  
+- Alignment in practice must consider:
+  - **Interpretability:** what is the model “keying on”?  
+  - **Safety & governance:** who sets the rules and reviews failures?  
+  - **Ongoing drift:** models and users change over time.  
+- In this alignment block, we’ll look at:
+  - What interpretability can (and can’t) tell us.  
+  - How HHH trade-offs create tension (helpful vs. harmless vs. honest).  
+  - Alternative alignment methods (e.g., DPO, Constitutional AI).  
+  - How evaluation, governance, and documentation support long-term trust.
+
+
+
+---
+
+## <!--7.7.4--> Alignment as a socio-technical process
+
+- Alignment transforms LLMs from **“good at language”** → **“good at behaving in ways we accept.”**  
+- RLHF:
+  - Adds a human preference layer on top of pretraining and fine-tuning.  
+  - Is central, but also costly and imperfect.  
+- Real-world alignment requires:
+  - Technical methods (RLHF, DPO, CAI, filters).  
+  - Human processes (policies, rater guidelines, red-teaming).  
+  - Governance (evaluation, documentation, oversight).  
+
+
+<figure>
+  <img src="../materials/assets/images/alignment1.jpg"
+       alt="">
+  <figcaption></figcaption>
+</figure>
+
+::: {.notes}
+Use this slide to emphasize that alignment is never “done”—it’s an ongoing negotiation between models, humans, and institutions.  
+Then move into 7.7b with a focus on the role and limitations of human feedback and reward models.
+:::
+
+---
+
+<!-- # 7.7b RLHF and Model Alignment: Human Preference Modeling and Reward Training -->
+
+---
+
+## <!--7.7.10--> From Feedback to Preference Modeling
+
+- **Goal:** teach models what humans *prefer*, not just what’s probable.  
+- **Process:**  
+  1. Generate responses for the same prompt.  
+  2. Humans **rank outputs** (best → worst).  
+  3. A **reward model** learns to predict these preferences → proxy for *human approval*.  
+- **PPO Optimization:** the model (policy) updates to maximize reward while staying close to its pretrained distribution—balancing *stability* and *adaptation.*  
+- **Result:** the model learns *human-like preferences* rather than raw text prediction.  
+
+<figure>
+  <img src="../materials/assets/images/starrating.svg"
+       alt="">
+  <figcaption></figcaption>
+</figure>
+
+::: {.notes}
+Keep focus on the transformation from qualitative feedback → quantitative reward signal.  
+Use the “teacher’s assistant” analogy: reward model grades, PPO refines behavior.  
+:::
+
+---
+
+## <!--7.7.11--> Challenges, Costs, and Enterprise Implications
+
+- **Human bias & inconsistency:** raters differ by culture and context.  
+- **Reward hacking:** model exploits shortcuts (verbosity ≠ quality).  
+- **Alignment drift:** norms evolve → reward model grows outdated.  
+- **Resource intensity:** RLHF = multiple models, large compute, expensive annotation.  
+  - High-quality feedback → better alignment, less scalability.  
+  - Low-quality feedback → cheaper, more drift.  
+- **Enterprise challenge:** define what “aligned” means for your domain.  
+  - Govern labeling policy & rater guidelines.  
+  - Audit for bias and value drift over time.  
+- **Key tension:** *human subjectivity vs. scalable automation.*
+
+::: {.notes}
+Frame RLHF as the bridge from data to values—powerful but fragile.  
+Emphasize that “alignment” is both a technical and governance decision.  
+:::
+
+---
+
+
+# 7.7c RLHF and Model Alignment: Alternative Alignment Methods (DPO and Constitutional AI)
+
+---
+
+## <!--7.7.18--> Why look beyond RLHF?
+
+- **RLHF limitations:**  
+  - Expensive and compute-heavy.  
+  - Prone to human bias and annotation inconsistency.  
+  - Difficult to reproduce across labs.  
+- **Emerging trend:** simplify or replace RL loops with **direct preference learning** or **principle-driven self-alignment**.  
+- These alternatives aim for *scalability* and *transparency.*
+
+<figure>
+  <img src="../materials/assets/images/forking_lines.jpg"
+       alt="">
+  <figcaption></figcaption>
+</figure>
+
+::: {.notes}
+Frame this cluster as “the evolution of alignment methods.”  
+Ask: “If RLHF works, why are researchers replacing it?”  
+:::
+
+---
+
+## <!--7.7.19--> Direct Preference Optimization (DPO)
+
+- **Core idea:** directly train the model to prefer human-ranked responses—no separate RL loop.  
+- Uses a **contrastive objective**:  
+  - Given two responses, $y_{+}$ (preferred) and $y_{-}$ (dispreferred),  
+    the model learns to increase $P(y_{+}|x)$ and decrease $P(y_{-}|x)$.  
+- Simplifies alignment: no reward model, no PPO.  
+- **Result:** cheaper, more stable, easier to reproduce.
+
+![**Figure:** [@rafailovDirectPreferenceOptimization2024]](../../materials/assets/images/DPO_rafailov_etal.png){width=70%}
+
+::: {.notes}
+Explain the intuitive advantage: direct optimization avoids instability from reinforcement learning.  
+Emphasize reproducibility and lower compute requirements.  
+:::
+
+---
+
+## <!--7.7.21--> Constitutional AI (CAI)
+
+- Developed by **Anthropic** as an alternative to direct human feedback.  
+- Uses a **“constitution”** — a set of guiding principles (e.g., transparency, safety, respect).  
+- Models generate and critique their own responses according to these rules.  
+- Process:  
+  1. Generate outputs for prompts.  
+  2. Use the constitution to critique and revise responses.  
+  3. Fine-tune on self-critiqued examples.
+
+![**Figure:** [@baiConstitutionalAIHarmlessness2022]](../../materials/assets/images/constitutionalai_bai_etal.png){width=70%}
+
+::: {.notes}
+Frame CAI as “alignment by rule-based self-critique.”  
+Highlight scalability — fewer human raters required.  
+:::
+
+---
+
+## <!--7.7.22--> Example principles in a model constitution
+
+- “Choose the response that is **most helpful** and **least harmful.**”  
+- “Be **honest** about uncertainty and sources.”  
+- “Avoid taking political or moral stances.”  
+- “Prioritize **clarity** over persuasion.”  
+- Principles can be **organization-specific** or **domain-specific.**
+
+
+::: {.notes}
+brainstorm what a constitution might look like for their industry (e.g., healthcare, finance).  
+Explain that principle clarity determines CAI’s success.  
+:::
+
+---
+
+## <!--7.7.23--> Comparing alignment approaches
+
+| Method | Strengths | Limitations |
+|---------|------------|-------------|
+| **RLHF** | High-quality human alignment; proven results | Expensive, bias-prone, hard to scale |
+| **DPO** | Simple, efficient, reproducible | Dependent on initial preference dataset |
+| **Constitutional AI** | Scalable, values-based, fewer human raters | Relies on principle clarity; potential rule conflicts |
+
+
+::: {.notes}
+Encourage discussion: “Which method best balances cost, transparency, and trust?”  
+Use this table as a synthesis point across methods.  
+:::
+
+---
+
+## <!--7.7.24--> Recap: evolving the alignment toolkit
+
+- Alignment is diversifying beyond RLHF.  
+- **DPO:** lightweight, reproducible alignment through direct preference learning.  
+- **CAI:** scalable, principle-based self-alignment.  
+- Each approach trades **cost vs. interpretability vs. control.**  
+
+<figure>
+  <img src="../materials/assets/images/alignment3.svg"
+       alt="">
+  <figcaption></figcaption>
+</figure>
+
+::: {.notes}
+Close by summarizing the shift: from human-intensive RLHF → data-efficient DPO → principle-based CAI.  
+ 
+:::
+
+---
+
+<!-- # 7.7d RLHF and Model Alignment: Safety, Honesty, and Alignment Challenges -->
+
+## <!--7.7.25--> The alignment problem in practice
+
+- Even aligned models can behave unpredictably.  
+- **Trade-offs:**  
+  - Helpful ≠ Harmless.  
+  - Honest ≠ Safe.  
+  - Overly safe = “refusal bias” or *overalignment.*  
+- Alignment is a **moving target**: context, culture, and risk tolerance evolve.
+
+
+::: {.notes}
+Open with relatable examples (e.g., model refusing benign medical or legal questions).  
+Frame alignment as an optimization, not a solved problem.  
+:::
+
+---
+
+## <!--7.7.26--> The HHH triangle
+
+Is the model...
+
+- **Helpful**: Provide relevant, useful info & Vague or evasive replies
+- **Harmless**: Avoid unsafe or error prone content & Over-cautious refusals 
+- **Honest**: | Maintain factual accuracy & Confident hallucination 
+
+- Achieving perfect balance is **impossible**—improvements in one often degrade another.
+
+<figure>
+  <img src="../materials/assets/images/7.7.26_HHHtriangle.drawio.svg"
+       alt="">
+  <figcaption></figcaption>
+</figure>
+
+::: {.notes}
+Explain that RLHF optimizes for this triad, but trade-offs are inevitable.  
+Invite brief reflection: “Which corner do enterprises tend to optimize first?”  
+:::
+
+---
+
+## <!--7.7.27--> Hallucination and calibration
+
+- **Hallucination:** confident generation of false information.  
+- **Calibration:** model expresses appropriate uncertainty or abstains when unsure.  
+- Challenge: models sound confident regardless of confidence level.  
+
+<figure>
+  <img src="../materials/assets/images/7.7.27_hallucination_calibration.drawio.svg"
+       alt="">
+  <figcaption></figcaption>
+</figure>
+
+::: {.notes}
+Demonstrate example of hallucination vs. calibrated response.  
+Stress importance of confidence modeling for enterprise deployment.  
+:::
+
+---
+
+## <!--7.7.28--> Overalignment and refusal bias
+
+- **Overalignment:** model becomes excessively cautious.  
+  - Refuses benign or factual questions (“I can’t help with that”).  
+- **Causes:**  
+  - Overweighting “harmlessness” in feedback data.  
+  - Excessive red-teaming or safety filters.  
+- **Solution:** calibrate refusal thresholds and diversify training feedback.
+
+<figure>
+  <img src="../materials/assets/images/7.7.28_overaligned.drawio.svg"
+       alt="">
+  <figcaption></figcaption>
+</figure>
+
+::: {.notes}
+Discuss how overalignment erodes trust and usability.  
+Note tension between public safety demands and product usability.  
+:::
+
+---
+
+## <!--7.7.29--> Value alignment vs. technical alignment
+
+- **Value alignment:** embedding human norms, ethics, and social rules.  
+- **Technical alignment:** engineering control—RLHF, DPO, filters.  
+- **Tension:**  
+  - Whose values are encoded?  
+  - Are “safe” responses culturally specific?  
+  - Governance defines acceptable trade-offs.
+
+<figure>
+  <img src="../materials/assets/images/7.7.29_value_vs_technicallyaligned.drawio.svg"
+       alt="">
+  <figcaption></figcaption>
+</figure>
+
+::: {.notes}
+Use this slide to bridge ethical philosophy and AI engineering.  
+Prompt discussion: “Can technical alignment ever solve value alignment?”  
+:::
+
+---
+
+## <!--7.7.30--> Misuse and broader alignment risks
+
+- **Misuse:** generating misinformation, deepfakes, or malicious code.  
+- **Hallucination at scale:** amplifies misinformation.  
+- **Feedback contamination:** bad user input → misaligned updates.  
+- **Enterprise risk:** compliance, liability, and trust.  
+- Alignment failures have *real-world governance implications.*
+
+<figure>
+  <img src="../materials/assets/images/7.7.30_riskawareresponse.drawio.svg"
+       alt="">
+  <figcaption></figcaption>
+</figure>
+
+::: {.notes}
+Tie these points to risk management frameworks (EU AI Act, NIST RMF).  
+Encourage students to consider alignment as corporate governance, not just model design.  
+:::
+
+---
+
+## <!--7.7.31--> Balancing safety and innovation
+
+- **Tight controls** → reduced creativity and responsiveness.  
+- **Loose controls** → reputational and ethical risk.  
+- Balance through:  
+  - Multi-objective reward design.  
+  - Tiered safety settings (e.g., “creative mode” vs. “compliance mode”).  
+  - Human oversight and transparent fallback policies.
+
+<figure>
+  <img src="../materials/assets/images/7.7.31_tightcsloosecontrol.drawio.svg"
+       alt="**Figure:** The balance, and often trade off, between tighter safety constraints and greater creative freedom.">
+  <figcaption>**Figure:** The balance, and often trade off, between tighter safety constraints and greater creative freedom.</figcaption>
+</figure>
+
+::: {.notes}
+Use analogy: like driving with adjustable traction control—balance autonomy and safety dynamically.  
+:::
+
+---
+
+<!--# 7.7e RLHF and Model Alignment: Evaluation, Auditing, and Emerging Trends-->
+
+
+
+## <!--7.7.33--> Evaluating and Auditing Alignment
+
+- **Alignment isn’t permanent — it drifts without evaluation.**  
+- Continuous assessment keeps models:  
+  - **Helpful** (meets intent) · **Honest** (factually grounded) · **Harmless** (safe).  
+- **Human-centered review:**  
+  - Raters score outputs on *HHH*, tone, factuality* in blind comparisons.  
+  - Reveals refusal bias or subtle degradation missed by metrics.  
+- **Automated testing:**  
+  - **Red-teaming** uncovers unsafe or deceptive behavior.  
+  - Track metrics like *refusal rate, hallucination frequency, response consistency*.  
+- Together, human and automated audits form a **feedback loop → monitor → retrain.**
+
+::: {.notes}
+Stress that evaluation is lifecycle QA for alignment.  
+Show how quantitative stress tests and qualitative ratings complement each other.  
+:::
+
+---
+
+
+## <!--7.7.32--> Recap so far: alignment is a balancing act
+
+- Alignment optimizes for **values, safety, and trust**, not perfection.  
+- The **HHH trade-off** defines behavioral tuning limits.  
+- Overalignment, hallucination, and bias persist as active challenges.  
+- Alignment(s) need updating. 
+
+<figure>
+  <img src="../materials/assets/images/balancing_act.jpg"
+       alt="**Figure:** Alignment is balancing act.^1^">
+  <figcaption>**Figure:** Alignment is balancing act.^1^</figcaption>
+</figure>
+
+
+::: {.notes}
+End with synthesis: alignment = ongoing negotiation between technical constraints and human expectations.  
+Transition to evaluation and auditing in the next cluster.  
+:::
+
+---
+
+
+
+# 7.8 Retrieval-Augmented Generation
+
+---
+
+# 7.8a Retrieval-Augmented Generation: Why RAG and How It Works
+
+---
+
+## <!--7.8.1--> Why retrieval-augmented generation (RAG)?
+
+- Large language models have a **fixed training corpus** and a **knowledge cutoff.**  
+- They cannot access new or proprietary data after pretraining.  
+- As a result, they may **hallucinate** or confidently generate plausible falsehoods.  
+- **RAG** augments models with **external retrieval**—bringing in real, current, or private knowledge.
+
+<figure>
+  <img src="../materials/assets/images/rag_spine1.drawio.svg"
+       alt="**Figure:** Conceptual diagram showing RAG bridging model knowledge cutoff with external retrieval.">
+  <figcaption>**Figure:** Conceptual diagram showing RAG bridging model knowledge cutoff with external retrieval.</figcaption>
+</figure>
+
+::: {.notes}
+Open Deck C with motivation: RAG solves the “frozen knowledge” problem.  
+Explain that RAG = retrieval + generation = *context grounding without retraining.*  
+:::
+
+---
+
+## <!--7.8.2--> Why fine-tuning alone isn’t enough
+
+- **Fine-tuning** improves task precision but is **static and costly**, once trained, the model’s knowledge cannot evolve.  
+- **Retrieval-Augmented Generation (RAG)** keeps the base model frozen and adds **live, updateable context**, making systems more flexible and current.
+
+
+::: {.notes}
+Use this slide only to motivate *why* RAG emerged — a single contrast point, not a deep explanation.  
+Details and comparative analysis follow in 7.8.9 “RAG as the middle path.”
+:::
+
+
+---
+
+## <!--7.8.3--> The RAG pipeline: four stages
+
+1. **Document Ingestion:** collect and preprocess text data.  
+2. **Embedding & Storage:** convert chunks to vectors, store in a vector DB.  
+3. **Retrieval:** find semantically similar text based on a query.  
+4. **Generation:** augment the prompt with retrieved context for grounded answers.
+
+<figure>
+  <img src="../materials/assets/images/rag_spine1.drawio.svg"
+       alt="">
+  <figcaption></figcaption>
+</figure>
+
+::: {.notes}
+Describe each stage briefly; this figure will reappear across Deck C.  
+Clarify that “augment” = appending retrieved text to the prompt, not retraining.  
+:::
+
+---
+
+## <!--7.8.4--> Stage 1: document ingestion
+
+- Gather corpus: policies, manuals, papers, FAQs, tickets.  
+- **Chunk** documents into manageable segments (500–1 000 tokens).  
+- Clean data: remove duplicates and boilerplate.  
+- Add metadata (title, source, timestamp) for filtering and traceability.
+
+<figure>
+  <img src="../materials/assets/images/7.8.4_stage1_document_ingestion.drawio.svg"
+       alt="">
+  <figcaption></figcaption>
+</figure>
+
+::: {.notes}
+Explain the importance of semantic chunking—too small loses coherence; too large breaks token limits.  
+Mention preprocessing as 80 % of the work in RAG projects.  
+:::
+
+---
+
+## <!--7.8.5--> Stage 2: embedding and storage
+
+- Encode each text chunk into a **dense vector** using embedding models (e.g., `text-embedding-3-small`, `sentence-transformers`).  
+- Store vectors in a **vector database** such as FAISS, Pinecone, Weaviate, or Chroma.  
+- Maintain metadata for filtering by domain, date, or access control.  
+- Enables efficient **semantic search** at query time.
+
+<figure>
+  <img src="../materials/assets/images/7.8.5_stage2_embedding_storage.drawio.svg"
+       alt="">
+  <figcaption></figcaption>
+</figure>
+
+::: {.notes}
+Clarify “semantic search” vs. keyword search.  
+Students should recognize embeddings as numeric representations enabling similarity comparison.  
+:::
+
+---
+
+## <!--7.8.6--> Stage 3: retrieval
+
+- Convert the user query into an embedding.  
+- Perform **nearest-neighbor search** in the vector store.  
+- Retrieve **top-k** most relevant chunks.  
+- Balance **recall vs. precision** to get enough but not too much context.
+
+<figure>
+  <img src="../materials/assets/images/7.8.6_stage3_retrieval.drawio.svg"
+       alt="">
+  <figcaption></figcaption>
+</figure>
+
+::: {.notes}
+Use the “semantic space” analogy—related texts cluster together.  
+Discuss parameter tuning (top-k = 3 – 10 typical).  
+:::
+
+---
+
+## <!--7.8.7--> Stage 4: augmentation and generation
+
+- Combine retrieved chunks with the user query into a **context-augmented prompt.**  
+- Send to the LLM for generation.  
+- Optionally cite or reference retrieved documents in the output.  
+- Produces **grounded, context-aware responses.**
+
+<figure>
+  <img src="../materials/assets/images/rag_industry_style.drawio.svg"
+       alt="">
+  <figcaption></figcaption>
+</figure>
+
+::: {.notes}
+Show an example: “Based on policy A (section 5)…”.  
+Highlight how RAG increases factual grounding while retaining model fluency.  
+:::
+
+---
+
+## <!--7.8.8--> Dense vs. sparse vs. hybrid retrieval
+
+| Type | Mechanism | Strengths | Limitations |
+|------|------------|------------|--------------|
+| **Sparse (BM25)** | Keyword-based | Transparent, interpretable | Misses synonyms and paraphrases |
+| **Dense** | Embedding similarity | Semantic understanding | Harder to interpret |
+| **Hybrid** | Combine both | Best of both worlds | More complex to implement |
+
+
+::: {.notes}
+Explain that modern RAG often uses hybrid search: dense for meaning, sparse for precision.  
+Encourage experiment with BM25 + embedding hybrid in demos.  
+:::
+
+---
+
+## <!--7.8.9--> RAG as the middle path
+
+- **Prompting:** quick, but shallow grounding.  
+- **Fine-tuning:** deep, but static and costly.  
+- **RAG:** dynamic, grounded, and efficient.  
+- Foundation for enterprise knowledge copilots and internal QA systems.  
+
+
+<figure>
+  <img src="../materials/assets/images/rag_middle_ground.drawio.svg"
+       alt="">
+  <figcaption></figcaption>
+</figure>
+
+::: {.notes}
+Close with synthesis: RAG complements prior modules by extending knowledge without retraining.  
+Transition to architecture patterns and design considerations in 7.8b.  
+:::
+
+---
+
+<!-- # 7.8b Retrieval-Augmented Generation: Design Patterns and System Components -->
+
+
+## <!--7.8.10--> Anatomy of a RAG System
+
+- **Retrieval-Augmented Generation (RAG)** links *retrieval* and *generation* for grounded, current responses.  
+- **Core components:**  
+  1. **Vector DB** – stores embeddings for semantic search.  
+  2. **Retriever** – fetches most relevant chunks.  
+  3. **Generator (LLM)** – produces grounded responses using retrieved context.  
+  4. **Evaluator / Feedback loop** – measures retrieval and output quality.  
+- Each layer can be tuned independently — modular like a modern data stack.  
+
+### Key Design Levers
+- **Chunking:** 500–1,000 tokens; split semantically; use sliding windows for overlap.  
+- **Embeddings:** choose domain-aligned models (e.g., `text-embedding-3-small`, FinBERT).  
+- **Retriever tuning:**  
+  - Top-k (3–10) or threshold cutoffs.  
+  - Re-ranking or hybrid (dense + sparse) retrieval for precision.  
+- **Generator:** combine retrieved text + query via structured prompt templates; add citations for transparency.  
+
+<figure>
+  <img src="../materials/assets/images/rag_industry_style.drawio.svg"
+       alt="**Figure:** Modular RAG pipeline: Vector DB → Retriever → Generator → Feedback.">
+  <figcaption>**Figure:** Modular RAG pipeline: Vector DB → Retriever → Generator → Feedback.</figcaption>
+</figure>
+
+::: {.notes}
+Frame RAG as modular and tunable—each layer improves groundedness or efficiency.  
+Use a visual or animation to emphasize the data-flow analogy.  
+:::
+
+---
+
+## <!--7.8.11--> Optimizing and Evolving RAG Systems
+
+- **Feedback loop:**  
+  - Log user queries, retrieved chunks, and outputs.  
+  - Collect human ratings or relevance scores to refine retrievers and embeddings.  
+- **Continuous improvement:**  
+  - Tune retrieval accuracy and update corpora regularly.  
+  - Identify “semantic blind spots” (gaps in the corpus).  
+- **Strategic design patterns:**  
+  - Pair RAG with fine-tuning → hybrid systems combining *style* (fine-tune) + *facts* (RAG).  
+  - Cache frequent queries and embeddings to reduce latency and cost.  
+- **Takeaway:** RAG isn’t one model—it’s a *system of evolving components* balancing accuracy, speed, and maintainability.  
+
+
+::: {.notes}
+Highlight feedback-driven refinement as the bridge between alignment (7.7) and deployment (7.8c).  
+Emphasize that RAG succeeds through ongoing tuning, not static setup.  
+:::
+
+---
+
+# 7.8c Retrieval-Augmented Generation: Enterprise and Operational Considerations
+
+---
+
+## <!--7.8.18--> Scaling RAG for the enterprise
+
+- Production RAG systems must balance:  
+  - **Latency:** user responsiveness.  
+  - **Scalability:** corpus size and concurrent users.  
+  - **Security and compliance:** who can access what.  
+- Key challenge: retrieval adds complexity beyond standard LLM inference.
+
+<figure>
+  <img src="../materials/assets/images/rag_enterprise_architecture.drawio.svg"
+       alt="**Figure:** Diagram showing production-scale RAG architecture with caching and monitoring layers.">
+  <figcaption>**Figure:** Diagram showing production-scale RAG architecture with caching and monitoring layers.</figcaption>
+</figure>
+
+::: {.notes}
+Frame this as the moment RAG shifts from prototype to infrastructure.  
+Remind students: every design choice (chunk size, top-k, cache) affects user experience.  
+:::
+
+---
+
+## <!--7.8.19--> Latency and caching optimization
+
+- Each RAG step adds delay:  
+  - **Embedding query** → **vector search** → **prompt assembly** → **generation**.  
+- Techniques to reduce latency:  
+  - Cache embeddings and frequent queries.  
+  - Use smaller embedding models for lookup.  
+  - Parallelize retrieval and generation stages.  
+  - Adjust **top-k** and chunk size for faster searches.
+
+
+::: {.notes}
+Encourage quantifying total response time (goal: <2 s for user-facing systems).  
+Discuss trade-off between completeness (k) and speed.  
+:::
+
+---
+
+## <!--7.8.20--> Scalability and data freshness
+
+- **Scalability:**  
+  - Use distributed vector stores (e.g., Pinecone, Weaviate, Milvus).  
+  - Shard by topic or document source.  
+- **Data freshness:**  
+  - Schedule re-indexing for newly added or updated documents.  
+  - Automate embedding refresh pipelines.  
+  - Maintain time-based metadata for recency filtering.
+
+
+::: {.notes}
+Explain that RAG systems must evolve with data — stale embeddings break trust.  
+Mention monitoring embedding coverage vs. source repository changes.  
+:::
+
+---
+
+
+## <!--7.8.22--> Evaluating RAG performance
+
+| Metric | Description | Goal |
+|---------|--------------|------|
+| **Groundedness** | Response aligns with retrieved docs | High |
+| **Faithfulness** | Citations accurately reflect content | High |
+| **Relevance** | Retrieved chunks match query intent | High |
+| **Latency** | Query → response time | <2 s typical |
+| **Cost efficiency** | Tokens and compute per query | Optimized |
+
+
+
+::: {.notes}
+Encourage using a mix of human review (groundedness) and quantitative logging (latency, cost).  
+Explain that “faithfulness” checks can be automated via semantic similarity scores.  
+:::
+
+---
+
+## <!--7.8.23--> Human-in-the-loop evaluation
+
+- Combine **automated metrics** with **human audits.**  
+- Evaluate for:  
+  - Citation accuracy and bias.  
+  - Missing context or misleading truncation.  
+  - Consistency across repeated queries.  
+- Use human ratings to refine chunking, retrieval, or reranking settings.
+
+<figure>
+  <img src="../materials/assets/images/rag_human_in_loop.drawio.svg"
+       alt="**Figure:** Feedback loop showing human review integrated into RAG evaluation.">
+  <figcaption>**Figure:** Feedback loop showing human review integrated into RAG evaluation.</figcaption>
+</figure>
+
+::: {.notes}
+Draw connection to alignment evaluation (7.7e).  
+Stress that enterprise deployment always requires human oversight for validation.  
+:::
+
+
+---
+
+## <!--7.8.25--> Recap: RAG as an operational system
+
+- Successful RAG = balance between **speed, scale, security, and governance.**  
+- Ongoing monitoring ensures grounded, compliant, and up-to-date outputs.  
+- Evaluation blends metrics + human review.  
+
+
+
+::: {.notes}
+Wrap with the key message: operationalizing RAG = engineering + governance.  
+Transition to common failure modes and applied use cases.  
+:::
+
+---
+
+# 7.8d Retrieval-Augmented Generation: Failure Analysis and Applications
+
+---
+
+
+## <!--7.8.26--> Diagnosing and Preventing RAG Failures
+
+- Even strong RAG systems can fail when fundamentals slip:  
+  - **Bad chunking** → broken context, incomplete answers.  
+  - **Poor embeddings** → irrelevant or off-topic retrievals.  
+  - **Retriever bias** → repetitive or narrow results.  
+  - **Context overflow** → truncated responses, long latency.  
+  - **Stale data** → outdated or misleading information.  
+
+<figure>
+  <img src="../materials/assets/images/broken_glass.jpg"
+       alt="**Figure:** End-to-end diagram showing RAG failure points and mitigation levers.">
+  <figcaption>**Figure:** End-to-end diagram showing RAG failure points and mitigation levers.</figcaption>
+</figure>
+
+##  Troubleshooting Matrix
+
+| **Failure Mode** | **Symptom** | **Mitigation** |
+|------------------|-------------|----------------|
+| Chunking | Missing context | Semantic splits · Sliding window |
+| Embedding mismatch | Irrelevant retrievals | Use domain-aligned model |
+| Retriever bias | Narrow or redundant hits | Hybrid dense + sparse search |
+| Context overflow | Truncation or errors | Re-rank · Summarize before generation |
+| Stale data | Outdated content | Automate re-embedding |
+
+- **Evaluate quality:** combine retrieval metrics (*recall@k, precision@k*) with human validation for factual domains.  
+- **Key takeaway:** RAG ≠ automatic truth — its quality depends on data hygiene, retrieval tuning, and active monitoring.
+
+
+::: {.notes}
+Position this as RAG’s “operational risk checklist.”  
+Encourage using gold-standard queries and continuous retriever audits.  
+:::
+
+---
+
+## <!--7.8.27--> Applying RAG in Practice
+
+- **Knowledge-grounded assistants:** internal policy bots, compliance copilots, customer service chatbots — grounded answers with **traceable sources.**  
+- **Research & education copilots:** literature summarizers, tutoring assistants using **verified open data.**  
+- **Legal & compliance systems:** case-law summarization, multi-jurisdiction retrieval with **audit-ready outputs.**  
+
+**Benefits across domains:**  
+- Grounded and explainable results → less hallucination.  
+- Clear data provenance → governance and audit alignment.  
+- Domain tuning via PEFT + RAG hybrid → consistent tone + current facts.  
+
+
+::: {.notes}
+Use this slide to move from diagnostics → value.  
+Show that successful RAG = accuracy + auditability + adaptability across domains.  
+:::
+
+---
+
+<!-- 7.8e Retrieval-Augmented Generation: Integration & Hands-On Lab -->
+
+---
+
+## <!--7.8.33--> Integration frameworks for RAG
+
+- Popular frameworks abstract the entire RAG pipeline:  
+  - **LangChain:** modular building blocks for embedding, retrieval, and chaining logic.  
+  - **LlamaIndex (GPT Index):** document loaders, vector storage, query engines.  
+  - **Haystack / Semantic Kernel:** enterprise-grade orchestration and evaluation.  
+- Simplify integration with APIs and plug-and-play retrievers.
+
+
+::: {.notes}
+Show how frameworks standardize the Ingest → Embed → Retrieve → Generate pattern.  
+Mention that these tools are open-source and work across different LLM providers.  
+:::
+
+---
+
+## <!--7.8.34--> RAG integration patterns
+
+| Pattern | Description | Typical Use |
+|----------|--------------|--------------|
+| **Lightweight RAG** | Simple FAISS/Chroma retrieval; minimal setup | Prototypes, teaching, small corpora |
+| **Augmented RAG** | Adds reranking, caching, metadata filters | Production assistants |
+| **RAG + Function Calling** | Retrieval triggers external tools or APIs | Finance, analytics, automation |
+| **Hybrid RAG** | Combines vector + keyword retrieval | Compliance, research |
+
+
+::: {.notes}
+Explain that most enterprise systems start “lightweight” and evolve into “augmented.”  
+Encourage students to design for modular upgrades.  
+:::
+
+---
+
+## <!--7.8.35--> Hands-on mini-lab: build a simple RAG pipeline
+
+1. **Ingest** a small corpus (e.g., FAQs, articles).  
+2. **Embed** using `sentence-transformers` or OpenAI’s embedding API.  
+3. **Store** vectors in **Chroma** or **FAISS**.  
+4. **Retrieve + Generate:** query with and without retrieval augmentation.  
+5. **Compare:** evaluate groundedness, faithfulness, and hallucination rate.
+
+
+::: {.notes}
+Provide students with starter notebooks or demo links.  
+Have them log query times and note qualitative differences in groundedness.  
+:::
+
+---
+
+## <!--7.8.36--> Reflection and discussion
+
+- What differences did you observe **with vs. without** retrieval?  
+- Which step most influenced quality (chunking, embeddings, retrieval)?  
+- How would latency and cost scale to enterprise level?  
+- How could this pipeline integrate with your organization’s data systems?
+
+
+::: {.notes}
+Facilitate group sharing.  
+Encourage teams to connect RAG design choices with governance, latency, and compliance considerations.  
+:::
+
+---
+
+## <!--7.8.37--> Recap: integrating RAG into production systems
+
+- RAG unites **retrieval**, **generation**, and **evaluation** in one architecture.  
+- Frameworks (LangChain, LlamaIndex) make it accessible and modular.  
+- Enterprise success requires balance: accuracy × latency × governance.  
+
+
+
+::: {.notes}
+Wrap Deck C’s RAG section.  
+Reinforce transition: next module evaluates and operationalizes all system types (RAG, FT, PEFT).  
+:::
+
+---
+
+# 7.9 LLMs in Practice
+
+---
+
+<!-- # 7.9a LLMs in Practice: Tool Calling and Agents-->
+
+
+## <!--7.9.1--> Why tool calling matters
+
+- LLMs generate text but cannot directly **act** or **query external systems**.  
+- **Tool calling** lets models: query APIs and databases, perform calculations, automate workflows.  
+- **Agents** coordinate tool choices and sequencing under constraints.
+
+<figure>
+  <img src="../materials/assets/images/tools.jpg"
+       alt="Figure: Diagram showing an LLM agent choosing tools through a defined API interface.">
+  <figcaption>Figure: Diagram showing an LLM agent choosing tools through a defined API interface.</figcaption>
+</figure>
+
+::: {.notes}
+Position tool use as the bridge from language to action.  
+Contrast “chat model” vs “agentic system” with bounded autonomy.  
+:::
+
+---
+
+## <!--7.9.2--> Contract-first design
+
+- Define a **clear contract** for each tool (inputs, outputs, types).  
+- Keep schemas minimal, deterministic, and machine-parseable.  
+- The model’s job is to **fill parameters correctly**, not improvise formats.
+
+<figure>
+  <img src="../materials/assets/images/placeholder.jpg"
+       alt="Figure: Concept visual showing function schemas defining input/output contracts.">
+  <figcaption>Figure: Concept visual showing function schemas defining input/output contracts.</figcaption>
+</figure>
+
+::: {.notes}
+Explain why upfront schemas reduce ambiguity and error handling downstream.  
+Reference common ecosystems (function calling, tool specs) without code.  
+:::
+
+---
+
+## <!--7.9.3--> Validation and retry loops
+
+- **Parse and validate** model output against the schema.  
+- On failure, **return concise errors** and **retry** with minimal deltas.  
+- Stop after a bounded number of retries.
+
+<figure>
+  <img src="../materials/assets/images/placeholder.jpg"
+       alt="Figure: Workflow diagram showing generate → validate → error → retry cycle.">
+  <figcaption>Figure: Workflow diagram showing generate → validate → error → retry cycle.</figcaption>
+</figure>
+
+::: {.notes}
+Emphasize reliability via tight feedback loops and structured errors.  
+Log failures to improve prompts and schemas.  
+:::
+
+---
+
+## <!--7.9.4--> Planning and memory pitfalls
+
+- **Planning drift:** long chains lose focus.  
+- **Memory limits:** context overflow drops earlier instructions.  
+- **Mitigations:** limit steps/recursion; periodic summaries; snapshot state; forbid unbounded self-calls.
+
+<figure>
+  <img src="../materials/assets/images/maze.jpg"
+       alt="Figure: Flow showing controlled reasoning depth and summarization checkpoints.">
+  <figcaption>Figure: Flow showing controlled reasoning depth and summarization checkpoints.</figcaption>
+</figure>
+
+::: {.notes}
+Tie to agent frameworks; stress explicit stop criteria and summarization triggers.  
+:::
+
+---
+
+## <!--7.9.5--> Observability and traceability
+
+- Treat every tool call as **auditable**: log prompts, parameters, outputs, and latency.  
+- Assign **trace IDs** and centralize logs for debugging and compliance.  
+- Use dashboards to surface errors and outliers.
+
+<figure>
+  <img src="../materials/assets/images/placeholder.jpg"
+       alt="Figure: Observability pipeline showing traces flowing into a monitoring dashboard.">
+  <figcaption>Figure: Observability pipeline showing traces flowing into a monitoring dashboard.</figcaption>
+</figure>
+
+::: {.notes}
+Connect observability to governance and post-incident reviews.  
+:::
+
+---
+
+## <!--7.9.6--> Guardrails and sandboxing
+
+- Enforce **allow/deny lists** for tools.  
+- **Sandbox** side effects; rate-limit and isolate execution.  
+- Monitor for **prompt injection** and unexpected tool invocation patterns.
+
+<figure>
+  <img src="../materials/assets/images/guardrails2.jpg"
+       alt="Figure: Security diagram showing sandboxed tool access with allow/deny filters.">
+  <figcaption>Figure: Security diagram showing sandboxed tool access with allow/deny filters.</figcaption>
+</figure>
+
+::: {.notes}
+Frame guardrails as policy-in-code; align with org risk posture.  
+:::
+
+---
+
+## <!--7.9.7--> Plan–act–observe loop
+
+- **Plan:** choose next action or tool.  
+- **Act:** execute call and capture result.  
+- **Observe:** integrate result, decide to continue or stop.  
+- Bound iteration; prefer short, verifiable loops.
+
+<figure>
+  <img src="../materials/assets/images/placeholder.jpg"
+       alt="Figure: Plan–act–observe cycle diagram.">
+  <figcaption>Figure: Plan–act–observe cycle diagram.</figcaption>
+</figure>
+
+::: {.notes}
+Relate to control loops; discourage open-ended autonomous runs.  
+:::
+
+---
+
+## <!--7.9.8--> What to monitor (example metrics)
+
+- **Latency:** end-to-end and per tool.  
+- **Validation failure rate:** percent of schema violations.  
+- **Retry count:** average retries per request.  
+- **Tool call frequency:** usage by tool to detect misuse or inefficiency.
+
+::: {.notes}
+Suggest SLOs for latency and failure rates; trigger alerts on regressions.  
+:::
+
+---
+
+## <!--7.9.9--> Recap: building reliable LLM agents
+
+- **Contract-first** schemas → predictable calls.  
+- **Validate → retry** loops → robust structure.  
+- **Constrain planning/memory** → avoid drift.  
+- **Observe and guard** → safety and compliance.  
+
+<figure>
+  <img src="../materials/assets/images/placeholder.jpg"
+       alt="Figure: Concept map linking schema design, validation, observability, and guardrails.">
+  <figcaption>Figure: Concept map linking schema design, validation, observability, and guardrails.</figcaption>
+</figure>
+
+::: {.notes}
+Preview practical connectivity to APIs, open-weight runtimes, and abstraction layers.  
+:::
+
+---
+
+# 7.9 LLMs in Practice: Accessing LLMs via APIs and Local Toolkits
+
+---
+
+## <!--7.9.10--> Why multiple access options matter
+
+- Different deployment goals require different toolchains.  
+- **Cloud APIs** offer easy scale; **local runtimes** offer privacy and control.  
+- Understanding both ensures flexibility, cost awareness, and compliance alignment.  
+
+
+
+::: {.notes}
+Set context: there’s no “one best” way to run LLMs — choice depends on governance, latency, and resources.  
+:::
+
+---
+
+## <!--7.9.11--> Using hosted APIs (OpenAI, Anthropic, Google)
+
+- Provide access to high-quality frontier models (GPT-4, Claude, Gemini).  
+- Offer chat and completion endpoints; abstract away infrastructure.  
+- **Advantages:** quick prototyping, enterprise support, managed scaling.  
+- **Limitations:** latency, privacy exposure, recurring cost, dependency on provider uptime.
+
+<figure>
+  <img src="../materials/assets/images/placeholder.jpg"
+       alt="Figure: Cloud API flow: request → provider → LLM → response.">
+  <figcaption>Figure: Cloud API flow: request → provider → LLM → response.</figcaption>
+</figure>
+
+::: {.notes}
+Show a live or recorded API call demo; emphasize reproducible settings (temperature, max tokens).  
+:::
+
+---
+
+## <!--7.9.12--> Hugging Face Transformers library
+
+- Open-source toolkit for **running models locally** or via hosted inference endpoints.  
+- Supports hundreds of models: GPT-2, BERT, T5, Falcon, Llama, Mistral, Gemma.  
+- **Strengths:** transparency, flexibility, reproducibility.  
+- **Trade-offs:** compute management, dependency tracking, slower iteration cycles.
+
+<figure>
+  <img src="../materials/assets/images/placeholder.jpg"
+       alt="Figure: Workflow of loading and running models via Transformers pipeline.">
+  <figcaption>Figure: Workflow of loading and running models via Transformers pipeline.</figcaption>
+</figure>
+
+::: {.notes}
+Discuss versioning (model checkpoints) and hardware requirements.  
+Point out integration with `accelerate`, `bitsandbytes`, and PEFT adapters.  
+:::
+
+---
+
+## <!--7.9.13--> Local inference options
+
+- **Ollama:** simplified runtime for open-weight models (Llama 3, Mistral).  
+- **Text-Generation-WebUI:** browser-based interface for experimentation.  
+- Benefits: privacy, air-gapped capability, no API keys needed.  
+- Constraints: limited context windows, slower CPU/GPU performance.
+
+<figure>
+  <img src="../materials/assets/images/placeholder.jpg"
+       alt="Figure: Local inference setup showing user → Ollama runtime → local model.">
+  <figcaption>Figure: Local inference setup showing user → Ollama runtime → local model.</figcaption>
+</figure>
+
+::: {.notes}
+Encourage students to install a local model for sandbox experimentation.  
+Clarify that quantization (int4/int8) enables laptop-scale operation.  
+:::
+
+---
+
+## <!--7.9.14--> Provider abstraction layers
+
+- Frameworks such as **LiteLLM**, **OpenRouter**, and **LangChain**:  
+  - Standardize API calls across multiple providers.  
+  - Enable routing requests by cost, latency, or performance.  
+  - Allow fallback redundancy between providers.  
+- Benefits: vendor flexibility and easy benchmarking.
+
+<figure>
+  <img src="../materials/assets/images/placeholder.jpg"
+       alt="Figure: Routing layer diagram connecting one API client to multiple providers.">
+  <figcaption>Figure: Routing layer diagram connecting one API client to multiple providers.</figcaption>
+</figure>
+
+::: {.notes}
+Demonstrate conceptually how abstraction reduces vendor lock-in.  
+Mention unified environment variable standards for API keys.  
+:::
+
+---
+
+## <!--7.9.15--> Typical LLM tasks via APIs
+
+- **Zero-shot / few-shot classification:** label text directly from description.  
+- **Summarization:** abstractive or extractive text condensation.  
+- **Question answering:** contextual passage + query → short answer.  
+- **Information extraction:** structured outputs (names, amounts, dates).  
+- **Code generation:** natural language → function or snippet translation.
+
+<figure>
+  <img src="../materials/assets/images/placeholder.jpg"
+       alt="Figure: Example pipeline of API requests performing multiple NLP tasks.">
+  <figcaption>Figure: Example pipeline of API requests performing multiple NLP tasks.</figcaption>
+</figure>
+
+::: {.notes}
+Tie each example back to earlier modules (prompting, fine-tuning, RAG).  
+Highlight use of JSON schemas for extraction tasks.  
+:::
+
+---
+
+## <!--7.9.16--> Selecting the right access pattern
+
+| Mode | When to Use | Key Benefit | Limitation |
+|------|--------------|--------------|-------------|
+| **Cloud API** | Prototyping or large-scale apps | No setup, high quality | Ongoing cost |
+| **Local inference** | Privacy-critical or offline | Control, compliance | Hardware demand |
+| **Serverless GPU** | Variable workloads | Pay-per-use flexibility | Cold-start latency |
+| **Hybrid routing** | Production redundancy | Multi-provider choice | Management complexity |
+
+<figure>
+  <img src="../materials/assets/images/placeholder.jpg"
+       alt="Figure: Table summarizing trade-offs across access modes.">
+  <figcaption>Figure: Table summarizing trade-offs across access modes.</figcaption>
+</figure>
+
+::: {.notes}
+Encourage students to match mode to context: experimentation vs production.  
+:::
+
+---
+
+## <!--7.9.17--> Recap: connecting to and orchestrating LLMs
+
+- Multiple toolkits enable access at different scales and governance levels.  
+- Cloud APIs = convenience; Local runtimes = control; Abstraction layers = flexibility.  
+- Understanding APIs is foundational for building pipelines, agents, and RAG systems.  
+- Next: **7.9c – Controlling and Optimizing Model Behavior.**
+
+<figure>
+  <img src="../materials/assets/images/placeholder.jpg"
+       alt="Figure: Summary concept map linking API, local, and hybrid orchestration.">
+  <figcaption>Figure: Summary concept map linking API, local, and hybrid orchestration.</figcaption>
+</figure>
+
+::: {.notes}
+Summarize practical takeaway: mastery of APIs/toolkits is prerequisite for scalable LLM deployment.  
+:::
+
+---
+
+# 7.9c LLMs in Practice: Controlling and Optimizing Model Behavior
+
+---
+
+## <!--7.9.18--> Why control model behavior?
+
+- LLMs are **probabilistic**, not deterministic—outputs vary run to run.  
+- Controlling randomness, structure, and response length is crucial for:  
+  - Reliability and reproducibility.  
+  - Cost management (token limits).  
+  - Meeting enterprise formatting and safety requirements.
+
+<figure>
+  <img src="../materials/assets/images/placeholder.jpg"
+       alt="Figure: Illustration of temperature and sampling controls shaping output diversity.">
+  <figcaption>Figure: Illustration of temperature and sampling controls shaping output diversity.</figcaption>
+</figure>
+
+::: {.notes}
+Open by framing behavior control as a balance between creativity and consistency.  
+Stress reproducibility and governance as the core enterprise needs.  
+:::
+
+---
+
+## <!--7.9.19--> Temperature and sampling controls
+
+- **Temperature:** controls randomness in token selection.  
+  - Low = precise, repetitive.  
+  - High = creative, exploratory.  
+- **Top-k sampling:** restricts next-token choices to top *k* probabilities.  
+- **Top-p (nucleus) sampling:** samples from top tokens whose combined probability ≥ *p*.  
+- **Combined effect:** governs diversity vs. reliability of output.
+
+<figure>
+  <img src="../materials/assets/images/placeholder.jpg"
+       alt="Figure: Graph showing how temperature and top-p affect distribution sharpness.">
+  <figcaption>Figure: Graph showing how temperature and top-p affect distribution sharpness.</figcaption>
+</figure>
+
+::: {.notes}
+Demonstrate low vs. high temperature responses for the same prompt.  
+Encourage parameter documentation for reproducibility.  
+:::
+
+---
+
+## <!--7.9.20--> Output length and stop conditions
+
+- **Max tokens:** limits output length, manages latency and cost.  
+- **Stop sequences:** define custom boundaries for completion (e.g., “END”).  
+- **Truncation:** prevents partial sentences or runaway responses.  
+- **Best practice:** specify both `max_tokens` and clear stop rules for structured workflows.
+
+<figure>
+  <img src="../materials/assets/images/placeholder.jpg"
+       alt="Figure: Visualization showing controlled output length vs. unbounded generation.">
+  <figcaption>Figure: Visualization showing controlled output length vs. unbounded generation.</figcaption>
+</figure>
+
+::: {.notes}
+Explain that bounded generation ensures pipeline stability and predictable API costs.  
+:::
+
+---
+
+## <!--7.9.21--> Structured and constrained outputs
+
+- Models can return **structured formats** (JSON, XML, CSV) for automation.  
+- Approaches:  
+  - Schema-based prompts (“Respond only in JSON format”).  
+  - Function-calling interfaces with validated parameter types.  
+  - Validation libraries such as Pydantic or Guardrails.  
+- Benefits: reliable downstream parsing and integration.
+
+<figure>
+  <img src="../materials/assets/images/placeholder.jpg"
+       alt="Figure: Example of structured JSON-style output integrated into workflow.">
+  <figcaption>Figure: Example of structured JSON-style output integrated into workflow.</figcaption>
+</figure>
+
+::: {.notes}
+Connect this back to 7.9a’s validation–retry loop.  
+Highlight enterprise use: structured LLM outputs feed APIs and dashboards.  
+:::
+
+---
+
+## <!--7.9.22--> Streaming vs. blocking generation
+
+- **Streaming:** model emits tokens in real time (ideal for chat interfaces).  
+- **Blocking:** waits for full completion before returning.  
+- **Trade-offs:**  
+  - Streaming → lower perceived latency, more interactive.  
+  - Blocking → simpler error handling and logging.  
+- Use streaming for dashboards, chatbots; blocking for batch processing.
+
+<figure>
+  <img src="../materials/assets/images/placeholder.jpg"
+       alt="Figure: Timeline comparing streaming vs. blocking output behavior.">
+  <figcaption>Figure: Timeline comparing streaming vs. blocking output behavior.</figcaption>
+</figure>
+
+::: {.notes}
+Demonstrate streaming via command-line or API dashboard.  
+Stress user experience improvements for real-time applications.  
+:::
+
+---
+
+## <!--7.9.23--> Measuring confidence and alternatives
+
+- **Log probabilities (logprobs):** expose model’s internal confidence per token.  
+- Use cases:  
+  - Uncertainty quantification.  
+  - Ranking multiple completions.  
+  - Detecting instability in reasoning.  
+- Enables interpretability and ensemble approaches.
+
+<figure>
+  <img src="../materials/assets/images/placeholder.jpg"
+       alt="Figure: Bar chart comparing token probabilities across completions.">
+  <figcaption>Figure: Bar chart comparing token probabilities across completions.</figcaption>
+</figure>
+
+::: {.notes}
+Show how logprobs enable “choose the most confident answer” workflows.  
+Explain integration with evaluation metrics for QA systems.  
+:::
+
+---
+
+## <!--7.9.24--> Optimizing behavioral parameters
+
+| Parameter | Goal | Common Range | Effect |
+|------------|------|---------------|--------|
+| Temperature | Control randomness | 0.1–1.0 | Creativity vs. precision |
+| Top-p | Limit sampling mass | 0.7–1.0 | Diversity vs. determinism |
+| Max tokens | Bound output size | 256–2048 | Cost and coherence control |
+| Stop seqs | Enforce structure | Custom | Clean pipeline handoff |
+
+::: {.notes}
+Encourage saving tuned parameter sets for reuse.  
+Remind students to align hyperparameters with application tolerance for creativity.  
+:::
+
+---
+
+## <!--7.9.25--> Recap: making LLM behavior predictable
+
+- **Temperature & sampling:** tune creativity and precision.  
+- **Max tokens & stop rules:** enforce consistency and cost control.  
+- **Structured outputs:** enable automation.  
+- **Streaming & logprobs:** improve interactivity and confidence monitoring.  
+
+<figure>
+  <img src="../materials/assets/images/placeholder.jpg"
+       alt="Figure: Summary concept map linking control parameters and behavioral stability.">
+  <figcaption>Figure: Summary concept map linking control parameters and behavioral stability.</figcaption>
+</figure>
+
+::: {.notes}
+Summarize that “model control” is part of operational maturity.  
+Preview next section on efficiency and scaling strategies.  
+:::
+
+---
+
+
+## <!--7.9.26--> Why performance optimization matters
+
+- LLM inference is **computationally expensive** — latency and cost scale with context length and model size.  
+- Optimization improves:  
+  - **User experience** (faster responses).  
+  - **Cost efficiency** (fewer GPU-hours).  
+  - **Sustainability** (reduced energy use).  
+- Requires balancing precision, hardware constraints, and throughput.
+
+<figure>
+  <img src="../materials/assets/images/placeholder.jpg"
+       alt="Figure: Diagram showing trade-offs between accuracy, speed, and cost.">
+  <figcaption>Figure: Diagram showing trade-offs between accuracy, speed, and cost.</figcaption>
+</figure>
+
+::: {.notes}
+Open by contextualizing performance as both technical and business optimization.  
+Ask: “Where is your organization most constrained—latency, accuracy, or cost?”  
+:::
+
+---
+
+## <!--7.9.27--> Quantization: lighter, faster models
+
+- **Quantization** reduces numerical precision (fp16 → int8/int4).  
+- Benefits:  
+  - Lower memory footprint.  
+  - Faster inference on smaller GPUs/CPUs.  
+- Common tools: `bitsandbytes`, GGUF, GPTQ.  
+- Accuracy impact: minimal if applied carefully.
+
+<figure>
+  <img src="../materials/assets/images/placeholder.jpg"
+       alt="Figure: Visualization of model size reduction after quantization.">
+  <figcaption>Figure: Visualization of model size reduction after quantization.</figcaption>
+</figure>
+
+::: {.notes}
+Explain that quantization trades representational range for efficiency.  
+Highlight reproducibility and validation after quantization.  
+:::
+
+---
+
+## <!--7.9.28--> KV-cache reuse and batching
+
+- **KV-cache:** stores key-value attention states between turns to avoid recomputation.  
+  - Accelerates multi-turn chats and streaming use cases.  
+- **Batching:** groups multiple prompts in one forward pass.  
+  - Improves throughput for high-volume workloads.  
+- Both techniques **maximize GPU utilization**.
+
+<figure>
+  <img src="../materials/assets/images/placeholder.jpg"
+       alt="Figure: Diagram showing KV-cache reuse across conversation turns.">
+  <figcaption>Figure: Diagram showing KV-cache reuse across conversation turns.</figcaption>
+</figure>
+
+::: {.notes}
+Show latency reduction curves for batched vs. single requests.  
+Explain how caching improves conversational systems dramatically.  
+:::
+
+---
+
+## <!--7.9.29--> Speculative decoding
+
+- **Speculative decoding:** model predicts multiple next tokens in parallel.  
+- A smaller “draft” model proposes tokens; main model verifies.  
+- Reduces time per generation by up to 2–3×.  
+- Supported by some OpenAI and Anthropic APIs; research continues for open-weight models.
+
+<figure>
+  <img src="../materials/assets/images/placeholder.jpg"
+       alt="Figure: Illustration of speculative decoding with draft and verifier models.">
+  <figcaption>Figure: Illustration of speculative decoding with draft and verifier models.</figcaption>
+</figure>
+
+::: {.notes}
+Simplify concept: “guess first, confirm later.”  
+Explain performance gain without major architectural change.  
+:::
+
+---
+
+## <!--7.9.30--> Serverless and distributed inference
+
+- **Serverless GPUs** (Modal, RunPod, Replicate):  
+  - Pay-per-use scaling.  
+  - Ideal for variable workloads.  
+- **Distributed inference:**  
+  - Splits model across multiple GPUs.  
+  - Useful for long-context models (Llama 3, Mixtral).  
+- Trade-off: cold starts and network overhead.
+
+<figure>
+  <img src="../materials/assets/images/placeholder.jpg"
+       alt="Figure: Flowchart showing on-demand serverless deployment pipeline.">
+  <figcaption>Figure: Flowchart showing on-demand serverless deployment pipeline.</figcaption>
+</figure>
+
+::: {.notes}
+Highlight serverless for experimentation vs. persistent clusters for production.  
+Emphasize monitoring utilization to prevent cost spikes.  
+:::
+
+---
+
+## <!--7.9.31--> Comparing deployment strategies
+
+| Deployment | Example Tools | Advantages | Limitations |
+|-------------|----------------|-------------|--------------|
+| **Cloud API** | OpenAI, Anthropic, Gemini | Easy setup, robust infra | Ongoing cost, external dependency |
+| **Local inference** | Hugging Face, Ollama | Privacy, offline | Hardware & maintenance |
+| **Serverless GPU** | Modal, RunPod | Pay-per-use scalability | Cold starts, limited control |
+| **Hybrid routing** | LiteLLM, OpenRouter | Multi-provider flexibility | Complexity in orchestration |
+
+
+::: {.notes}
+Discuss how hybrid routing can optimize both cost and resilience.  
+Invite students to identify which model best suits their environments.  
+:::
+
+---
+
+## <!--7.9.32--> Cost and latency optimization checklist
+
+- Cache frequent prompts and responses.  
+- Reuse embeddings or partial generations.  
+- Reduce max token length where possible.  
+- Profile and log token usage per request.  
+- Use asynchronous or batched requests for bulk tasks.
+
+<figure>
+  <img src="../materials/assets/images/placeholder.jpg"
+       alt="Figure: Concept map summarizing optimization techniques.">
+  <figcaption>Figure: Concept map summarizing optimization techniques.</figcaption>
+</figure>
+
+::: {.notes}
+Encourage applying these optimizations in lab exercises.  
+Point out that small efficiency gains multiply at production scale.  
+:::
+
+---
+
+## <!--7.9.33--> Recap: engineering for efficiency
+
+- **Quantization** and **KV-cache** reduce compute.  
+- **Speculative decoding** accelerates token generation.  
+- **Serverless and hybrid routing** balance flexibility and cost.  
+- Efficiency decisions shape reliability, cost, and sustainability.  
+- Next: **7.9e – Governance and Security in Production Use.**
+
+<figure>
+  <img src="../materials/assets/images/placeholder.jpg"
+       alt="Figure: Summary visual linking quantization, caching, batching, and deployment choices.">
+  <figcaption>Figure: Summary visual linking quantization, caching, batching, and deployment choices.</figcaption>
+</figure>
+
+::: {.notes}
+Close with message: optimization is about balancing user experience and responsible resource use.  
+Transition to governance and security practices.  
+:::
+
+---
+
+# 7.9e LLMs in Practice: Governance and Security in Production Use
+
+---
+
+## <!--7.9.34--> Why governance matters for LLMs
+
+- As LLMs enter production, **accountability and reproducibility** become critical.  
+- Governance ensures:  
+  - **Consistency** across runs and versions.  
+  - **Traceability** of data, prompts, and outputs.  
+  - **Compliance** with enterprise and regulatory standards.  
+- “If it can’t be reproduced, it can’t be trusted.”
+
+<figure>
+  <img src="../materials/assets/images/placeholder.jpg"
+       alt="Figure: Diagram linking reproducibility, traceability, and compliance pillars.">
+  <figcaption>Figure: Diagram linking reproducibility, traceability, and compliance pillars.</figcaption>
+</figure>
+
+::: {.notes}
+Open by defining governance as operational quality assurance.  
+Relate to risk management and responsible AI mandates.  
+:::
+
+---
+
+## <!--7.9.35--> Reproducibility and auditability
+
+- Fix **random seeds**, **temperature**, and **sampling parameters**.  
+- Record model name, version, and prompt context for every request.  
+- Maintain logs of all interactions (inputs, outputs, metadata).  
+- Use **prompt registries** or **versioned libraries** to manage evolution.
+
+<figure>
+  <img src="../materials/assets/images/placeholder.jpg"
+       alt="Figure: Example workflow of prompt and model version control.">
+  <figcaption>Figure: Example workflow of prompt and model version control.</figcaption>
+</figure>
+
+::: {.notes}
+Highlight prompt drift as a major reproducibility challenge.  
+Recommend internal registries (Git, MLflow, PromptHub).  
+:::
+
+---
+
+## <!--7.9.36--> Model and data documentation
+
+- Create and maintain:  
+  - **Model cards:** describe capabilities, limitations, and alignment method.  
+  - **Data cards:** outline source, license, and curation processes.  
+  - **System cards:** summarize intended use, risk mitigation, and evaluation results.  
+- Documentation builds **organizational memory** and transparency.
+
+<figure>
+  <img src="../materials/assets/images/placeholder.jpg"
+       alt="Figure: Template overview of model card sections.">
+  <figcaption>Figure: Template overview of model card sections.</figcaption>
+</figure>
+
+::: {.notes}
+Tie this to industry standards (Partnership on AI, NIST RMF).  
+Stress that transparency protects both developers and users.  
+:::
+
+---
+
+## <!--7.9.37--> Security and data privacy
+
+- Avoid sending **sensitive text** to public APIs.  
+- Apply **data masking** or **tokenization** before processing.  
+- Use **private inference** or **on-prem hosting** for regulated data (HIPAA, GDPR).  
+- Encrypt vector stores and outputs at rest and in transit.
+
+<figure>
+  <img src="../materials/assets/images/placeholder.jpg"
+       alt="Figure: Security architecture with encryption and data masking layers.">
+  <figcaption>Figure: Security architecture with encryption and data masking layers.</figcaption>
+</figure>
+
+::: {.notes}
+Explain that embedding models can inadvertently leak data.  
+Discuss anonymization best practices for enterprise text analytics.  
+:::
+
+---
+
+## <!--7.9.38--> Monitoring and compliance in production
+
+- Monitor for:  
+  - Toxic responses.  
+  - Prompt injections and misuse.  
+  - Latency and availability metrics.  
+- Incorporate **red-teaming** and **periodic audits** for content safety.  
+- Align with internal policy frameworks and external regulation.
+
+<figure>
+  <img src="../materials/assets/images/placeholder.jpg"
+       alt="Figure: Flow diagram linking monitoring, alerting, and audit review.">
+  <figcaption>Figure: Flow diagram linking monitoring, alerting, and audit review.</figcaption>
+</figure>
+
+::: {.notes}
+Encourage periodic reviews with compliance and legal teams.  
+Mention automated filters and human-in-the-loop oversight.  
+:::
+
+---
+
+## <!--7.9.39--> Governance and ethics checklist
+
+- ✅ Reproducibility: logs, seeds, configs fixed.  
+- ✅ Documentation: model/data/system cards maintained.  
+- ✅ Security: encryption, masking, sandboxing.  
+- ✅ Compliance: red-teaming, content filters, audit schedule.  
+- ✅ Transparency: accessible governance dashboards.
+
+<figure>
+  <img src="../materials/assets/images/placeholder.jpg"
+       alt="Figure: Checklist graphic illustrating governance maturity levels.">
+  <figcaption>Figure: Checklist graphic illustrating governance maturity levels.</figcaption>
+</figure>
+
+::: {.notes}
+Encourage teams to benchmark their current processes against this checklist.  
+:::
+
+---
+
+## <!--7.9.40--> Recap: operating LLMs responsibly
+
+- Reproducibility enables trust.  
+- Documentation and privacy ensure compliance.  
+- Continuous monitoring sustains reliability.  
+
+<figure>
+  <img src="../materials/assets/images/placeholder.jpg"
+       alt="Figure: Summary concept map linking reproducibility, documentation, and security.">
+  <figcaption>Figure: Summary concept map linking reproducibility, documentation, and security.</figcaption>
+</figure>
+
+::: {.notes}
+Conclude Deck C with the message: production AI = technology + governance.  
+Preview next capstone or comparative exercise if applicable.  
+:::
+
+
+
+# Appendix
+
+
+## Appendix: PEFT Reference Tables
+
+| Parameter              | Typical Range | Description                  |
+| ---------------------- | ------------- | ---------------------------- |
+| **Rank (r)**           | 4–16          | Adapter capacity             |
+| **Scaling factor (α)** | 8–32          | Balances update magnitude    |
+| **Dropout**            | 0.05–0.1      | Prevents overfitting         |
+| **Learning rate**      | 1e-4–3e-4     | Slightly higher than full FT |
+
+| Method              | Where It Hooks             | Trainable Params | Ideal Use                 |
+| ------------------- | -------------------------- | ---------------- | ------------------------- |
+| **LoRA**            | Attention weights          | ~0.1–1%          | Modular domain adapters   |
+| **Adapters**        | Between Transformer blocks | ~1–5%            | Multi-task specialization |
+| **Prefix / Prompt** | Input embeddings           | ~0.01%           | Style or role control     |
+
+<figure>
+  <img src="../materials/assets/images/placeholder.jpg"
+       alt="Figure: Summary diagram for PEFT family relationships.">
+  <figcaption>Figure: Summary diagram for PEFT family relationships.</figcaption>
+</figure>
+
+::: {.notes}
+Include these tables as a student handout or appendix for deeper review.
+Avoid presenting them during lecture to maintain pacing.
+:::
+
+
+## Image Attribution
+1. Images sourced from Unsplash (unsplash.com)
+2. Icons sources from The Noun Project (thenounproject.com)
+3. Diagrams created in drawio, diagrammer, or Python by Joel Davis
+
+
+
+## References
+::: {#refs}
+:::

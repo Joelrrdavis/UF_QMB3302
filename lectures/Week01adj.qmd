@@ -1,0 +1,183 @@
+---
+title: Week1
+subtitle: QMB3302 Foundations of Analytics and AI
+format:
+  metropolis-beamer-revealjs:
+    slide-number: c
+    embed-resources: true
+    # Syntax highlighting theme (pick one: pygments, tango, zenburn, kate, breeze, nord, github, dracula, monokai, etc.)
+    highlight-style: ../../materials/assets/highlight_accessible.theme
+    # Nice-to-have code UX for slides
+    code-line-numbers: true      # add line numbers to all code blocks
+    code-overflow: wrap          # wrap long lines (good for projectors)
+    code-copy: true              # copy-to-clipboard button
+    code-block-bg: true          # subtle background behind code blocks
+    code-block-border-left: "#E69F00"  # UF-amber accent; pick your brand color
+author:
+  - name: Joel Davis
+    orcid: 0000-0000-0000-0000
+    email: joel.davis@warrington.ufl.edu
+    affiliations: University of Florida
+date: last-modified
+bibliography: ../../materials/assets/shared_references_courses.bib
+---
+
+
+# Welcome
+
+# Goldilocks Rule
+
+## Purpose and Importance
+
+> "Humans experience **peak motivation** when working on tasks that are just beyond their current ability.
+> Not too hard.  
+> Not too easy.  
+>Just right." 
+> ~ *James Clear, Atomic Habits*
+
+
+
+## Too Pessimistic
+
+:::: {.columns}
+::: {.column width="50%"}
+- “No one here can learn this stuff.”
+- “It’s too complex and requires years of calculus and matrix algebra...”
+- Requires “a secret decoder ring.”  
+- → Leads to disengagement → despair → and dramatic emails about dropping the class. 
+:::
+
+::: {.column width="50%"}
+!["I'll never get there"](../materials/assets/images/placeholder.jpg)
+:::
+::::
+
+
+
+## Too Optimistic
+
+:::: {.columns}
+::: {.column width="50%"}
+- “This is so easy!”
+- “Each of you will become an expert in multivariate statistics by tomorrow.”
+- Unrealistic expectations → frustration and loss of motivation.
+:::
+
+::: {.column width="50%"}
+!["why bother?"](../materials/assets/images/tooeasy.png)
+:::
+::::
+
+
+## Just Right
+
+:::: {.columns}
+::: {.column width="50%"}
+- DBA students from **any background**, even with **no prior experience**, can:
+  - Learn this material.  
+  - Build a solid foundation.  
+  - Continue learning effectively.  
+- “Just right” may differ for everyone.
+:::
+
+::: {.column width="50%"}
+!["I made it!"](../materials/assets/images/justright.png)
+
+
+:::
+::::
+
+
+
+## Key Takeaway
+- *Just right*: start from where you are.  
+- Build a foundation to continue learning.  
+- I’ll assume **no prior experience** (though I know that’s not strictly true).  
+
+
+# Course Structure
+
+## Syllabus Overview
+- Lectures + applied examples.
+- In-class exercises.
+- Open-book quizzes.
+- Collaborative problem solving.
+
+
+## Exercises: Practice Through Doing
+- Exercises occur during class sessions.
+
+### In-Class Exercises: Collaborative Learning
+- You’ll form a **team**.
+- Submit your work **during class**.
+- Graded for **completion only**. 
+    - A good college effort is 100%. If you call it in, it's 0%. 
+
+
+
+## At-Home Quizzes
+- Open book, open notes, open Google.  **Anything goes**.
+- Read the quiz notes carefully:
+  - Right answers explain *why* they’re right.
+  - Wrong answers explain *why* they’re wrong.
+- Two attempts per quiz.
+- Review feedback - it is important for the inperson quizzes.
+
+
+
+## In-Class Quizzes
+- Open **your own notes** (typed or handwritten).  
+- No computer, no textbook, no instructor materials.
+- One attempt only.
+- These are (obviously) harder. 
+
+- **First in-class quiz:** right after your return — be prepared!  
+- **Second in-class quiz:** higher stakes — cumulative coverage. Hard, this one exam will have the largest impact on your grade. 
+
+---
+
+## **Assessment Structure Overview**
+
+| Stage | Timing | Access | Learning Goal | 
+|:--|:--|:--|:--|
+| **Exam 1 (In-Class)** | first residency | Own notes only | Baseline conceptual reasoning |
+| **Exam 1R (Take-Home Reflection)** | Immediately after | All resources allowed | Deepen understanding; identify gaps | 
+| **Exam 2 (In-Class)** | Second in-residency | Own notes only | Apply concepts to new but analogous problems | 
+
+## 💡 Why R?
+
+R is a programming language built for **data analysis, reproducibility, and transparency**.  
+
+We use R instead of point-and-click software (like SPSS) because it allows us to:
+
+- **See every analytical step**: code is documentation.  
+- **Reproduce results** easily (important in research and consulting).  
+- **Scale** from simple stats to complex models without changing tools.  
+- **Integrate code + visuals + narrative** (as you see in this document).  
+- **Automate and share** workflows with collaborators.
+
+
+## 📦 Getting Started
+
+```r
+# Install packages if needed
+# install.packages(c("tidyverse", "janitor"))
+
+library(tidyverse)
+library(janitor)
+
+# Load example data
+ames <- read_csv("data/ames.csv") |> clean_names()
+
+# Glimpse structure of the data
+glimpse(ames)
+
+```
+
+
+
+# Closing Thoughts:
+- **Progress**, not **perfection**.
+- Find your own “just right” zone.
+- Don't freak out. 
+

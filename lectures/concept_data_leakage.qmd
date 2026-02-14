@@ -1,0 +1,186 @@
+---
+title: "Data Leakage and Why Pipelines Exist"
+subtitle: "One idea. One mental model. No workflow."
+format:
+  revealjs:
+    slide-number: false
+    incremental: false
+    transition: none
+    center: false
+    margin: 0.05
+    width: 1280
+    height: 720
+    theme: default
+---
+
+## What problem are we solving?
+
+::: columns
+::: column{width="50%"}
+- Models can accidentally learn from information they should not have
+- This makes performance look better than it truly is
+- The error is subtle and often invisible
+- The result is false confidence
+:::
+
+::: column{width="50%"}
+:::
+:::
+
+---
+
+## The core idea
+
+::: columns
+::: column{width="50%"}
+- Information from evaluation data leaks into training
+- The model gains unfair advantage
+- Performance metrics become unreliable
+- The mistake happens *before* modeling
+:::
+
+::: column{width="50%"}
+:::
+:::
+
+---
+
+## The mental model
+
+::: columns
+::: column{width="50%"}
+- Imagine seeing exam answers while studying
+- You still take the exam “honestly”
+- Your score looks excellent
+- But the test no longer measures understanding
+:::
+
+::: column{width="50%"}
+:::
+:::
+
+---
+
+## What data leakage is
+
+::: columns
+::: column{width="50%"}
+- Any use of future or held-out information during training
+- Can occur during cleaning, scaling, or feature creation
+- Often unintentional
+- Always harmful to evaluation
+:::
+
+::: column{width="50%"}
+:::
+:::
+
+---
+
+## Why it’s so dangerous
+
+::: columns
+::: column{width="50%"}
+- The model appears highly accurate
+- Errors are hidden until deployment
+- Decisions are made on bad evidence
+- Failures show up in the real world
+:::
+
+::: column{width="50%"}
+:::
+:::
+
+---
+
+## A common misconception
+
+::: columns
+::: column{width="50%"}
+- Leakage is not “cheating”
+- It does not require bad intent
+- It usually comes from convenience
+- Or from reusing data too early
+:::
+
+::: column{width="50%"}
+:::
+:::
+
+---
+
+## Where leakage comes from
+
+::: columns
+::: column{width="50%"}
+- Looking at all data before splitting
+- Computing statistics on the full dataset
+- Letting test information shape features
+- Blurring the line between learning and evaluation
+:::
+
+::: column{width="50%"}
+:::
+:::
+
+---
+
+## Why pipelines exist
+
+::: columns
+::: column{width="50%"}
+- Pipelines enforce proper data boundaries
+- Each step only sees what it is allowed to see
+- Training and testing stay isolated
+- Structure replaces discipline
+:::
+
+::: column{width="50%"}
+:::
+:::
+
+---
+
+## What pipelines really do
+
+::: columns
+::: column{width="50%"}
+- Prevent accidental information sharing
+- Make evaluation repeatable
+- Reduce human error
+- Protect the integrity of results
+:::
+
+::: column{width="50%"}
+:::
+:::
+
+---
+
+## What this is *not*
+
+::: columns
+::: column{width="50%"}
+- Not about performance tuning
+- Not about automation for speed
+- Not about convenience
+- About honesty in measurement
+:::
+
+::: column{width="50%"}
+:::
+:::
+
+---
+
+## Check point: 
+
+::: columns
+::: column{width="50%"}
+- **Pipelines exist to prevent models from learning what they shouldn’t**
+:::
+
+::: column{width="50%"}
+:::
+:::
+

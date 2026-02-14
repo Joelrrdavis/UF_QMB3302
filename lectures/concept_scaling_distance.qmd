@@ -1,0 +1,201 @@
+---
+title: "Scaling and Distance"
+subtitle: "One idea. One mental model. No workflow."
+format:
+  revealjs:
+    slide-number: false
+    incremental: false
+    transition: none
+    center: false
+    margin: 0.05
+    width: 1280
+    height: 720
+    theme: default
+---
+
+## What problem are we solving?
+
+::: columns
+::: column{width="50%"}
+- Models often rely on the idea of “closeness”
+- But numbers can live on very different scales
+- Large numbers can dominate small ones
+- Distance becomes distorted
+:::
+
+::: column{width="50%"}
+:::
+:::
+
+---
+
+## Why this appears in your code
+
+::: columns
+::: column{width="50%"}
+- You often see a step called “scaling”
+- It shows up before modeling
+- It feels mechanical or mysterious
+- But it exists for a simple reason
+:::
+
+::: column{width="50%"}
+:::
+:::
+
+---
+
+## The core idea
+
+::: columns
+::: column{width="50%"}
+- Many models compare observations using distance
+- Distance assumes numbers are comparable
+- Raw features often are not
+- Scaling makes comparison meaningful
+:::
+
+::: column{width="50%"}
+:::
+:::
+
+---
+
+## The mental model
+
+::: columns
+::: column{width="50%"}
+- Imagine measuring distance using mixed units
+- Inches for one feature
+- Miles for another
+- One dimension overwhelms the rest
+:::
+
+::: column{width="50%"}
+:::
+:::
+
+---
+
+## What “close” means to a model
+
+::: columns
+::: column{width="50%"}
+- “Close” means similar feature values
+- Similarity depends on scale
+- A small numeric change can matter a lot
+- Or not matter at all
+:::
+
+::: column{width="50%"}
+:::
+:::
+
+---
+
+## Why units matter
+
+::: columns
+::: column{width="50%"}
+- Age measured in years
+- Income measured in dollars
+- One ranges from tens
+- The other from thousands
+:::
+
+::: column{width="50%"}
+:::
+:::
+
+---
+
+## What goes wrong without scaling
+
+::: columns
+::: column{width="50%"}
+- Large-scale features dominate distance
+- Small-scale features are ignored
+- The model listens to the loudest variable
+- Not the most informative one
+:::
+
+::: column{width="50%"}
+:::
+:::
+
+---
+
+## What scaling actually does
+
+::: columns
+::: column{width="50%"}
+- Puts features on comparable footing
+- Prevents any one feature from overpowering others
+- Restores balance in distance calculations
+- Makes “closeness” meaningful again
+:::
+
+::: column{width="50%"}
+:::
+:::
+
+---
+
+## Why this must be conceptual
+
+::: columns
+::: column{width="50%"}
+- The math explanation overwhelms beginners
+- The intuition is simple
+- Distance depends on scale
+- Scale determines influence
+:::
+
+::: column{width="50%"}
+:::
+:::
+
+---
+
+## A common misconception
+
+::: columns
+::: column{width="50%"}
+- Scaling does not add information
+- It does not improve data quality
+- It changes how comparisons work
+- Not what the data contains
+:::
+
+::: column{width="50%"}
+:::
+:::
+
+---
+
+## What this is *not*
+
+::: columns
+::: column{width="50%"}
+- Not feature engineering
+- Not normalization for beauty
+- Not required for all models
+- A fix for distance distortion
+:::
+
+::: column{width="50%"}
+:::
+:::
+
+---
+## Check point: 
+
+
+::: columns
+::: column{width="50%"}
+- **Scaling ensures that “distance” reflects meaning, not units**
+:::
+
+::: column{width="50%"}
+:::
+:::

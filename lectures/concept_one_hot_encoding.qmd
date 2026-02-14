@@ -1,0 +1,249 @@
+---
+title: "Concept: One-Hot Encoding"
+subtitle: "One idea. One mental model. No workflow."
+format:
+  revealjs:
+    theme: default
+    slide-number: true
+    embed-resources: true
+    Highlight-style: ../materials/assets/highlight_accessible.theme
+    # Nice-to-have code UX for slides
+    code-line-numbers: true      # add line numbers to all code blocks
+    code-overflow: wrap          # wrap long lines (good for projectors)
+    code-copy: true              # copy-to-clipboard button
+    code-block-bg: true          # subtle background behind code blocks
+    code-block-border-left: "#E69F00"  # UF-amber accent; pick your brand color
+execute:
+  echo: false
+---
+
+## Why This Concept Exists
+
+:::: {.columns}
+::: {.column width="50%"}
+
+
+- Real datasets contain **categorical variables**
+  - neighborhood
+  - product type
+  - category labels
+- Most models only operate on **numbers**
+- We need a way to translate categories **without adding meaning that isn't there**
+
+:::
+
+::: {.column width="50%"}
+
+
+
+:::
+::::
+
+
+## Why This Concept Exists
+
+:::: {.columns}
+::: {.column width="50%"}
+
+
+| Feature        | Raw Value     |
+|----------------|---------------|
+| Neighborhood   | Old Town      |
+| Product Type   | Electronics   |
+| Store Format   | Outlet        |
+
+:::
+
+::: {.column width="50%"}
+
+
+
+:::
+::::
+
+
+---
+
+## The Tempting (But Wrong) Shortcut
+
+
+
+:::: {.columns}
+::: {.column width="50%"}
+
+
+- Assign numbers to categories: (Red = 1, Blue = 2, Green = 3)
+- This creates **fake structure** (order and distance)
+- Models interpret these numbers as meaningful quantities
+
+
+:::
+
+::: {.column width="50%"}
+
+
+
+:::
+::::
+
+
+---
+
+
+## What Goes Wrong When We Do This
+
+:::: {.columns}
+::: {.column width="50%"}
+
+- The model may assume:
+  - Blue (2) is "greater than" Red (1)  
+  - Green (3) is twice as far from Red (1) as Blue (2)  
+- None of this reflects reality  
+- The representation misleads the model  
+
+:::
+
+::: {.column width="50%"}
+<!-- reserved for video (you) -->
+:::
+::::
+
+---
+
+## The Core Idea Behind One-Hot Encoding
+
+:::: {.columns}
+::: {.column width="50%"}
+
+- Replace a single categorical column with **multiple yes/no indicators**  
+- Each indicator answers one question:
+  - Is Color = Red?  
+  - Is Color = Blue?  
+  - Is Color = Green?  
+
+
+:::
+
+::: {.column width="50%"}
+<!-- reserved for video (you) -->
+:::
+::::
+
+---
+
+
+## One-Hot Encoding (Red / Blue / Green)
+
+:::: {.columns}
+::: {.column width="50%"}
+
+| Color | Is Red | Is Blue | Is Green |
+|-------|-------:|--------:|---------:|
+| Red   | 1      | 0       | 0        |
+| Blue  | 0      | 1       | 0        |
+| Green | 0      | 0       | 1        |
+
+:::
+
+::: {.column width="50%"}
+<!-- reserved for video (you) -->
+:::
+::::
+
+---
+
+## What One-Hot Encoding Preserves
+
+:::: {.columns}
+::: {.column width="50%"}
+
+- No ordering between categories  
+- No distance between categories  
+- Equal treatment of all labels  
+- A numeric representation models can safely use  
+
+:::
+
+::: {.column width="50%"}
+<!-- reserved for video (you) -->
+:::
+::::
+
+---
+
+## What Changes in the Dataset
+
+:::: {.columns}
+::: {.column width="50%"}
+
+- Fewer categories → more columns  
+- One categorical variable becomes **several numeric features**  
+- This is a structural change, not a data cleaning step  
+
+The *meaning* of the data is preserved,  
+but the *shape* changes.
+
+:::
+
+::: {.column width="50%"}
+<!-- reserved for video (you) -->
+:::
+::::
+
+---
+
+## Why You Rarely See This Step Directly
+
+:::: {.columns}
+::: {.column width="50%"}
+
+- One-hot encoding is:
+  - tedious to manage manually  
+  - easy to apply inconsistently  
+- Modern workflows **automate** this step  
+
+:::
+
+::: {.column width="50%"}
+<!-- reserved for video (you) -->
+:::
+::::
+
+---
+
+
+## How This Connects to the Main Workflow
+
+:::: {.columns}
+::: {.column width="50%"}
+
+- One-hot encoding is a **translation step**  
+- It happens before modeling  
+- It is part of preprocessing, not model fitting  
+- Usually see it in pipelines (maintains consistency, no data leaks)
+
+:::
+
+::: {.column width="50%"}
+<!-- reserved for video (you) -->
+:::
+::::
+
+---
+
+## Takeaway
+
+:::: {.columns}
+::: {.column width="50%"}
+
+- Categories (often) must be translated into numbers  
+- Assigning numbers directly creates false meaning  
+- One-hot encoding avoids this problem  
+- Pipelines hide the mechanics so you can focus on modeling  
+
+:::
+
+::: {.column width="50%"}
+<!-- reserved for video (you) -->
+:::
+::::

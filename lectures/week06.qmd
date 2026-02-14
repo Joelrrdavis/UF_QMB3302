@@ -1,0 +1,782 @@
+---
+title: Week 6
+subtitle: QMB3302 Foundations of Analytics and AI
+format:
+  metropolis-beamer-revealjs:
+    slide-number: c
+    embed-resources: true
+    # Syntax highlighting theme (pick one: pygments, tango, zenburn, kate, breeze, nord, github, dracula, monokai, etc.)
+    highlight-style: ../materials/assets/highlight_accessible.theme
+    # Nice-to-have code UX for slides
+    code-line-numbers: true      # add line numbers to all code blocks
+    code-overflow: wrap          # wrap long lines (good for projectors)
+    code-copy: true              # copy-to-clipboard button
+    code-block-bg: true          # subtle background behind code blocks
+    code-block-border-left: "#E69F00"  # UF-amber accent; pick your brand color
+author:
+  - name: Joel Davis
+    orcid: 0000-0000-0000-0000
+    email: joel.davis@warrington.ufl.edu
+    affiliations: University of Florida
+bibliography: ../materials/assets/shared_references_courses.bib
+---
+
+
+# An Introduction to Classification
+
+## Classification predicts discrete categories, not continuous values
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- **Definition:** Predict a categorical label (class) for each input.
+- **Regression vs. Classification:**  
+  - Regression → continuous output (e.g., house price = \$250,000).  
+  - Classification → categorical output (e.g., “spam” or “not spam”).
+- The goal is to learn a boundary that separates categories effectively.
+
+::: 
+::: {.column width="50%"} 
+<figure>
+  <img src="../materials/assets/images/cls_intro_regression_vs_classification.png"
+       alt="**Figure:** Simple 2D scatterplot showing regression as a line vs. classification as color-separated regions.">
+  <figcaption>**Figure:** Simple 2D scatterplot showing regression as a line vs. classification as color-separated regions.</figcaption>
+</figure>  
+
+::: 
+::::
+
+
+::: {.notes}
+Introduce the conceptual difference between regression and classification.  
+Regression predicts continuous outcomes, while classification assigns inputs to categories.  
+Use examples like house price (continuous) vs. spam detection (categorical) to anchor intuition.  
+:::
+
+
+
+## Many real-world problems are classification tasks
+
+- **Binary classification examples:**  
+  - Fraud detection (fraud vs. not fraud).  
+  - Customer churn prediction (churn vs. stay).  
+  - Disease diagnosis (positive vs. negative).  
+
+- **Multiclass classification examples:**  
+  - Handwritten digit recognition (0–9).  
+  - Wine quality prediction (low, medium, high).  
+  - Document topic labeling (politics, sports, tech).  
+
+::: {.notes}
+Emphasize how classification pervades business and science.  
+Highlight the difference between binary (two outcomes) and multiclass (more than two outcomes).  
+Students should be able to name one example of each after this slide.  
+:::
+
+---
+
+## Key terminology for classification
+
+:::: {.columns} 
+::: {.column width="50%"} 
+
+- **Classes:** The categories being predicted.  
+- **Decision boundary:** A line or surface that separates classes in feature space.  
+- **Probability threshold:** Converts predicted probabilities to labels (default = 0.5).  
+- **Confusion matrix:** Evaluates how often predictions match true labels.  
+
+::: 
+::: {.column width="50%"} 
+<figure>
+  <img src="../materials/assets/images/cls_key_terms_decision_boundary.png"
+       alt="**Figure:** Simple 2D plot showing decision boundary separating two classes with a 0.5 probability line.">
+  <figcaption>**Figure:** Simple 2D plot showing decision boundary separating two classes with a 0.5 probability line.</figcaption>
+</figure>  
+
+::: 
+::::
+
+
+::: {.notes}
+Define essential vocabulary used throughout the module.  
+Use the visual to explain that the decision boundary corresponds to where model confidence flips (e.g., probability = 0.5).  
+:::
+
+
+## Why not just use linear regression?
+
+:::: {.columns} 
+::: {.column width="50%"} 
+Linear regression assumes **continuous, unbounded outputs**.  
+
+- For categorical responses, predictions can fall **below 0 or above 1**, making them invalid probabilities.  
+- For multiple classes, numeric encoding imposes a **false ordering** (e.g., dog=1, cat=2).  
+
+::: 
+::: {.column width="50%"} 
+<figure>
+  <img src="../materials/assets/images/cls_linear_vs_logistic_probabilities.png"
+       alt="**Figure:** Comparison of regression line crossing probability limits vs. logistic S-curve constrained between 0 and 1.">
+  <figcaption>**Figure:** Comparison of regression line crossing probability limits vs. logistic S-curve constrained between 0 and 1.</figcaption>
+</figure>  
+
+::: 
+::::
+
+
+::: {.notes}
+Set up the motivation for logistic regression by illustrating why linear regression fails conceptually for categorical outcomes.  
+Emphasize that logistic regression is not arbitrary—it’s the proper fix for a bounded probability space.  
+:::
+
+
+# Logistic Regression
+
+## Logistic regression converts continuous scores into probabilities
+
+:::: {.columns} 
+::: {.column width="50%"} 
+
+- Regression predicts unbounded numeric values.  
+- Logistic regression uses the **sigmoid function** to squash predictions between 0 and 1:  
+
+  $$
+  \sigma(z) = \frac{1}{1 + e^{-z}}
+  $$  
+
+- Outputs interpretable probabilities for belonging to the “positive” class.  
+
+::: 
+::: {.column width="50%"} 
+<figure>
+  <img src="../materials/assets/images/logit_sigmoid_curve.png"
+       alt="**Figure:** S-curve of the sigmoid function showing how z < 0 → prob ≈ 0 and z > 0 → prob ≈ 1.">
+  <figcaption>**Figure:** S-curve of the sigmoid function showing how z < 0 → prob ≈ 0 and z > 0 → prob ≈ 1.</figcaption>
+</figure>  
+
+::: 
+::::
+
+ 
+
+::: {.notes}
+Contrast the sigmoid with a linear model’s unbounded line.  
+
+Show how the logistic curve compresses all predictions into [0, 1].  
+
+this transformation enables probability interpretation.  
+:::
+
+
+## Logistic regression models the log-odds of the positive class
+
+:::: {.columns} 
+::: {.column width="60%"} 
+
+- Core equation:  
+
+  $$
+  \log\left(\frac{p}{1-p}\right) = \beta_0 + \beta_1x_1 + \dots + \beta_nx_n
+  $$  
+
+- **Odds:** $p / (1-p)$ — e.g., 0.8 probability → odds = 4 : 1.  
+- Each coefficient $\beta_j$ represents change in **log-odds** per unit of $x_j$.  
+- Exponentiating: $e^{\beta_j}$ = multiplicative change in odds.  
+- Example: if $e^{\beta_1}=1.5$ one-unit increase in $x_1$ multiplies odds by 1.5.  
+
+::: 
+::: {.column width="40%"} 
+
+<figure>
+  <img src="../materials/assets/images/logit_probability_to_logodds_flow.svg"
+       width="85%"
+       alt="Figure: Illustration of probability → odds → log-odds transformations with labeled axes.">
+  <figcaption><strong>Figure:</strong> Illustration of probability → odds → log-odds transformations with labeled axes.</figcaption>
+</figure> 
+
+:::
+
+::::
+
+
+::: {.notes}
+Clarify intuition for odds and log-odds. 
+
+coefficients add linearly in log-odds space, enabling interpretability.  
+  
+:::
+
+
+## Probability thresholds turn model outputs into class predictions
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- Model produces probabilities $p$ for each observation.  
+- **Default threshold:** 0.5 → predict positive if $p > 0.5$.  
+- Lower thresholds → more positives (higher recall).  
+- Higher thresholds → fewer false alarms (higher precision).  
+- Example: fraud detection might use 0.2 to catch more fraud at cost of false positives.  
+
+::: 
+::: {.column width="50%"} 
+<figure>
+  <img src="../materials/assets/images/logit_thresholds_precision_recall.png"
+       alt="**Figure:** Sigmoid curve with varying cutoff thresholds showing how precision/recall trade-off shifts.">
+  <figcaption>**Figure:** Sigmoid curve with varying cutoff thresholds showing how precision/recall trade-off shifts.</figcaption>
+</figure>  
+
+::: 
+::::
+
+
+::: {.notes}
+Use this slide to tie thresholding to business decisions.  
+Show ROC or confusion-matrix snippets conceptually, emphasizing trade-offs.  
+:::
+
+
+## Logistic regression assumes linear decision boundaries
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- The model’s decision boundary is **linear in the features**.  
+- In 2D → a straight line; in higher D → a hyperplane.  
+- Performs well when separation is roughly linear.  
+- Struggles with complex or curved class structures.  
+
+::: 
+::: {.column width="50%"} 
+<figure>
+  <img src="../materials/assets/images/logit_linear_boundary_vs_curved_truth.png"
+       alt="**Figure:** 2D plot comparing a linear decision boundary vs. a curved true separation.">
+  <figcaption>**Figure:** 2D plot comparing a linear decision boundary vs. a curved true separation.</figcaption>
+</figure>  
+
+::: 
+::::
+
+
+::: {.notes}
+show what “linear boundary” means.  
+
+motivation for tree-based and ensemble approaches   
+:::
+
+
+
+## Logistic regression remains the “Hello World” entry way for classification
+
+ 
+<figure>
+  <img src="../materials/assets/images/cls_timeline_logistic_baseline.svg"
+       alt="**Figure:** Timeline showing evolution from logistic regression → trees → ensembles → deep learning, highlighting logistic as baseline.">
+  <figcaption>**Figure:** Timeline showing evolution from logistic regression → trees → ensembles → deep learning, highlighting logistic as a strong baseline. </figcaption>
+</figure>  
+
+::: {.notes}
+logistic regression as a conceptual bridge: simple yet powerful.  
+
+view it as the benchmark for model interpretability and performance comparison.  
+:::
+
+# Decision Trees
+
+
+
+## Decision trees classify by asking a sequence of questions
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- Each path from root to leaf = **human-readable rule**.  
+- **Root node:** Starting point where data is first split.  
+- **Decision nodes (branches):** Internal nodes that apply feature-based rules.  
+- **Leaf nodes:** Final outcomes or predictions.  
+- Example: “Age < 50?” → branch → “Churn” or “Stay.”  
+
+::: 
+::: {.column width="50%"} 
+<figure>
+  <img src="../materials/assets/images/tree_structure_example_light.svg"
+       alt="**Figure:** A Tree diagram showing nodes splitting by “Age < 50” and “Income < 40K.” Leaves (last boxes) are labeled with the predicted classes.">
+  <figcaption>**Figure:** A Tree diagram showing nodes splitting by “Age < 50” and “Income < 40K.” Leaves (last boxes) are labeled with the predicted classes.</figcaption>
+</figure> 
+
+::: 
+::::
+
+
+::: {.notes}
+Introduce tree structure as a sequence of if-then rules.  
+Use an intuitive example — customer churn or loan approval — to make the hierarchy tangible.  
+Explain how each split partitions the data to improve purity.  
+:::
+
+
+## Trees split data to increase node purity
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- **Splitting metrics:** quantify how “mixed” classes are in a node.  
+- **Gini impurity:** $1 - \sum p_i^2$  
+- **Entropy:** $-\sum p_i \log(p_i)$  
+- Lower impurity → better separation.  
+
+(check the default in your program if concerned: scikit-learn defaults to **Gini**, but both work similarly.)  
+
+
+::: 
+::: {.column width="50%"} 
+<figure>
+  <img src="../materials/assets/images/tree_node_impurity_comparison.png"
+       alt="**Figure:** Two bar charts comparing high-impurity vs. low-impurity node class proportions.">
+  <figcaption>**Figure:** Two bar charts comparing high-impurity vs. low-impurity node class proportions.</figcaption>
+</figure>  
+
+::: 
+::::
+
+
+::: {.notes}
+
+both Gini and entropy measure class disorder.  
+
+decision trees greedily choose splits minimizing impurity.  
+:::
+
+
+## Trees can overfit easily — regularization controls complexity
+
+- Deep trees can memorize training data → **high variance**.  
+- Shallow trees may underfit → **high bias**.  
+- Key controls:  
+  - `max_depth` — limit number of levels.  
+  - `min_samples_split`, `min_samples_leaf` — ensure each node has enough data.  
+- Goal: find the sweet spot between underfitting and overfitting.  
+
+
+::: {.notes}
+Emphasize interpretability vs. generalization trade-off.  
+ 
+:::
+
+
+# Ensemble Methods: Random Forest and XGBoost  
+
+
+## Ensembles strengthen weak learners into robust predictors
+
+- Single decision trees are **unstable**:  small data changes can lead to big differences.  
+- Ensembles combine **many weak learners** to form a stronger, more stable model.  
+- Benefits:  
+  - Reduce variance and overfitting.  
+  - Improve accuracy and robustness.  
+  - Generalize better to unseen data.  
+
+
+::: {.notes}
+
+motivation for ensembles - the idea of “wisdom of the crowd.”  
+
+Contrast the instability of a single tree with the stability of aggregated predictions.  
+
+Emphasize how ensemble learning reduces variance while maintaining flexibility.  
+:::
+
+
+## Random Forest combines results from many decorrelated trees via **majority vote** (classification) or **averaging** (regression).
+
+<figure>
+  <img src="../materials/assets/images/rf_bagging_majority_vote.png"
+       alt="**Figure:** Multiple smaller trees trained on different bootstrap samples, voting on final class. Effect: more stable, less prone to overfitting.">
+  <figcaption>**Figure:** Multiple smaller trees trained on different bootstrap samples, voting on final class. Effect: more stable, less prone to overfitting.</figcaption>
+</figure>  
+
+
+
+::: {.notes}
+mechanics of bagging — bootstrap resampling + aggregation.  
+
+feature randomness reduces correlation between trees.  
+
+Random Forest balances bias and variance better than a single tree.  
+:::
+
+
+## Random Forest strengths and limitations
+
+
+| **Strengths** | **Limitations** |
+|---------------|-----------------|
+| High accuracy on many tabular datasets | Less interpretable (ensemble of many trees) |
+| Reduces variance through bagging | Larger memory footprint |
+| Robust to overfitting compared to a single tree | Slower inference than a single tree |
+| Handles nonlinear relationships naturally | Can still overfit if trees are very deep |
+| Works well with imbalanced data (class weights) | Fewer mechanisms for bias reduction |
+| Highly parallelizable |  |
+
+
+
+::: {.notes}
+
+- **Strengths:**  
+  - Handles nonlinearities and interactions automatically.  
+  - Robust to noise and outliers.  
+  - Works well with both numeric and categorical data.  
+
+- **Limitations:**  
+  - Less interpretable than individual trees.  
+  - Large ensembles can slow prediction and require more memory.  
+  - Tuning can still impact performance (e.g., number of trees, features).  
+
+:::
+
+
+## XGBoost builds trees **sequentially**, each correcting errors of the previous.  
+
+<figure>
+  <img src="../materials/assets/images/XGB_boosting_sequence2.svg"
+       alt="**Figure:** Illustration of sequential boosting — each tree focusing on the remaining errors of the previous one.">
+  <figcaption>**Figure:** Illustration of sequential boosting. Each tree focusing on the remaining errors of the previous one.</figcaption>
+</figure>  
+
+::: {.notes}
+Differentiate boosting from bagging: boosting is sequential, not parallel.  
+Highlight that XGBoost builds small corrective trees — not deep trees.  
+Explain that gradient descent optimizes the residual errors between rounds. 
+
+Emphasizes misclassified examples or high-residual cases.  
+Key features:  
+
+Gradient boosting with regularization (penalizes complex trees).  
+
+Handles missing data automatically.  
+
+Supports **class imbalance** with weighted loss.  
+
+:::
+
+
+## Strengths and limitations of XGBoost
+
+
+| **Strengths** | **Limitations** |
+|---------------|-----------------|
+| Often state-of-the-art for tabular data | More sensitive to hyperparameters |
+| Reduces bias via sequential error correction | Can overfit if learning rate/depth not controlled |
+| Built-in regularization (L1/L2) | Requires careful tuning |
+| Handles missing values natively | Training is sequential (less parallel than RF) |
+| Strong performance with engineered features | More complex to interpret |
+| Efficient optimized implementation |  |
+
+
+::: {.notes}
+
+**Strengths:**  
+State-of-the-art performance on many datasets (Kaggle, industry).  
+Regularization reduces overfitting risk.  
+Highly tunable and fast implementation.  
+
+**Limitations:**  
+Less interpretable — many small trees make decision logic opaque.  
+Sensitive to hyperparameters like learning rate and depth.  
+Can overfit if learning rate is too high or trees too deep.  
+
+Emphasize XGBoost’s popularity and practical dominance in competitions.  
+Warn students about overfitting and the need for careful tuning.  
+Mention that interpretability tools (e.g., SHAP) can help understand results.  
+:::
+
+
+## Random Forest vs. XGBoost — when to use each
+
+- **Random Forest:**  
+  - General-purpose, stable, strong out-of-box performance.  
+  - Low tuning effort, moderate interpretability.  
+
+- **XGBoost:**  
+  - Better for complex or imbalanced datasets.  
+  - Higher accuracy when tuned carefully.  
+  - Strong choice for performance-critical systems.  
+
+
+::: {.notes}
+Contrast “parallel averaging” (RF) vs. “sequential correction” (XGB) paradigms.  
+Give domain examples:  
+- RF for customer churn or marketing response.  
+- XGB for fraud detection or credit scoring.  
+:::
+
+## Random Forest vs. XGBoost — Visual comparison
+
+<figure>
+  <img src="../materials/assets/images/rf_vs_xgb_comparison2.svg"
+       alt="**Figure:** Comparison chart — RF: parallel averaging vs. XGB: sequential correction.">
+  <figcaption>**Figure:** Comparison chart. RF: parallel averaging vs. XGB: sequential correction.</figcaption>
+</figure>  
+
+::: {.notes}
+visual comparison of two approaches
+:::
+
+# Evaluation Metrics for Classification  
+
+
+## Accuracy alone rarely tells the full story
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- **Accuracy:** % of correct predictions.  
+- Works well **only when classes are balanced**.  
+- Example:  95% accuracy sounds good, but in fraud detection (1% fraud), a model that always predicts “not fraud” achieves 99%.  
+- Key idea: high accuracy ≠ good performance.  
+
+
+::: 
+::: {.column width="50%"} 
+<figure>
+  <img src="../materials/assets/images/metrics_accuracy_fallacy.png"
+       alt="**Figure:** An “always negative” model achieving high accuracy but zero recall.">
+  <figcaption>**Figure:** An “always negative” model achieving high accuracy but zero recall.</figcaption>
+</figure>  
+
+::: 
+::::
+
+
+::: {.notes}
+Start by challenging the assumption that high accuracy equals good performance.  
+Use an example where the majority class dominates (e.g., 99% “not fraud”).  
+Lead into why we need **precision** and **recall** to diagnose classifier quality.  
+:::
+
+
+## Precision, recall, and F1-score clarify performance trade-offs
+
+- **Precision:**  
+  - Of all predicted positives, how many are correct? Formula: $\text{Precision} = \frac{TP}{TP + FP}$  
+  - Important when **false positives** are costly (e.g., flagging legit transactions).  
+
+- **Recall (Sensitivity):**  
+  - Of all actual positives, how many did we capture? Formula: $\text{Recall} = \frac{TP}{TP + FN}$  
+  - Important when **false negatives** are costly (e.g., missing real fraud).  
+
+- **F1-score:**  
+  - Harmonic mean of precision and recall.  
+  - Balances the two when both matter.  
+
+
+::: {.notes}
+Use intuitive metaphors — e.g., “precision = of what we caught, how many were real; recall = of what was real, how many did we catch.”  
+Explain why the F1-score combines both as a balanced metric.  
+:::
+
+
+## The confusion matrix shows all four types of outcomes
+
+
+<figure>
+  <img src="../materials/assets/images/confusion_matrix_light.svg"
+       alt="**Figure:** 2×2 confusion matrix diagram with labels for TP, FP, FN, TN.">
+  <figcaption>**Figure:** 2×2 confusion matrix diagram with labels for TP, FP, FN, TN.</figcaption>
+</figure>  
+
+::: {.notes}
+
+- **Layout:**  
+  - Rows = actual classes.  
+  - Columns = predicted classes.  
+- **Cells:**  
+  - TP (true positive): correctly predicted positive.  
+  - TN (true negative): correctly predicted negative.  
+  - FP (false positive): predicted positive, actually negative.  
+  - FN (false negative): predicted negative, actually positive.  
+
+
+Clarify which type of error corresponds to which business consequence.  
+Show that confusion matrices are the foundation for all other metrics.  
+:::
+
+
+## ROC curves reveal model ranking quality across thresholds
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- **ROC curve:** plots **True Positive Rate (Recall)** vs. **False Positive Rate (1 − Specificity)** across thresholds.  
+- **AUC (Area Under Curve):** overall measure of ranking performance.  
+  - AUC = 0.5 → random guessing.  
+  - AUC = 1.0 → perfect classifier.  
+- Benefit: **threshold-independent** evaluation.  
+
+::: 
+::: {.column width="50%"} 
+<figure>
+  <img src="../materials/assets/images/metrics_roc_curve.png"
+       alt="**Figure:** ROC curve with diagonal “random” line and high-performing curve above it.">
+  <figcaption>**Figure:** ROC curve with diagonal “random” line and high-performing curve above it.</figcaption>
+</figure>  
+
+::: 
+::::
+
+
+::: {.notes}
+Explain that ROC curves visualize how well a model separates classes across all thresholds.  
+AUC summarizes performance regardless of specific decision threshold.  
+Optional: mention ISLR Figure 4.7 for reference.  
+:::
+
+
+## Precision–recall curve: trade-off depends on chosen threshold
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- **Lower threshold:** higher recall, lower precision.  
+- **Higher threshold:** higher precision, lower recall.  
+- Example: fraud detection → lower threshold to catch all suspicious cases.  
+- Visualization: **precision–recall curve**.  
+
+::: 
+::: {.column width="50%"} 
+<figure>
+  <img src="../materials/assets/images/metrics_precision_recall_curve.png"
+       alt="**Figure:** Precision–recall curves show how threshold movement changes trade-off.">
+  <figcaption>**Figure:** Precision–recall curves show how threshold movement changes trade-off.</figcaption>
+</figure>  
+
+::: 
+::::
+
+::: {.notes}
+adjusting thresholds changes business outcomes.  
+ 
+ 
+:::
+
+
+## Matching metrics to real-world context
+
+- **High precision preferred:** Email spam filters (avoid blocking important mail).  
+- **High recall preferred:** Medical screening (catch every possible case).  
+- **F1-score:** Balanced need for both precision and recall.  
+- Key idea: **metric choice = context choice**, not math choice.  
+
+::: {.notes}
+Summarize metric trade-offs with relatable cases.  
+Reinforce that “best metric” depends on organizational cost structure and tolerance for errors.  
+:::
+
+
+## Cost-sensitive thresholding aligns models with business goals
+
+- Not all errors are equal: Çost matters.  
+- Example:  
+  - Missing fraud (false negative) costs more than false alarm (false positive).  
+  - Lowering threshold increases recall but increases false alarms.  
+- The decision rule is part of **business strategy**, not just modeling.  
+
+
+::: {.notes}
+Introduce cost-based thinking — thresholds as levers for business alignment.  
+Encourage students to discuss real organizational examples where recall vs. precision priorities differ.  
+:::
+
+
+
+# Model Tuning and Validation  
+
+
+
+## Cross-validation improves confidence in model performance
+
+:::: {.columns} 
+::: {.column width="50%"} 
+
+Same principle as regression: use multiple train/validation splits to assess generalization.  
+
+**Stratified k-fold** is generally preferred in classification: keeps class ratios consistent across folds.  
+
+::: 
+::: {.column width="50%"} 
+<figure>
+  <img src="../materials/assets/images/cv_stratified_kfold_light.svg"
+       alt="**Figure:** Diagram showing data split into folds, cycling through training and validation.">
+  <figcaption>**Figure:** Diagram showing data split into folds, cycling through training and validation.</figcaption>
+</figure>  
+
+::: 
+::::
+
+
+::: {.notes}
+single train-test splits can be misleading, especially for small or imbalanced datasets.  
+Demonstrate stratified k-fold visually — emphasize preserving class balance.  
+Remind students that cross-validation measures stability, not just accuracy.  
+:::
+
+
+## Classification models have key hyperparameters. Grid search systematically tunes these, testing for the best combination via cross- validation. 
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- **Decision Trees:** `max_depth`, `min_samples_split`.  
+- **Random Forest:** `n_estimators`, `max_features`.  
+- **XGBoost:** `learning_rate`, `max_depth`, `subsample`.  
+- **Trade-off:** computational cost vs. thoroughness.  
+
+::: 
+::: {.column width="50%"} 
+<figure>
+  <img src="../materials/assets/images/tuning_grid_search_heatmap.png"
+       alt="**Figure:** Grid search heatmap visual showing accuracy across combinations of hyperparameters.">
+  <figcaption>**Figure:** Grid search heatmap visual showing accuracy across combinations of hyperparameters.</figcaption>
+</figure> 
+
+::: 
+::::
+
+
+::: {.notes}
+Show the idea of evaluating performance across a grid of parameters.  
+Contrast brute-force grid search with more efficient methods (e.g., random search, Bayesian optimization).  
+Stress that the best settings are those that generalize — not just those with highest training accuracy.  
+:::
+---
+
+## Diagnosing overfitting, underfitting, and imbalance
+
+- **Overfitting:**  
+  - Training accuracy ≫ validation accuracy.  
+  - Fix: reduce model complexity, use regularization, or gather more data.  
+
+- **Underfitting:**  
+  - Both training and validation performance are poor.  
+  - Fix: increase model complexity, add features, or try flexible models.  
+
+- **Class imbalance:**  
+  - Model predicts majority class well but misses minority class.  
+  - Fix: use class weights, resampling, or metrics like F1 and AUC.  
+
+
+::: {.notes}
+Explain the bias–variance connection using overfit/underfit graphs.  
+Discuss how imbalance can mislead accuracy metrics — tie back to Section 3.6.  
+Encourage diagnosing using learning curves and confusion matrices.  
+:::
+
+
+## Tuning is an iterative process, not a destination
+
+- Goal: **generalization**, not perfection.  
+- Tuning is about **balancing**:  
+  - Complexity vs. interpretability.  
+  - Accuracy vs. robustness.  
+- No “best” model. Only models that perform well **for a given context**.  
+
+
+::: {.notes}
+tuning is iterative exploration, not final optimization.  
+Encourage experimentation, documentation, and reproducibility in workflow.  
+Tie this section back to the “exploration” theme of your overall teaching approach.  
+:::
+
+
+

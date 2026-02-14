@@ -1,0 +1,1507 @@
+---
+title: "Gateway Technical"
+subtitle: "Supervised Learning – Classification"
+format: 
+  pptx:
+    reference-doc: ../../materials/assets/template_fixed2.pptx
+
+#author:
+#  - name: Joel Davis
+#    email: joel.davis@warrington.ufl.edu
+#    affiliations:
+#      - University of Florida
+
+#license: "CC BY"
+
+bibliography: ../../materials/assets/shared_references_courses.bib
+csl: ../../materials/assets/apa.csl
+---
+
+
+# 3.1 An Introduction to Classification
+
+## Classification predicts discrete categories, not continuous values
+
+- **Definition:** Predict a categorical label (class) for each input.
+- **Regression vs. Classification:**  
+  - Regression → continuous output (e.g., house price = \$250,000).  
+  - Classification → categorical output (e.g., “spam” or “not spam”).
+- The goal is to learn a boundary that separates categories effectively.
+
+--
+
+<figure>
+  <img src="../materials/assets/images/cls_intro_regression_vs_classification.png"
+       alt="**Figure:** Simple 2D scatterplot showing regression as a line vs. classification as color-separated regions.">
+  <figcaption>**Figure:** Simple 2D scatterplot showing regression as a line vs. classification as color-separated regions.</figcaption>
+</figure>  
+
+::: {.notes}
+
+### Detailed Notes
+- Define the task crisply, given features \(X \in \mathbb{R}^d\), predict a class label \(Y \in \{1,\dots,K\}\).
+- Contrast with regression, regression targets \(Y \in \mathbb{R}\), classification targets a finite set of categories.
+- Emphasize the geometric view, a classifier induces **regions** of feature space, separated by a **decision boundary** where class preference flips.
+- Use the figure to anchor intuition, show a line for regression output and colored regions for class membership.
+- Invite a short think-pair-share, ask learners to propose one binary and one multiclass example from their domain.
+
+### DEEPER DIVE
+In supervised learning, classification problems concern the prediction of discrete outcomes, typically drawn from a finite set of possible classes. Formally, a classifier is a function \( h: \mathcal{X} \rightarrow \mathcal{Y} \) that maps an input vector \(x \in \mathbb{R}^d\) to a class label \(y \in \{1, \dots, K\}\). The optimal classifier under zero-one loss is the **Bayes classifier**, which assigns each input to the class with the highest conditional probability,  
+\[
+h^*(x) = \arg\max_{k} P(Y = k \mid X = x).
+\]
+The error associated with this optimal classifier, known as the **Bayes error rate**, defines a theoretical lower bound on classification performance given inherent noise or class overlap in the data.  
+
+Classification models can be viewed through both probabilistic and geometric lenses. Probabilistically, they estimate \(P(Y = k \mid X)\) and choose the most probable class; geometrically, they partition the input space into regions delineated by **decision boundaries** — surfaces where competing class probabilities are equal. For linearly separable data, these boundaries are hyperplanes; for more complex distributions, they may take nonlinear or highly irregular forms.  
+
+A central challenge in classification is that minimizing empirical zero-one loss is computationally intractable. In practice, algorithms use **surrogate losses** — differentiable, convex functions that approximate the zero-one objective while maintaining consistency with the Bayes rule. Logistic regression, support vector machines, and neural networks each rely on different surrogates (logistic, hinge, and cross-entropy losses, respectively) that balance mathematical tractability and classification accuracy.  
+
+:::
+---
+
+## Many real-world problems are classification tasks
+
+- **Binary classification examples:**  
+  - Fraud detection (fraud vs. not fraud).  
+  - Customer churn prediction (churn vs. stay).  
+  - Disease diagnosis (positive vs. negative).  
+
+- **Multiclass classification examples:**  
+  - Handwritten digit recognition (0–9).  
+  - Wine quality prediction (low, medium, high).  
+  - Document topic labeling (politics, sports, tech).  
+
+::: {.notes}
+
+### Detailed Notes
+- Enumerate binary versus multiclass examples that resonate with your learners’ domains, finance, health, operations, marketing, security.
+- Ask learners to label one **positive class** they care about and articulate the **cost** of false negatives versus false positives.
+- Reinforce that task framing determines metric priorities and threshold policy.
+
+### DEEPER DIVE
+Classification is one of the most widely used paradigms in applied machine learning, underpinning decision systems across domains as diverse as healthcare, marketing, finance, and cybersecurity. Problems such as fraud detection, disease diagnosis, and spam filtering share a common structure: the system must categorize an incoming instance based on observed features and prior examples.  
+
+Binary classification handles tasks with two possible outcomes, such as “fraud” vs. “legitimate” or “churn” vs. “retain.” When there are more than two possible outcomes, as in handwritten digit recognition (0–9) or image tagging, the problem extends to **multiclass classification**. More complex still is **multilabel classification**, where instances can belong to multiple categories simultaneously — as in predicting multiple topics for a single document.  
+
+In real-world applications, class distributions are rarely balanced. Fraud cases, for example, may represent less than 1% of all transactions. Such **class imbalance** means that simple metrics like accuracy become misleading — a model predicting all cases as the majority class may appear highly accurate yet be useless in practice. Evaluation must therefore focus on **recall**, **precision**, or **cost-weighted metrics** that reflect the asymmetry in error consequences.  
+
+Classification systems also face **dataset shift**, where the relationship between features and labels changes over time. Common variants include **covariate shift** (the distribution of \(X\) changes), **prior probability shift** (the marginal \(P(Y)\) changes), and **concept drift** (the conditional \(P(Y|X)\) changes). Robust systems must monitor these shifts continuously, recalibrating thresholds or retraining models to maintain decision integrity.  
+
+:::
+
+---
+
+## Key terminology for classification
+
+- **Classes:** The categories being predicted.  
+- **Decision boundary:** A line or surface that separates classes in feature space.  
+- **Probability threshold:** Converts predicted probabilities to labels (default = 0.5).  
+- **Confusion matrix:** Evaluates how often predictions match true labels.  
+
+--
+
+<figure>
+  <img src="../materials/assets/images/cls_key_terms_decision_boundary.png"
+       alt="**Figure:** Simple 2D plot showing decision boundary separating two classes with a 0.5 probability line.">
+  <figcaption>**Figure:** Simple 2D plot showing decision boundary separating two classes with a 0.5 probability line.</figcaption>
+</figure>  
+
+::: {.notes}
+
+### Detailed Notes
+- Define **classes**, **decision boundary**, **probability threshold**, and **confusion matrix** in precise, instructor friendly language.
+- Use the figure to show that the decision boundary coincides with points where the model is indifferent between classes, for a binary probabilistic model this is where \(P(Y=1\mid X)=0.5\) if costs are equal.
+- Plant the idea that the threshold is a policy choice informed by costs and prevalence, not a fixed constant.
+
+### DEEPER DIVE
+Every classification problem can be analyzed in terms of its **decision function**, **thresholding rule**, and **evaluation outcomes**. For binary probabilistic models, the decision function typically produces a continuous score \( s(x) \) — for instance, the log-odds in logistic regression. This score is converted to a discrete prediction using a threshold \( t \):  
+\[
+\hat{y} =
+\begin{cases}
+1, & \text{if } s(x) > t, \\
+0, & \text{otherwise.}
+\end{cases}
+\]
+If the model produces probabilities \( p(x) = P(Y=1|X=x) \), the default threshold \( t=0.5 \) corresponds to the point of maximum uncertainty, but the optimal threshold depends on class prevalence and the cost of misclassification.  
+
+The **decision boundary** is the locus of points in feature space where competing classes are equally probable — that is, where \( P(Y=1|X) = P(Y=0|X) \). In two dimensions, this appears as a line; in higher dimensions, it generalizes to a hyperplane or nonlinear manifold.  
+
+Performance evaluation relies on the **confusion matrix**, a 2×2 table summarizing true positives (TP), false positives (FP), false negatives (FN), and true negatives (TN). From these counts derive key diagnostic metrics such as **precision**, **recall**, **specificity**, **F1-score**, and **accuracy**. Together, these metrics characterize a model’s ability to discriminate between classes and to balance competing types of error.  
+
+Beyond accuracy, classification models should be **well-calibrated**, meaning that predicted probabilities correspond to empirical frequencies. For example, among cases predicted to have a 0.2 probability of being positive, roughly 20% should indeed be positive. Calibration ensures that the model’s outputs can be interpreted as reliable risk scores, a prerequisite for cost-sensitive decision-making.  
+
+:::
+---
+
+## Examples of classification problems
+
+- **Fraud detection:** Predict probability of a transaction being fraudulent.  
+- **Email spam filtering:** Classify messages as spam or legitimate.  
+- **Customer churn:** Identify users most likely to cancel or leave.  
+- **Medical diagnosis:** Detect presence or absence of a condition.  
+
+
+::: {.notes}
+
+### Detailed Notes
+- Connect each example to a practical objective and a likely metric focus, fraud detection emphasizes recall at controlled precision, spam filtering emphasizes precision, churn emphasizes lift in the top deciles.
+- Use quick anecdotes to frame stakes and error costs, a missed fraud versus an unnecessary review, a missed cancer screening versus an unnecessary test.
+
+### DEEPER DIVE
+Applications of classification vary widely but share a unifying goal: to support decision-making under uncertainty by estimating the likelihood of discrete outcomes.  
+
+In **fraud detection**, the model predicts the probability that a transaction is fraudulent. Because fraudulent cases are rare, maximizing recall is critical even if it increases false positives. The task often involves continuous monitoring and adaptive retraining to handle adversarial behavior or evolving fraud patterns.  
+
+**Spam filtering** prioritizes precision over recall. False positives — legitimate emails flagged as spam — are highly visible to users and erode trust, whereas missed spam messages are a lesser inconvenience. Modern filters therefore use ensemble models and adaptive thresholds to maintain high precision.  
+
+In **customer churn prediction**, classification models identify customers likely to leave a service. However, prediction alone is insufficient; actionable insights require connecting predictions to interventions. The true objective is to identify customers whose behavior can be changed by retention offers, making **uplift modeling** or causal inference methods more appropriate extensions.  
+
+**Medical diagnosis** represents perhaps the most consequential form of classification. In early-stage screening, models prioritize sensitivity to minimize missed cases, even if it increases false positives. In confirmatory testing, the focus reverses toward precision and specificity. Ethical and regulatory considerations require transparency in feature use, interpretability of decision logic, and ongoing calibration monitoring to detect drift over time.  
+
+Across these contexts, the interplay between statistical performance and decision utility defines success more clearly than accuracy alone.  
+
+:::
+
+---
+
+## Why not just use linear regression?
+
+Linear regression assumes **continuous, unbounded outputs**.  
+
+- For categorical responses, predictions can fall **below 0 or above 1**, making them invalid probabilities.  
+- For multiple classes, numeric encoding imposes a **false ordering** (e.g., dog=1, cat=2).  
+
+--
+
+<figure>
+  <img src="../materials/assets/images/cls_linear_vs_logistic_probabilities.png"
+       alt="**Figure:** Comparison of regression line crossing probability limits vs. logistic S-curve constrained between 0 and 1.">
+  <figcaption>**Figure:** Comparison of regression line crossing probability limits vs. logistic S-curve constrained between 0 and 1.</figcaption>
+</figure>  
+
+::: {.notes}
+
+### Detailed Notes
+- Show the failure modes directly, linear regression can produce values below 0 and above 1 for a Bernoulli target, which cannot be interpreted as probabilities.
+- Explain that encoding classes as 0 and 1 and fitting least squares implicitly assumes constant variance Gaussian noise, which is inappropriate for Bernoulli outcomes.
+- Use the figure to compare an unbounded line with a bounded logistic S curve and to motivate logistic regression as the principled fix.
+
+### DEEPER DIVE
+Linear regression is ill-suited for categorical outcomes because its predictions are unbounded and rely on assumptions inconsistent with discrete probability models. When applied to binary data, the linear model assumes that \(Y \in \{0,1\}\) arises from a Gaussian process with constant variance, an assumption that fails since the variance of a Bernoulli variable depends on its mean, \( \text{Var}(Y|X) = p(1-p) \).  
+
+To properly model binary responses, one must adopt a **Generalized Linear Model (GLM)** framework, which links the mean of the response variable to a linear predictor through a **link function**. In the case of logistic regression, this link is the **logit**:
+\[
+\log\left(\frac{p(x)}{1 - p(x)}\right) = \beta_0 + \beta^T x.
+\]
+The logit transformation maps probabilities in \((0,1)\) to the entire real line, ensuring that predicted probabilities remain bounded between 0 and 1 after applying the inverse transformation:
+\[
+p(x) = \frac{1}{1 + e^{-(\beta_0 + \beta^T x)}}.
+\]
+This yields a model that is both interpretable and statistically coherent. Coefficients \(\beta_j\) describe additive effects on the log-odds of the positive class, and exponentiated coefficients \(e^{\beta_j}\) correspond to multiplicative changes in the odds, a property that supports clear inferential interpretation.  
+
+Beyond correcting the range of predictions, the logistic model introduces a proper probabilistic foundation for inference and evaluation. Because it is estimated by **maximum likelihood**, it provides confidence intervals, hypothesis tests, and model comparison tools (e.g., deviance, AIC, likelihood ratio tests). Moreover, logistic loss is a **proper scoring rule**, meaning that it encourages truthful probability estimates — an essential property for calibration and cost-sensitive decision-making.  
+
+The logistic function’s S-shaped curve visually encapsulates the notion of **saturation**: extreme inputs lead to near-certain predictions, while intermediate values remain uncertain. This captures many real-world relationships where risk transitions gradually, not linearly, with predictors.
+:::
+---
+
+# 3.2 Logistic Regression
+
+## Logistic regression converts continuous scores into probabilities
+
+- Regression predicts unbounded numeric values.  
+- Logistic regression uses the **sigmoid function** to squash predictions between 0 and 1:  
+
+  $$
+  \sigma(z) = \frac{1}{1 + e^{-z}}
+  $$  
+
+- Outputs interpretable probabilities for belonging to the “positive” class.  
+
+--
+
+<figure>
+  <img src="../materials/assets/images/logit_sigmoid_curve.png"
+       alt="**Figure:** S-curve of the sigmoid function showing how z < 0 → prob ≈ 0 and z > 0 → prob ≈ 1.">
+  <figcaption>**Figure:** S-curve of the sigmoid function showing how z < 0 → prob ≈ 0 and z > 0 → prob ≈ 1.</figcaption>
+</figure>  
+
+::: {.notes}
+### Detailed Notes
+- Regression predicts unbounded numeric values.  
+- Logistic regression uses the **sigmoid function** to squash predictions between 0 and 1:  
+
+  $$
+  \sigma(z) = \frac{1}{1 + e^{-z}}
+  $$  
+
+- Outputs interpretable probabilities for belonging to the “positive” class.  
+
+### DEEPER DIVE
+The key innovation of logistic regression lies in transforming an unbounded linear predictor into a value interpretable as a probability.  
+In ordinary linear regression, predictions are unconstrained, potentially taking values below 0 or above 1. Logistic regression introduces a **link function**—the logistic or *sigmoid* function—to ensure that all predictions lie strictly within the unit interval \([0,1]\).  
+
+The transformation is defined as:
+\[
+\sigma(z) = \frac{1}{1 + e^{-z}},
+\]
+where \(z = \beta_0 + \beta^T x\) is a linear combination of features. The resulting S-shaped curve, or **sigmoid**, maps large negative values of \(z\) toward 0 and large positive values toward 1, with \(z = 0\) corresponding to a probability of 0.5.  
+
+This monotonic transformation has an elegant probabilistic interpretation. Logistic regression assumes that the log-odds of the positive outcome are linear in the predictors:
+\[
+\log\left(\frac{p}{1-p}\right) = \beta_0 + \beta^T x.
+\]
+Applying the inverse transformation yields the familiar logistic equation.  
+This property makes logistic regression both a **generalized linear model (GLM)** and a foundational bridge between classical statistics and modern machine learning. It captures nonlinear relationships in the probability space while retaining interpretability and convex optimization properties in the parameter space (McCullagh & Nelder, 1989).  
+
+**References**  
+- McCullagh, P., & Nelder, J. A. (1989). *Generalized Linear Models* (2nd ed.). Chapman & Hall.  
+- Menard, S. (2010). *Logistic Regression: From Introductory to Advanced Concepts and Applications*. Sage.  
+
+:::
+---
+
+## Logistic regression models the log-odds of the positive class
+
+- Core equation:  
+
+  $$
+  \log\left(\frac{p}{1-p}\right) = \beta_0 + \beta_1x_1 + \dots + \beta_nx_n
+  $$  
+
+- **Odds:** $p / (1-p)$ — e.g., 0.8 probability → odds = 4 : 1.  
+- Each coefficient $\beta_j$ represents change in **log-odds** per unit of $x_j$.  
+- Exponentiating: $e^{\beta_j}$ = multiplicative change in odds.  
+- Example: if $e^{\beta_1}=1.5$ one-unit increase in $x_1$ multiplies odds by 1.5.  
+
+--
+
+
+<figure>
+  <img src="../materials/assets/images/logit_probability_to_logodds_flow.svg"
+       alt="Figure: Illustration of probability → odds → log-odds transformations.">
+  <figcaption>Figure: Illustration of probability → odds → log-odds transformations.</figcaption>
+</figure>
+
+
+::: {.notes}
+### Detailed Notes
+- Core equation:  
+
+  $$
+  \log\left(\frac{p}{1-p}\right) = \beta_0 + \beta_1x_1 + \dots + \beta_nx_n
+  $$  
+
+- **Odds:** \(p / (1-p)\) — e.g., 0.8 probability → odds = 4 : 1.  
+- Each coefficient \(\beta_j\) represents change in **log-odds** per unit of \(x_j\).  
+- Exponentiating: \(e^{\beta_j}\) = multiplicative change in odds.  
+- Example: if \(e^{\beta_1}=1.5\), one-unit increase in \(x_1\) multiplies odds by 1.5.  
+
+### DEEPER DIVE
+Logistic regression expresses the relationship between predictors and outcome in terms of **odds**—the ratio of the probability of an event occurring to the probability of it not occurring.  
+If \(p = P(Y=1|X)\), then the odds are \(p/(1-p)\). Taking the logarithm of these odds yields the **log-odds**, or **logit**, a transformation that maps the unit interval \((0,1)\) onto the real line \((-\infty, \infty)\).  
+
+The model assumes that these log-odds vary linearly with the input features:
+\[
+\log\left(\frac{p}{1-p}\right) = \beta_0 + \beta_1x_1 + \dots + \beta_nx_n.
+\]
+Each coefficient \(\beta_j\) quantifies the change in the log-odds of the positive class associated with a one-unit increase in \(x_j\), holding all other variables constant. Exponentiating a coefficient, \(e^{\beta_j}\), converts it to an **odds ratio**—the multiplicative change in odds per unit change in the predictor.  
+
+This formulation offers a transparent interpretation of effects. A positive coefficient increases the odds of the outcome, while a negative coefficient decreases them.  
+Because the relationship is additive in the log-odds but nonlinear in the probability space, logistic regression captures diminishing returns: as predicted probabilities approach 0 or 1, further increases in a predictor yield smaller changes in probability.  
+
+This interpretive clarity—together with its mathematical elegance—has made logistic regression one of the most widely used and enduring models in statistics and applied data science (Agresti, 2013).  
+
+**References**  
+- Agresti, A. (2013). *Categorical Data Analysis* (3rd ed.). Wiley.  
+
+--- 
+  
+:::
+---
+
+## Logistic regression chooses parameters by maximizing likelihood
+
+- Coefficients are chosen to make the observed outcomes most probable.  
+- Instead of minimizing squared error, logistic regression **maximizes likelihood** of correct labels.  
+- Guarantees valid probabilities within [0, 1].  
+- Leads naturally to measures such as deviance and log-likelihood.  
+
+--
+
+<figure>
+  <img src="../materials/assets/images/logit_mle_likelihood_surface.png"
+       alt="**Figure:** Conceptual diagram showing likelihood surface with single peak where parameters maximize probability of observed data.">
+  <figcaption>**Figure:** Conceptual diagram showing likelihood surface with single peak where parameters maximize probability of observed data.</figcaption>
+</figure>  
+
+::: {.notes}
+
+### Detailed Notes
+- Coefficients are chosen to make the observed outcomes most probable.  
+- Instead of minimizing squared error, logistic regression **maximizes likelihood** of correct labels.  
+- Guarantees valid probabilities within [0, 1].  
+- Leads naturally to measures such as deviance and log-likelihood.  
+
+### DEEPER DIVE
+The parameters of a logistic regression model are estimated through **maximum likelihood estimation (MLE)**, a general framework for inferring parameters that make the observed data most probable under the assumed model.  
+For each observation \(i\) with binary outcome \(y_i \in \{0,1\}\) and predicted probability \(p_i = \sigma(\beta_0 + \beta^T x_i)\), the likelihood of the observed data is:
+\[
+L(\beta) = \prod_{i=1}^n p_i^{y_i}(1-p_i)^{(1-y_i)}.
+\]
+Taking the logarithm gives the **log-likelihood**:
+\[
+\ell(\beta) = \sum_{i=1}^n \left[y_i \log(p_i) + (1-y_i)\log(1-p_i)\right].
+\]
+Maximizing this concave function with respect to \(\beta\) ensures convergence to a unique global optimum. The negative of twice the log-likelihood forms the **deviance**, an analogue to residual sum of squares in linear regression.  
+
+This likelihood-based estimation provides not only point estimates but also inferential statistics—standard errors, confidence intervals, and likelihood ratio tests—derived from the curvature (Hessian) of the log-likelihood surface. Because the model is part of the exponential family, these properties are well-behaved and asymptotically efficient (Cox & Snell, 1989).   
+
+**References**  
+- Cox, D. R., & Snell, E. J. (1989). *Analysis of Binary Data* (2nd ed.). Chapman & Hall.  
+- Hosmer, D. W., Lemeshow, S., & Sturdivant, T. (2013). *Applied Logistic Regression* (3rd ed.). Wiley.  
+
+:::
+---
+
+## Probability thresholds turn model outputs into class predictions
+
+- Model produces probabilities $p$ for each observation.  
+- **Default threshold:** 0.5 → predict positive if $p > 0.5$.  
+- Lower thresholds → more positives (higher recall).  
+- Higher thresholds → fewer false alarms (higher precision).  
+- Example: fraud detection might use 0.2 to catch more fraud at cost of false positives.  
+
+--
+
+<figure>
+  <img src="../materials/assets/images/logit_thresholds_precision_recall.png"
+       alt="**Figure:** Sigmoid curve with varying cutoff thresholds showing how precision/recall trade-off shifts.">
+  <figcaption>**Figure:** Sigmoid curve with varying cutoff thresholds showing how precision/recall trade-off shifts.</figcaption>
+</figure>  
+
+::: {.notes}
+
+### Detailed Notes
+- Model produces probabilities \(p\) for each observation.  
+- **Default threshold:** 0.5 → predict positive if \(p > 0.5\).  
+- Lower thresholds → more positives (higher recall).  
+- Higher thresholds → fewer false alarms (higher precision).  
+- Example: fraud detection might use 0.2 to catch more fraud at cost of false positives.  
+
+### DEEPER DIVE
+Although logistic regression produces continuous probabilities, real-world decision systems often require categorical outputs. This conversion depends on a **probability threshold**, \(\tau\), which determines how predictions are classified into positive or negative outcomes.  
+
+The simplest threshold is 0.5, implying that the positive class is predicted whenever \(P(Y=1|X) > 0.5\). However, this assumes balanced classes and equal misclassification costs. In most applications, neither condition holds. For instance, in fraud detection, where positives are rare and costly to miss, lowering the threshold improves sensitivity (recall) at the expense of more false alarms.  
+
+The optimal threshold depends on the expected costs of false positives and false negatives.  
+If \(C_{FP}\) and \(C_{FN}\) denote those costs, and \(\pi = P(Y=1)\) the base rate of positives, the **Bayes optimal threshold** is:
+\[
+\tau^* = \frac{C_{FN}(1 - \pi)}{C_{FP}\pi + C_{FN}(1 - \pi)}.
+\]
+This framework links statistical modeling to managerial decision-making by explicitly balancing detection sensitivity and resource constraints.  
+
+Receiver Operating Characteristic (ROC) and Precision–Recall (PR) curves visualize this trade-off across thresholds, allowing stakeholders to align the model’s operating point with domain priorities (Fawcett, 2006).  
+
+**References**  
+- Fawcett, T. (2006). An introduction to ROC analysis. *Pattern Recognition Letters, 27*(8), 861–874.  
+- Elkan, C. (2001). The foundations of cost-sensitive learning. *Proceedings of the 17th International Joint Conference on Artificial Intelligence (IJCAI)*, 973–978.   
+:::
+---
+
+## Confounding can flip or distort coefficient signs
+
+- Adding correlated predictors changes coefficient size and even sign.  
+- **Key idea:** coefficients reflect *conditional*, not marginal effects.  
+- Correlated predictors require careful interpretation.  
+
+--
+
+<figure>
+  <img src="../materials/assets/images/logit_confounding_sign_reversal.png"
+       alt="**Figure:** Parallel lines crossing after conditioning; shows reversal of apparent effect when controlling for a confounder.">
+  <figcaption>**Figure:** Parallel lines crossing after conditioning; shows reversal of apparent effect when controlling for a confounder.</figcaption>
+</figure>  
+
+::: {.notes}
+
+### Detailed Notes
+- Adding correlated predictors changes coefficient size and even sign.  
+- **Key idea:** coefficients reflect *conditional*, not marginal effects.  
+- Correlated predictors require careful interpretation.  
+
+### DEEPER DIVE
+Logistic regression coefficients represent **conditional relationships** between predictors and the log-odds of the outcome. When predictors are correlated, these coefficients may change dramatically—or even reverse sign—after adding or removing variables, a phenomenon known as **Simpson’s paradox** or **confounding reversal**.  
+
+Consider two predictors, \(X_1\) and \(X_2\), both associated with the outcome \(Y\) and correlated with each other. In a univariate model, the coefficient of \(X_1\) captures its marginal relationship with \(Y\). When \(X_2\) is added, the model estimates the effect of \(X_1\) **holding \(X_2\) constant**. If \(X_2\) mediates or masks part of \(X_1\)’s association, the coefficient may shrink or change sign.  
+
+Mathematically, the issue arises because the maximum-likelihood estimate of \(\beta_1\) depends on the covariance structure of the predictors:
+\[
+\hat{\beta}_1 = (X^T W X)^{-1} X^T W z,
+\]
+where \(W\) is a weight matrix depending on \(p_i(1-p_i)\). High collinearity inflates variance and introduces instability in these estimates.  
+
+Interpreting coefficients therefore requires care: they describe effects conditional on all other variables in the model. Partial dependence plots, variance inflation factors (VIF), and correlation matrices help diagnose such distortions.  
+
+**References**  
+- Greenland, S., Pearl, J., & Robins, J. M. (1999). Causal diagrams for epidemiologic research. *Epidemiology, 10*(1), 37–48.  
+- Wooldridge, J. M. (2010). *Econometric Analysis of Cross Section and Panel Data* (2nd ed.). MIT Press.  
+:::
+---
+
+## Logistic regression assumes linear decision boundaries
+
+- The model’s decision boundary is **linear in the features**.  
+- In 2D → a straight line; in higher D → a hyperplane.  
+- Performs well when separation is roughly linear.  
+- Struggles with complex or curved class structures.  
+
+--
+
+<figure>
+  <img src="../materials/assets/images/logit_linear_boundary_vs_curved_truth.png"
+       alt="**Figure:** 2D plot comparing a linear decision boundary vs. a curved true separation.">
+  <figcaption>**Figure:** 2D plot comparing a linear decision boundary vs. a curved true separation.</figcaption>
+</figure>  
+
+::: {.notes}
+
+### Detailed Notes
+- The model’s decision boundary is **linear in the features**.  
+- In 2D → a straight line; in higher D → a hyperplane.  
+- Performs well when separation is roughly linear.  
+- Struggles with complex or curved class structures.  
+
+### DEEPER DIVE
+In its standard form, logistic regression models decision boundaries that are **linear in the feature space**. For binary classification, this boundary is defined by:
+\[
+\beta_0 + \beta^T x = 0.
+\]
+Geometrically, this equation represents a hyperplane dividing the feature space into two half-spaces corresponding to the predicted classes. The orientation of the hyperplane depends on the relative magnitudes and signs of the coefficients, while the intercept \(\beta_0\) controls its position.  
+
+This linearity assumption simplifies interpretation and training but limits flexibility. If the true boundary between classes is nonlinear—such as concentric circles or curved manifolds—logistic regression misclassifies regions systematically. To address this, analysts often introduce **basis expansions** (e.g., polynomial features or splines) or transform the feature space via **kernels** or **nonlinear embeddings**, thereby enabling nonlinear decision boundaries while retaining probabilistic interpretability (Hastie et al., 2009).  
+
+The linear boundary assumption thus delineates logistic regression’s conceptual boundary as well: it serves as the simplest model that links statistical inference, geometry, and probability in a unified framework.  
+
+**References**  
+- Hastie, T., Tibshirani, R., & Friedman, J. (2009). *The Elements of Statistical Learning* (2nd ed.). Springer.    
+:::
+---
+
+
+## Logistic regression remains the “Hello World” entry way for classification
+
+ 
+<figure>
+  <img src="../materials/assets/images/cls_timeline_logistic_baseline.svg"
+       alt="**Figure:** Timeline showing evolution from logistic regression → trees → ensembles → deep learning, highlighting logistic as baseline.">
+  <figcaption>**Figure:** Timeline showing evolution from logistic regression → trees → ensembles → deep learning, highlighting logistic as baseline.</figcaption>
+</figure>  
+
+**Advantages:** interpretable, fast, and robust. Provides a strong baseline before trying more complex models. 
+
+::: {.notes}
+
+### Detailed Notes
+- Logistic regression as a conceptual bridge: simple yet powerful.  
+- View it as the benchmark for model interpretability and performance comparison.  
+
+### DEEPER DIVE
+Despite its simplicity, logistic regression endures as one of the most influential and instructive models in applied data analysis. It combines theoretical elegance with practical interpretability, producing outputs that are both statistically sound and operationally actionable.  
+
+As the first fully probabilistic classification model, it established the modern paradigm of **discriminative learning**—directly modeling \(P(Y|X)\) rather than the joint distribution \(P(X,Y)\). This viewpoint underpins most contemporary machine learning algorithms, from neural networks to large language models.  
+
+Moreover, logistic regression provides a baseline for model evaluation: its coefficients offer interpretable marginal effects, its outputs are calibrated probabilities, and its optimization surface is convex, guaranteeing reproducible convergence.  
+Even in the age of complex models, logistic regression remains the standard against which interpretability, calibration, and stability are measured (Rudin, 2019).  
+
+**References**  
+- Rudin, C. (2019). Stop explaining black box machine learning models for high stakes decisions and use interpretable models instead. *Nature Machine Intelligence, 1*(5), 206–215.  
+:::
+---
+
+# 3.3 Generative vs. Discriminative Approaches
+
+---
+
+## Classification models can take two philosophical approaches
+
+- **Discriminative models** (e.g., Logistic Regression, Decision Trees):  
+  - Model $P(Y|X)$ directly.  
+  - Focus on learning **boundaries between classes**.  
+
+- **Generative models** (e.g., LDA, QDA, Naive Bayes):  
+  - Model $P(X|Y)$ and $P(Y)$, then apply Bayes’ rule to compute $$P(Y|X)$$.  
+  - Focus on **how the data for each class is distributed**.  
+
+--
+
+<figure>
+  <img src="../materials/assets/images/gen_vs_disc_comparison.png"
+       alt="**Figure:** Illustration comparing discriminative decision boundaries (direct line between classes) vs. generative class distributions with overlapping densities.">
+  <figcaption>**Figure:** Illustration comparing discriminative decision boundaries (direct line between classes) vs. generative class distributions with overlapping densities.</figcaption>
+</figure>  
+
+::: {.notes}
+
+
+### Detailed Notes
+- Explain the fundamental distinction between discriminative and generative approaches.  
+- Discriminative models (e.g., logistic regression, decision trees) directly model the conditional probability \(P(Y|X)\).  
+- Generative models (e.g., Naive Bayes, LDA, QDA) model the joint distribution via \(P(X|Y)\) and \(P(Y)\), using Bayes’ rule to derive \(P(Y|X)\).  
+- Use the figure to contrast: discriminative models draw a boundary directly, while generative models describe class densities.  
+- Highlight that logistic regression and Naive Bayes represent canonical forms of each paradigm.  
+
+### DEEPER DIVE
+The distinction between generative and discriminative classifiers is not merely computational—it represents two fundamentally different conceptions of learning.  
+A **generative model** seeks to capture the process that generates the data. It specifies a model for the joint distribution \(P(X, Y)\), typically decomposed into \(P(Y)\), the class prior, and \(P(X|Y)\), the class-conditional density. Predictions are then made via Bayes’ theorem:
+\[
+P(Y|X) = \frac{P(X|Y)P(Y)}{P(X)}.
+\]
+In this formulation, \(P(X|Y)\) encodes how the features are distributed within each class, while \(P(Y)\) represents the prior belief about class frequencies. The denominator \(P(X)\) serves as a normalization constant ensuring probabilities sum to one.  
+
+In contrast, a **discriminative model** bypasses the joint distribution and focuses directly on the conditional \(P(Y|X)\) or on a decision boundary that separates classes. Logistic regression, decision trees, and neural networks exemplify this approach. These models optimize decision surfaces that minimize classification error without assuming how the data were generated.  
+
+Generative models provide deeper insight into data structure, often with interpretable parameters. For instance, **Linear Discriminant Analysis (LDA)** assumes multivariate Gaussian distributions with shared covariance matrices for each class, leading to linear boundaries in feature space. **Quadratic Discriminant Analysis (QDA)** relaxes that assumption, allowing distinct covariances and producing quadratic boundaries.  
+
+Discriminative models, on the other hand, trade structural assumptions for predictive performance. By focusing purely on boundary estimation, they tend to generalize better when sufficient labeled data exist. The **Naive Bayes** classifier, for example, assumes conditional independence among features given the class—an assumption rarely true in practice—yet performs surprisingly well because estimation of \(P(X|Y)\) is tractable even with limited data.  
+
+Thus, the generative approach answers “how was this data produced?”, while the discriminative approach answers “how should this data be labeled?”. Both yield valid but distinct pathways to classification.  
+
+**References**  
+- Ng, A. Y., & Jordan, M. I. (2002). On discriminative vs. generative classifiers: A comparison of logistic regression and naive Bayes. *Advances in Neural Information Processing Systems, 14*, 841–848.  
+- Bishop, C. M. (2006). *Pattern Recognition and Machine Learning*. Springer. 
+
+:::
+---
+
+## Why understanding the distinction matters
+
+- **Discriminative** models often achieve **higher predictive accuracy**.  
+- **Generative** models capture **data structure** and handle **small-sample situations** better.  
+- When class covariances are equal, **logistic regression and LDA produce nearly identical boundaries**.  
+- Choice depends on goal: *prediction vs. understanding*.  
+
+--
+
+<figure>
+  <img src="../materials/assets/images/gen_vs_disc_logistic_vs_lda_boundaries.png"
+       alt="**Figure:** Side-by-side plot showing similar linear boundaries for logistic regression and LDA when covariances are equal.">
+  <figcaption>**Figure:** Side-by-side plot showing similar linear boundaries for logistic regression and LDA when covariances are equal.</figcaption>
+</figure>  
+
+::: {.notes}
+
+### Detailed Notes
+- Emphasize that discriminative models often achieve higher predictive accuracy when training data are abundant.  
+- Generative models can be advantageous with smaller datasets, where their assumptions provide regularization.  
+- Explain that when class covariances are equal, LDA and logistic regression yield almost identical boundaries.  
+- Frame this as a methodological choice rather than competition: prediction versus explanation.  
+
+### DEEPER DIVE
+Understanding the trade-offs between generative and discriminative models clarifies when each approach should be preferred.  
+
+Discriminative models optimize directly for predictive accuracy by estimating the conditional probability \(P(Y|X)\). They rely on fewer assumptions about data structure and are optimized using convex or near-convex loss functions such as logistic or hinge loss. Given enough labeled data, these models typically outperform generative ones because they focus solely on minimizing classification error rather than modeling the full data distribution.  
+
+Generative models, however, shine in data-scarce environments. By imposing strong distributional assumptions—such as Gaussian class-conditional densities—they exploit **inductive bias** to infer structure from limited information. This bias acts as a regularizer, preventing overfitting when sample size is small relative to feature dimensionality. Generative models also offer interpretability: parameters like means and covariances summarize the data-generating mechanism, supporting hypothesis testing and anomaly detection.  
+
+Ng and Jordan (2002) demonstrated analytically that while discriminative models achieve lower asymptotic error, generative models converge faster with small samples. As the dataset grows, discriminative models eventually surpass generative ones in accuracy, since their flexibility allows better boundary fitting once sufficient evidence accumulates.  
+
+A particularly important result is the equivalence between **LDA** and **logistic regression** when class covariances are identical. Under this condition, the LDA decision rule reduces to a linear function in \(X\):
+\[
+\log \frac{P(Y=1|X)}{P(Y=0|X)} = \beta_0 + \beta^T X,
+\]
+which is algebraically identical to the logistic model. The difference lies in estimation philosophy: LDA fits the data-generating distributions \(P(X|Y)\), while logistic regression fits the conditional directly.  
+
+Ultimately, the choice depends on the analytic goal. When the objective is **prediction**, discriminative methods often dominate. When the goal is **understanding**—to explain mechanisms, identify latent structure, or simulate data—generative models provide richer insight. Modern machine learning increasingly blends these paradigms: semi-supervised models, variational autoencoders, and diffusion models combine generative and discriminative objectives within unified frameworks.  
+
+**References**  
+- Ng, A. Y., & Jordan, M. I. (2002). On discriminative vs. generative classifiers: A comparison of logistic regression and naive Bayes. *Advances in Neural Information Processing Systems, 14*, 841–848.  
+- Murphy, K. P. (2012). *Machine Learning: A Probabilistic Perspective*. MIT Press.  
+- Friedman, J., Hastie, T., & Tibshirani, R. (2000). Additive logistic regression: A statistical view of boosting. *Annals of Statistics, 28*(2), 337–374.    
+:::
+---
+
+
+# 3.4 Decision Trees
+
+---
+
+## Decision trees classify by asking a sequence of questions
+
+- Each path from root to leaf = **human-readable rule**.  
+- **Root node:** Starting point where data is first split.  
+- **Decision nodes (branches):** Internal nodes that apply feature-based rules.  
+- **Leaf nodes:** Final outcomes or predictions.  
+- Example: “Age < 50?” → branch → “Churn” or “Stay.”  
+
+--
+
+<figure>
+  <img src="../materials/assets/images/tree_structure_example.svg"
+       alt="**Figure:** A Tree diagram showing nodes splitting by “Age < 50” and “Income < 40K.” Leaves (last boxes) are labeled with the predicted classes.">
+  <figcaption>**Figure:** A Tree diagram showing nodes splitting by “Age < 50” and “Income < 40K.” Leaves (last boxes) are labeled with the predicted classes.</figcaption>
+</figure>  
+
+::: {.notes}
+
+### Detailed Notes
+- Each path from root to leaf = **human-readable rule**.  
+- **Root node:** Starting point where data is first split.  
+- **Decision nodes (branches):** Internal nodes that apply feature-based rules.  
+- **Leaf nodes:** Final outcomes or predictions.  
+- Example: “Age < 50?” → branch → “Churn” or “Stay.”  
+
+### DEEPER DIVE
+Decision trees are hierarchical, rule-based models that recursively partition the feature space into distinct regions associated with specific class predictions.  
+At each **node**, a splitting criterion divides the dataset into two or more subsets based on feature values that maximize class homogeneity within the resulting partitions. The process continues recursively, forming a **tree structure** where each internal node represents a decision rule and each leaf node corresponds to a predicted outcome or class.  
+
+Mathematically, a decision tree partitions the input space \(\mathcal{X}\) into \(M\) disjoint regions \(\{R_1, R_2, \dots, R_M\}\). The model assigns a constant prediction \(c_m\) within each region:
+\[
+\hat{f}(x) = \sum_{m=1}^{M} c_m \, I(x \in R_m),
+\]
+where \(I(\cdot)\) is an indicator function.  
+For classification, \(c_m\) typically represents the majority class within region \(R_m\).  
+
+Decision trees are attractive because their structure mirrors human reasoning—decisions proceed through a sequence of interpretable “if–then” rules. However, because trees choose splits **greedily** (locally optimal choices at each step), they are not guaranteed to find a globally optimal partition of the feature space (Breiman, Friedman, Olshen, & Stone, 1984). This local optimization nature underlies both their simplicity and their tendency toward overfitting, a limitation addressed later through pruning and ensemble methods.  
+
+**References**  
+- Breiman, L., Friedman, J., Olshen, R., & Stone, C. (1984). *Classification and Regression Trees*. Wadsworth.  
+- Rokach, L., & Maimon, O. (2014). *Data Mining with Decision Trees: Theory and Applications* (2nd ed.). World Scientific.   
+:::
+---
+
+## Trees split data to increase node purity
+
+- **Splitting metrics:** quantify how “mixed” classes are in a node.  
+- **Gini impurity:** $1 - \sum p_i^2$  
+- **Entropy:** $-\sum p_i \log(p_i)$  
+- Lower impurity → better separation.  
+
+(check the default in your program if concerned- scikit-learn defaults to **Gini**, but both work similarly.)  
+
+--
+
+<figure>
+  <img src="../materials/assets/images/tree_node_impurity_comparison.png"
+       alt="**Figure:** Two bar charts comparing high-impurity vs. low-impurity node class proportions.">
+  <figcaption>**Figure:** Two bar charts comparing high-impurity vs. low-impurity node class proportions.</figcaption>
+</figure>  
+
+::: {.notes}
+
+
+### Detailed Notes
+- **Splitting metrics:** quantify how “mixed” classes are in a node.  
+- **Gini impurity:** $(1 - \sum p_i^2)$
+- **Entropy:** $(-\sum p_i \log(p_i))$ 
+- Lower impurity → better separation.  
+- Check defaults (e.g., scikit-learn uses Gini by default).  
+
+### DEEPER DIVE
+The core principle guiding the construction of decision trees is the **reduction of impurity**—a measure of class heterogeneity within nodes.  
+Given a node containing observations from \(K\) classes, with proportions \(p_1, p_2, \ldots, p_K\), impurity functions quantify the “mixedness” of these classes:  
+
+- **Gini Impurity:**  
+  $$
+  G = 1 - \sum_{k=1}^{K} p_k^2,
+  $$
+which reaches zero when all samples in the node belong to a single class and is maximal when classes are evenly mixed.  
+
+- **Entropy (Information Gain):**  
+  \[
+  H = -\sum_{k=1}^{K} p_k \log(p_k),
+  \]
+  which originates from information theory and measures expected uncertainty (Shannon, 1948).  
+
+At each potential split, the algorithm evaluates how much impurity decreases—known as **information gain** or **Gini gain**—and chooses the feature and split point that maximize this decrease:
+\[
+\Delta I = I_{\text{parent}} - \sum_{j} \frac{n_j}{n_{\text{parent}}} I_j.
+\]
+This greedy optimization is repeated recursively until stopping criteria are met.  
+
+Entropy and Gini often produce similar trees in practice. Entropy penalizes misclassification more heavily near balanced class distributions, whereas Gini places slightly more emphasis on the majority class. Both aim to increase **node purity**, which corresponds to greater local certainty and simpler leaf predictions.  
+
+**References**  
+- Shannon, C. E. (1948). A mathematical theory of communication. *Bell System Technical Journal, 27*(3), 379–423.  
+- Breiman, L. et al. (1984). *Classification and Regression Trees*.  
+
+:::
+---
+
+## Trees can overfit easily — regularization controls complexity
+
+- Deep trees can memorize training data → **high variance**.  
+- Shallow trees may underfit → **high bias**.  
+- Key controls:  
+  - `max_depth` — limit number of levels.  
+  - `min_samples_split`, `min_samples_leaf` — ensure each node has enough data.  
+- Goal: find the sweet spot between underfitting and overfitting.  
+
+
+::: {.notes}
+
+### Detailed Notes
+- Deep trees can memorize training data → **high variance**.  
+- Shallow trees may underfit → **high bias**.  
+- Key controls:  
+  - `max_depth` — limit number of levels.  
+  - `min_samples_split`, `min_samples_leaf` — ensure each node has enough data.  
+- Goal: find the sweet spot between underfitting and overfitting.  
+
+### DEEPER DIVE
+The recursive partitioning process that gives decision trees their flexibility also makes them prone to **overfitting**.  
+Unrestricted growth can lead to **perfect memorization** of training data—each leaf may contain only a few samples or even a single observation. Such trees exhibit near-zero training error but perform poorly on unseen data due to excessive variance. Conversely, overly shallow trees fail to capture underlying patterns, producing systematic bias.  
+
+Regularization constrains tree growth and improves generalization. Common techniques include:
+- **Depth control:** limiting the maximum number of levels (`max_depth`) reduces partition granularity.  
+- **Minimum samples per node:** enforcing `min_samples_split` or `min_samples_leaf` prevents unstable splits based on small sample subsets.  
+- **Cost-complexity pruning:** post-pruning removes branches that contribute minimally to predictive power by minimizing  
+  \[
+  R_\alpha(T) = R(T) + \alpha |T|,
+  \]
+  where \(R(T)\) is the misclassification error and \(|T|\) is the number of terminal nodes. The penalty term \(\alpha\) trades off accuracy and simplicity.  
+
+These methods align with the **bias–variance trade-off**: increasing complexity reduces bias but raises variance, while regularization restores balance by introducing controlled bias.  
+The resulting model is more interpretable, stable, and generalizable.  
+
+**References**  
+- Breiman, L. et al. (1984). *Classification and Regression Trees*.  
+- Quinlan, J. R. (1993). *C4.5: Programs for Machine Learning*. Morgan Kaufmann.  
+ 
+:::
+---
+
+## KNN offers a simple, nonparametric alternative for classification
+
+- Predict a new point’s class by **majority vote** among its K nearest neighbors.  
+- **Why it matters:** flexible, **no parametric assumptions**; adapts to local structure.  
+- It has limits, performance drops in **high dimensions** (curse of dimensionality); sensitive to feature scaling.  
+- **Key Idea:** KNN bridges **parametric** (logistic) and **rule-based** (trees) models
+
+--
+
+<figure>
+  <img src="../materials/assets/images/knn_local_decision_boundary.png"
+       alt="**Figure:** 2D scatterplot showing a query point classified by majority vote among its nearest neighbors; decision boundary adapts to local data.">
+  <figcaption>**Figure:** 2D scatterplot showing a query point classified by majority vote among its nearest neighbors; decision boundary adapts to local data.</figcaption>
+</figure>  
+
+::: {.notes}
+
+### Detailed Notes
+- Predict a new point’s class by **majority vote** among its K nearest neighbors.  
+- **Why it matters:** flexible, **no parametric assumptions**; adapts to local structure.  
+- It has limits, performance drops in **high dimensions** (curse of dimensionality); sensitive to feature scaling.  
+- **Key Idea:** KNN bridges **parametric** (logistic) and **rule-based** (trees) models.  
+
+### DEEPER DIVE
+The **k-nearest neighbors (KNN)** algorithm represents an alternative nonparametric approach to classification that relies on local similarity rather than global parameterization. Given a query point \(x_q\), KNN identifies the \(k\) closest training samples under a distance metric (typically Euclidean) and assigns \(x_q\) the majority class among these neighbors:
+\[
+\hat{y}(x_q) = \text{mode}\{y_i : x_i \in N_k(x_q)\}.
+\]
+This procedure estimates the posterior probability nonparametrically:
+\[
+\hat{P}(Y = c | X = x_q) = \frac{1}{k}\sum_{i \in N_k(x_q)} I(y_i = c).
+\]
+As \(k \to \infty\) and \(k/n \to 0\), the KNN classifier converges to the Bayes optimal classifier (Cover & Hart, 1967).  
+
+KNN’s strength lies in its flexibility—it makes no assumptions about functional form or distribution. However, this comes at the cost of scalability and sensitivity to dimensionality. In high-dimensional spaces, distances between points become less discriminative (the **curse of dimensionality**), and performance deteriorates. Moreover, since distance magnitudes depend on feature scale, preprocessing steps such as standardization or normalization are critical.  
+
+Conceptually, KNN bridges paradigms: it combines the local adaptivity of tree-based partitioning with the nonparametric philosophy of density estimation. It exemplifies a purely data-driven classifier whose complexity grows naturally with data size.  
+
+**References**  
+- Cover, T., & Hart, P. (1967). Nearest neighbor pattern classification. *IEEE Transactions on Information Theory, 13*(1), 21–27.  
+- Beyer, K., Goldstein, J., Ramakrishnan, R., & Shaft, U. (1999). When is “nearest neighbor” meaningful? *International Conference on Database Theory (ICDT)*, 217–235.   
+:::
+
+
+# 3.5 Ensemble Methods: Random Forest and XGBoost  
+
+---
+
+## Ensembles strengthen weak learners into robust predictors
+
+- Single decision trees are **unstable** — small data changes can lead to big differences.  
+- Ensembles combine **many weak learners** to form a stronger, more stable model.  
+- Benefits:  
+  - Reduce variance and overfitting.  
+  - Improve accuracy and robustness.  
+  - Generalize better to unseen data.  
+
+
+::: {.notes}
+
+### Detailed Notes
+- Single decision trees are **unstable** — small data changes can lead to big differences.  
+- Ensembles combine **many weak learners** to form a stronger, more stable model.  
+- Benefits:  
+  - Reduce variance and overfitting.  
+  - Improve accuracy and robustness.  
+  - Generalize better to unseen data.  
+
+### DEEPER DIVE
+Ensemble methods rest on a simple but profound insight: aggregating multiple imperfect models can produce a predictor that outperforms any individual component. This principle, known as the **wisdom of the crowd**, leverages diversity and independence among models to reduce variance and improve stability.  
+
+From a statistical perspective, an ensemble’s prediction is an average of individual learners’ outputs,  
+\[
+\hat{f}_{\text{ensemble}}(x) = \frac{1}{M} \sum_{m=1}^{M} \hat{f}_m(x),
+\]
+where each \(\hat{f}_m\) is a weak learner—typically a high-variance, low-bias model like a decision tree.  
+When the learners’ errors are uncorrelated, averaging reduces the overall variance of the estimator:
+\[
+\text{Var}(\hat{f}_{\text{ensemble}}) = \rho\sigma^2 + \frac{(1 - \rho)\sigma^2}{M},
+\]
+where \(\rho\) is the average correlation among model errors. As the number of models \(M\) increases, variance declines, particularly when \(\rho\) is small (Breiman, 1996).  
+
+The two major families of ensemble techniques—**bagging** and **boosting**—approach this variance–bias trade-off differently. Bagging (bootstrap aggregation) builds models independently and averages their predictions, while boosting builds models sequentially, correcting the errors of earlier ones. Both exploit the same idea: weak learners can become strong through strategic combination.  
+
+**References**  
+- Breiman, L. (1996). Bagging predictors. *Machine Learning, 24*(2), 123–140.  
+- Dietterich, T. G. (2000). Ensemble methods in machine learning. *Multiple Classifier Systems*, 1–15.  
+:::
+---
+
+## Random Forest combines results from many decorrelated trees via **majority vote** (classification) or **averaging** (regression).
+
+Adds **feature subsampling:** each split uses only a random subset of features, reducing correlation among trees → more diverse models.  
+
+<figure>
+  <img src="../materials/assets/images/rf_bagging_majority_vote.png"
+       alt="**Figure:** Multiple smaller trees trained on different bootstrap samples, voting on final class. Effect: more stable, less prone to overfitting.  ">
+  <figcaption>**Figure:** Multiple smaller trees trained on different bootstrap samples, voting on final class. Effect: more stable, less prone to overfitting.  </figcaption>
+</figure>  
+
+::: {.notes}
+
+### Detailed Notes
+- Mechanics of bagging: bootstrap resampling + aggregation.  
+- Adds feature randomness to decorrelate trees.  
+- Random Forest balances bias and variance better than a single tree.  
+
+### DEEPER DIVE
+The **Random Forest** algorithm (Breiman, 2001) operationalizes the bagging principle using decision trees as base learners. Each tree is trained on a bootstrap sample—drawn with replacement—from the training data. This resampling introduces diversity among trees, since each tree sees a slightly different subset of examples.  
+
+To further reduce correlation, Random Forests also introduce randomness at the feature level. At each split, the algorithm selects a random subset of predictors (\(m_{\text{try}}\)) from the full set of features. The best split is chosen only among these candidates, not all features. This combination of **row sampling** (bootstrapping) and **column sampling** (feature subsampling) ensures decorrelation among trees.  
+
+For classification, the ensemble prediction is obtained by majority vote; for regression, by averaging predictions across trees.  
+This parallel architecture provides high scalability and robustness while retaining the ability to model nonlinear relationships and complex interactions automatically.  
+
+The central intuition is that while each individual tree is a weak, noisy estimator, their aggregate—the Random Forest—exhibits low variance and high predictive stability. The method’s effectiveness arises not from any single tree but from the controlled randomness that ensures diversity without excessive bias.  
+
+**References**  
+- Breiman, L. (2001). Random forests. *Machine Learning, 45*(1), 5–32.  
+:::
+---
+
+## Random Forest strengths and limitations
+
+
+<figure>
+  <img src="../materials/assets/images/rf_strength_vs_limitations.png"
+       alt="**Figure:** Bar chart or split table summarizing Random Forest pros and cons.">
+  <figcaption>**Figure:** Bar chart or split table summarizing Random Forest pros and cons.</figcaption>
+</figure>  
+
+::: {.notes}
+
+
+### Detailed Notes
+- **Strengths:**  
+  - Handles nonlinearities and interactions automatically.  
+  - Robust to noise and outliers.  
+  - Works well with both numeric and categorical data.  
+- **Limitations:**  
+  - Less interpretable than individual trees.  
+  - Large ensembles can slow prediction and require more memory.  
+  - Tuning can still impact performance (e.g., number of trees, features).  
+
+### DEEPER DIVE
+Random Forests offer a favorable balance between interpretability, performance, and robustness.  
+They handle nonlinear feature interactions and mixed data types without explicit transformation, making them ideal for tabular, heterogeneous datasets. Because the ensemble averages across many deep trees, it is relatively immune to outliers and overfitting—especially as the number of trees \(M\) grows large.  
+
+However, Random Forests are not without trade-offs. The interpretability of a single decision tree is lost in the aggregation process; the model becomes an opaque collection of hundreds or thousands of trees. Tools such as **feature importance** (based on impurity reduction or permutation tests) and **partial dependence plots** provide limited interpretive windows but do not recover simple rule structures.  
+
+Computationally, large ensembles require significant memory and may slow inference, especially in real-time or resource-constrained environments. Hyperparameters such as the number of trees (`n_estimators`) and maximum depth influence both runtime and generalization performance. Despite these limitations, Random Forests remain a cornerstone of applied predictive modeling due to their robustness and strong baseline accuracy across domains.  
+
+**References**  
+- Breiman, L. (2001). Random forests. *Machine Learning, 45*(1), 5–32.  
+- Cutler, D. R., et al. (2007). Random forests for classification in ecology. *Ecology, 88*(11), 2783–2792.  
+
+
+:::
+---
+
+## XGBoost builds trees **sequentially**, each correcting errors of the previous.  
+
+<figure>
+  <img src="../materials/assets/images/XGB_boosting_sequence.svg"
+       alt="**Figure:** Illustration of sequential boosting — each tree focusing on the remaining errors of the previous one.">
+  <figcaption>**Figure:** Illustration of sequential boosting — each tree focusing on the remaining errors of the previous one.</figcaption>
+</figure>  
+
+::: {.notes}
+
+### Detailed Notes
+- Differentiate boosting from bagging: boosting is sequential, not parallel.  
+- Highlight that XGBoost builds small corrective trees—not deep trees.  
+- Gradient descent optimizes the residual errors between rounds.  
+- Key features: regularization, missing-data handling, weighted loss for imbalance.  
+
+### DEEPER DIVE
+**XGBoost (Extreme Gradient Boosting)** is a powerful implementation of gradient boosting (Friedman, 2001) that improves both the accuracy and computational efficiency of classical boosting algorithms.  
+Whereas bagging reduces variance by averaging independent models, boosting reduces bias by building a sequence of models, each trained to correct the residual errors of its predecessors.  
+
+At iteration \(t\), a new decision tree \(f_t(x)\) is added to the existing ensemble to minimize an objective function combining training loss and model complexity:
+\[
+\mathcal{L}^{(t)} = \sum_{i=1}^n l(y_i, \hat{y}_i^{(t-1)} + f_t(x_i)) + \Omega(f_t),
+\]
+where \(l\) is the differentiable loss (e.g., logistic loss), and \(\Omega(f_t)\) is a regularization term controlling tree depth and leaf weights.  
+
+By performing a second-order Taylor expansion of the loss, XGBoost efficiently approximates the gradient and Hessian of the objective, allowing for **exact greedy optimization** of each split. The algorithm includes built-in mechanisms for:
+- **Shrinkage (learning rate):** scales contributions of each tree to prevent overfitting.  
+- **Column subsampling:** improves diversity among trees.  
+- **Regularization parameters (\(\lambda, \alpha\)):** penalize overly complex trees.  
+- **Handling missing values:** learns optimal default directions for missing splits.  
+
+The result is a highly flexible and regularized additive model that consistently achieves state-of-the-art performance on structured data. XGBoost’s architecture also allows distributed training, making it scalable to millions of observations.  
+
+**References**  
+- Friedman, J. H. (2001). Greedy function approximation: A gradient boosting machine. *Annals of Statistics, 29*(5), 1189–1232.  
+- Chen, T., & Guestrin, C. (2016). XGBoost: A scalable tree boosting system. *Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining*, 785–794.   
+
+:::
+
+---
+
+## Strengths and limitations of XGBoost
+
+<figure>
+  <img src="../materials/assets/images/XGB_strength_vs_limitations.png"
+       alt="**Figure:** Table comparing XGBoost strengths (accuracy) vs. limitations (complexity).">
+  <figcaption>**Figure:** Table comparing XGBoost strengths (accuracy) vs. limitations (complexity).</figcaption>
+</figure>  
+
+::: {.notes}
+
+
+### Detailed Notes
+- **Strengths:**  
+  - State-of-the-art performance on many datasets.  
+  - Regularization reduces overfitting risk.  
+  - Highly tunable and efficient.  
+- **Limitations:**  
+  - Less interpretable; many small trees obscure logic.  
+  - Sensitive to hyperparameters such as learning rate and depth.  
+  - Overfitting possible with aggressive settings.  
+
+### DEEPER DIVE
+XGBoost’s strength lies in its combination of flexibility, scalability, and regularization.  
+It can approximate highly nonlinear decision surfaces through additive boosting while controlling overfitting via both shrinkage and explicit complexity penalties. This balance between bias reduction and variance control has made XGBoost dominant in applied machine learning competitions and industry use cases.  
+
+However, its power comes with trade-offs. The sequential, gradient-driven construction produces ensembles with hundreds or thousands of shallow trees—complex to interpret and prone to overfitting if tuned aggressively. Key hyperparameters such as learning rate (\(\eta\)), maximum depth, and the number of boosting rounds must be optimized carefully through cross-validation.  
+
+Modern interpretability methods like **SHAP values** (SHapley Additive exPlanations) provide local and global insights into feature influence, bridging the gap between predictive accuracy and explainability. Despite its complexity, XGBoost remains one of the most reliable general-purpose algorithms for tabular data.  
+
+**References**  
+- Lundberg, S. M., & Lee, S. I. (2017). A unified approach to
+
+:::
+---
+
+## Random Forest vs. XGBoost — when to use each
+
+- **Random Forest:**  
+  - General-purpose, stable, strong out-of-box performance.  
+  - Low tuning effort, moderate interpretability.  
+
+- **XGBoost:**  
+  - Better for complex or imbalanced datasets.  
+  - Higher accuracy when tuned carefully.  
+  - Strong choice for performance-critical systems.  
+
+
+::: {.notes}
+
+### Detailed Notes  
+- **Random Forest:**  
+  - General-purpose, stable, strong out-of-box performance.  
+  - Low tuning effort, moderate interpretability.  
+- **XGBoost:**  
+  - Better for complex or imbalanced datasets.  
+  - Higher accuracy when tuned carefully.  
+  - Strong choice for performance-critical systems.  
+- Contrast “parallel averaging” (RF) vs. “sequential correction” (XGB).  
+- Use domain examples: Random Forest for customer churn or marketing response; XGBoost for fraud detection or credit scoring.  
+
+### DEEPER DIVE  
+Random Forest and XGBoost represent two complementary philosophies in ensemble learning. **Random Forest** uses **parallel averaging**: each tree is built independently on a bootstrap sample, and their predictions are averaged (for regression) or voted (for classification). This averaging reduces variance and increases stability. The method requires little tuning, performs reliably across diverse datasets, and is robust to overfitting due to its randomization and aggregation steps (Breiman, 2001).  
+
+**XGBoost**, by contrast, employs **sequential boosting**: each new tree is trained to correct the residual errors of the previous ensemble. This process effectively performs a stagewise additive expansion of the prediction function, optimizing an explicit objective (e.g., logistic or squared loss) via gradient descent (Friedman, 2001). The algorithm integrates regularization, learning-rate shrinkage, and feature subsampling to prevent overfitting, achieving lower bias than Random Forest when properly tuned.  
+
+The key trade-off lies in bias and variance behavior. Random Forest reduces variance but may retain moderate bias; XGBoost reduces bias aggressively but risks overfitting. In practice, Random Forest is favored for interpretability, ease of deployment, and baseline performance. XGBoost is preferred when marginal performance gains justify the computational and tuning overhead—particularly for structured tabular data with complex feature interactions or severe imbalance.  
+
+**References**  
+- Breiman, L. (2001). Random forests. *Machine Learning, 45*(1), 5–32.*  
+- Friedman, J. H. (2001). Greedy function approximation: A gradient boosting machine. *Annals of Statistics, 29*(5), 1189–1232.*  
+- Chen, T., & Guestrin, C. (2016). XGBoost: A scalable tree boosting system. *KDD*, 785–794.  
+ 
+:::
+
+## Random Forest vs. XGBoost — Visual comparison
+
+<figure>
+  <img src="../materials/assets/images/rf_vs_xgb_comparison2.svg"
+       alt="**Figure:** Comparison chart — RF: parallel averaging vs. XGB: sequential correction.">
+  <figcaption>**Figure:** Comparison chart — RF: parallel averaging vs. XGB: sequential correction.</figcaption>
+</figure>  
+
+::: {.notes}
+### Detailed Notes  
+- Use visuals to reinforce mental models: RF as **parallel averaging**, XGB as **sequential correction**.  
+- Highlight that both use trees but differ in architecture: Random Forest trains many independent trees; XGBoost builds trees one after another, each improving the prior ensemble.  
+- Emphasize interpretive takeaway: averaging = stability; correction = precision.  
+
+### DEEPER DIVE  
+Visually, Random Forests resemble a forest of independent trees—each trained in parallel, contributing equally to the final prediction through majority vote or averaging. The randomness in both data sampling and feature selection ensures low correlation among trees, producing a smooth, stable aggregate model.  
+
+In contrast, XGBoost’s architecture is inherently sequential. Each tree depends on the residuals of its predecessors, targeting regions of the feature space where prior models performed poorly. This iterative refinement makes boosting models more **bias-corrective** but also more sensitive to hyperparameters such as learning rate and maximum tree depth.  
+
+The contrast between the two can be summarized as:  
+- Random Forest: *parallel ensemble → variance reduction → stability*.  
+- XGBoost: *sequential ensemble → bias correction → accuracy at the cost of complexity*.  
+
+In applied analytics, the choice often reflects operational constraints. Random Forest provides a dependable, interpretable default. XGBoost, though harder to tune, tends to deliver superior ranking or classification metrics in performance-critical contexts like credit scoring, fraud detection, and anomaly identification.  
+
+**References**  
+- Hastie, T., Tibshirani, R., & Friedman, J. (2009). *The Elements of Statistical Learning* (2nd ed.). Springer.  
+- Chen, T., & Guestrin, C. (2016). XGBoost: A scalable tree boosting system. *KDD*.  
+
+:::
+---
+
+## Stability vs. Complexity — the ensemble trade-off
+
+- **Random Forest:** increases **stability** through averaging.  
+- **XGBoost:** increases **accuracy** through correction.  
+- Trade-off:  
+  - Random Forest → simpler, interpretable, steady.  
+  - XGBoost → powerful but complex and sensitive.  
+
+--
+
+<figure>
+  <img src="../materials/assets/images/ensemble_stability_vs_performance.png"
+       alt="**Figure:** Two overlapping curves showing stability vs. performance trade-off.">
+  <figcaption>**Figure:** Two overlapping curves showing stability vs. performance trade-off.</figcaption>
+</figure>  
+
+::: {.notes}
+ 
+
+### Detailed Notes  
+- **Random Forest:** increases stability through averaging.  
+- **XGBoost:** increases accuracy through correction.  
+- **Trade-off:**  
+  - Random Forest → simpler, interpretable, steady.  
+  - XGBoost → powerful but complex and sensitive.  
+- Emphasize that the best choice depends on context: interpretability vs. accuracy, speed vs. fine-tuned precision.  
+
+### DEEPER DIVE  
+The ensemble trade-off between Random Forest and XGBoost reflects the broader **bias–variance decomposition** of model error:  
+\[
+\text{Total Error} = \text{Bias}^2 + \text{Variance} + \text{Irreducible Noise}.
+\]
+Random Forest primarily reduces variance through decorrelated averaging, resulting in consistent predictions even under noisy or slightly shifted inputs. XGBoost, in contrast, targets bias by sequentially fitting residuals, yielding a model capable of representing more complex patterns but also more prone to variance inflation if regularization or learning-rate control is inadequate.  
+
+From a systems perspective, Random Forest emphasizes **stability**—its results are repeatable, interpretable, and rarely catastrophic. XGBoost emphasizes **complexity management**—fine-grained optimization that can deliver state-of-the-art accuracy but requires meticulous hyperparameter control.  
+
+In choosing between the two, the guiding principle is **fit for purpose**.  
+- When interpretability, robustness, and minimal tuning matter: choose Random Forest.  
+- When incremental accuracy gains translate directly to measurable value (e.g., fraud prevention or credit underwriting): choose XGBoost.  
+
+Ultimately, both methods illustrate a central principle of modern machine learning—ensemble averaging and sequential refinement are two sides of the same coin, trading stability for precision in pursuit of generalization.  
+
+**References**  
+- Breiman, L. (2001). Random forests. *Machine Learning, 45*(1), 5–32.*  
+- Friedman, J. H. (2001). Greedy function approximation: A gradient boosting machine. *Annals of Statistics, 29*(5), 1189–1232.*  
+- Hastie, T., Tibshirani, R., & Friedman, J. (2009). *The Elements of Statistical Learning* (2nd ed.). Springer.  
+
+ 
+:::
+---
+
+# 3.6 Evaluation Metrics for Classification  
+
+---
+
+## Accuracy alone rarely tells the full story
+
+- **Accuracy:** % of correct predictions.  
+- Works well **only when classes are balanced**.  
+- Example:  95% accuracy sounds good, but in fraud detection (1% fraud), a model that always predicts “not fraud” achieves 99%.  
+- Key idea: high accuracy ≠ good performance.  
+
+--
+
+<figure>
+  <img src="../materials/assets/images/metrics_accuracy_fallacy.png"
+       alt="**Figure:** An “always negative” model achieving high accuracy but zero recall.">
+  <figcaption>**Figure:** An “always negative” model achieving high accuracy but zero recall.</figcaption>
+</figure>  
+
+::: {.notes}
+
+## Slide: Accuracy alone rarely tells the full story
+
+### Detailed Notes
+- **Accuracy:** % of correct predictions.  
+- Works well **only when classes are balanced**.  
+- Example: 95% accuracy sounds good, but in fraud detection (1% fraud), a model that always predicts “not fraud” achieves 99%.  
+- Key idea: high accuracy ≠ good performance.  
+
+### DEEPER DIVE
+Accuracy is the most familiar performance metric, yet in many contexts it is also the most misleading. Defined as the proportion of correct predictions,  
+\[
+\text{Accuracy} = \frac{TP + TN}{TP + TN + FP + FN},
+\]
+it treats all errors equally and assumes balanced class distributions. In real-world data, however, the positive class is often rare. In a fraud detection problem with a 1% fraud rate, a trivial model that always predicts “not fraud” achieves 99% accuracy but zero practical value.  
+
+The central flaw is that accuracy ignores **class imbalance** and the asymmetric costs of misclassification. For imbalanced problems, the **majority class dominates** the metric, masking poor performance on the minority class. Moreover, accuracy provides no insight into the trade-off between catching true positives and avoiding false alarms.  
+
+In operational systems, performance should instead be evaluated in terms of **utility**—how effectively the model supports the decision objective given the costs and prevalence of outcomes. Metrics like **precision**, **recall**, and **F1-score** address these limitations by explicitly disentangling the two major sources of error: false positives and false negatives.  
+
+**References**  
+- He, H., & Garcia, E. A. (2009). Learning from imbalanced data. *IEEE Transactions on Knowledge and Data Engineering, 21*(9), 1263–1284.*  
+- Saito, T., & Rehmsmeier, M. (2015). The precision–recall plot is more informative than the ROC plot when evaluating binary classifiers on imbalanced datasets. *PLOS ONE, 10*(3), e0118432.   
+:::
+---
+
+## Precision, recall, and F1-score clarify performance trade-offs
+
+- **Precision:**  
+  - Of all predicted positives, how many are correct?  
+  - Formula: $\text{Precision} = \frac{TP}{TP + FP}$  
+  - Important when **false positives** are costly (e.g., flagging legit transactions).  
+
+- **Recall (Sensitivity):**  
+  - Of all actual positives, how many did we capture?  
+  - Formula: $\text{Recall} = \frac{TP}{TP + FN}$  
+  - Important when **false negatives** are costly (e.g., missing real fraud).  
+
+- **F1-score:**  
+  - Harmonic mean of precision and recall.  
+  - Balances the two when both matter.  
+
+
+::: {.notes}
+
+### Detailed Notes
+- **Precision:** of all predicted positives, how many are correct.  
+- **Recall:** of all actual positives, how many were captured.  
+- **F1-score:** harmonic mean of precision and recall.  
+
+### DEEPER DIVE
+Precision, recall, and F1-score capture the dual aspects of classification performance that accuracy obscures.  
+- **Precision** measures the *purity* of predicted positives:
+  \[
+  \text{Precision} = \frac{TP}{TP + FP}.
+  \]
+  High precision indicates few false alarms.  
+- **Recall** (or sensitivity) measures *coverage* of the true positives:
+  \[
+  \text{Recall} = \frac{TP}{TP + FN}.
+  \]
+  High recall means the model identifies most actual positives.  
+
+These metrics are inherently **in tension**. Increasing recall (by lowering a decision threshold) usually lowers precision, since more marginal cases are classified as positive. The **F1-score** provides a single-number summary as the harmonic mean:
+\[
+F_1 = 2 \times \frac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}}.
+\]
+The harmonic mean penalizes imbalance between the two—both must be high for a good F1-score.  
+
+This framework aligns model evaluation with the realities of decision-making. In credit approval, for instance, precision matters most: false positives (bad loans) are expensive. In cancer screening, recall is paramount: missing a case has severe consequences. The metric choice thus reflects organizational priorities rather than purely statistical criteria.  
+
+**References**  
+- Powers, D. M. W. (2011). Evaluation: From precision, recall and F-measure to ROC, informedness, markedness, and correlation. *Journal of Machine Learning Technologies, 2*(1), 37–63.* 
+
+:::
+---
+
+## The confusion matrix shows all four types of outcomes
+
+
+<figure>
+  <img src="../materials/assets/images/confusion_matrix2.svg"
+       alt="**Figure:** 2×2 confusion matrix diagram with labels for TP, FP, FN, TN.">
+  <figcaption>**Figure:** 2×2 confusion matrix diagram with labels for TP, FP, FN, TN.</figcaption>
+</figure>  
+
+::: {.notes}
+
+
+### Detailed Notes
+- Layout: rows = actual, columns = predicted.  
+- Cells: TP, FP, FN, TN.  
+- Foundation for all other classification metrics.  
+
+### DEEPER DIVE
+The **confusion matrix** is the conceptual foundation for nearly every evaluation metric in classification. It decomposes predictions into four basic categories:
+|                | **Predicted Positive** | **Predicted Negative** |
+|----------------|------------------------|------------------------|
+| **Actual Positive** | True Positive (TP) | False Negative (FN) |
+| **Actual Negative** | False Positive (FP) | True Negative (TN) |
+
+From this table derive all other metrics:  
+- **Precision** = TP / (TP + FP)  
+- **Recall (Sensitivity)** = TP / (TP + FN)  
+- **Specificity** = TN / (TN + FP)  
+- **Accuracy** = (TP + TN) / Total  
+
+The confusion matrix also underlies **cost-sensitive evaluation**. Each cell corresponds to a decision consequence with its own economic or operational cost. False negatives and false positives often differ drastically in cost magnitude, motivating cost-weighted loss functions and threshold optimization.  
+
+Understanding this table allows practitioners to move from raw classification output to interpretable, actionable evaluation aligned with the practical stakes of decision-making.  
+
+**References**  
+- Fawcett, T. (2006). An introduction to ROC analysis. *Pattern Recognition Letters, 27*(8), 861–874.*  
+
+:::
+---
+
+## ROC curves reveal model ranking quality across thresholds
+
+- **ROC curve:** plots **True Positive Rate (Recall)** vs. **False Positive Rate (1 − Specificity)** across thresholds.  
+- **AUC (Area Under Curve):** overall measure of ranking performance.  
+  - AUC = 0.5 → random guessing.  
+  - AUC = 1.0 → perfect classifier.  
+- Benefit: **threshold-independent** evaluation.  
+
+--
+
+<figure>
+  <img src="../materials/assets/images/metrics_roc_curve.png"
+       alt="**Figure:** ROC curve with diagonal “random” line and high-performing curve above it.">
+  <figcaption>**Figure:** ROC curve with diagonal “random” line and high-performing curve above it.</figcaption>
+</figure>  
+
+::: {.notes}
+
+### Detailed Notes
+- ROC plots **True Positive Rate (Recall)** vs. **False Positive Rate**.  
+- **AUC** summarizes performance across thresholds.  
+- Benefit: threshold-independent evaluation.  
+
+### DEEPER DIVE
+The **Receiver Operating Characteristic (ROC)** curve visualizes how a classifier’s performance changes as its decision threshold varies. Each point on the curve corresponds to a specific threshold, plotting:
+\[
+\text{True Positive Rate (TPR)} = \frac{TP}{TP + FN}, \quad \text{False Positive Rate (FPR)} = \frac{FP}{FP + TN}.
+\]
+The curve’s shape reveals how effectively the model separates positive and negative cases. A perfect classifier hugs the top-left corner (TPR = 1, FPR = 0), while a random classifier falls along the diagonal.  
+
+The **Area Under the ROC Curve (AUC)** condenses this information into a single value between 0 and 1. Statistically, AUC represents the probability that the classifier ranks a randomly chosen positive example higher than a randomly chosen negative one.  
+
+ROC curves are **threshold-independent**, making them useful for model comparison. However, they can be deceptive under extreme imbalance: even large differences in TPR may produce minimal AUC changes when negatives dominate. In such cases, **Precision–Recall (PR)** curves provide a more informative picture.  
+
+**References**  
+- Fawcett, T. (2006). An introduction to ROC analysis. *Pattern Recognition Letters, 27*(8), 861–874.*  
+:::
+---
+
+## Precision–recall curve: trade-off depends on chosen threshold
+
+- **Lower threshold:** higher recall, lower precision.  
+- **Higher threshold:** higher precision, lower recall.  
+- Example: fraud detection → lower threshold to catch all suspicious cases.  
+- Visualization: **precision–recall curve**.  
+
+--
+
+<figure>
+  <img src="../materials/assets/images/metrics_precision_recall_curve.png"
+       alt="**Figure:** Precision–recall curves show how threshold movement changes trade-off.">
+  <figcaption>**Figure:** Precision–recall curves show how threshold movement changes trade-off.</figcaption>
+</figure>  
+
+::: {.notes}
+
+### Detailed Notes
+- Lower threshold → higher recall, lower precision.  
+- Higher threshold → higher precision, lower recall.  
+- Useful for imbalanced datasets.  
+
+### DEEPER DIVE
+The **Precision–Recall (PR) curve** is an alternative to the ROC curve, emphasizing the model’s ability to identify positive cases in heavily imbalanced datasets. It plots **precision** on the y-axis and **recall** on the x-axis across varying thresholds.  
+
+In contrast to the ROC curve, which can overstate performance when negatives dominate, the PR curve focuses exclusively on the positive class. The **area under the PR curve (Average Precision)** quantifies overall ranking quality for positive cases.  
+
+The PR curve’s shape vividly illustrates the trade-off between catching more positives (recall) and maintaining accuracy among predicted positives (precision). Lowering thresholds sweeps rightward across the curve (more recall, less precision), while raising thresholds sweeps leftward (less recall, more precision).  
+
+In practice, the PR curve provides a realistic view of model behavior in high-imbalance contexts such as fraud detection, rare disease identification, or anomaly detection—scenarios where even a small number of false positives can overwhelm operations.  
+
+**References**  
+- Davis, J., & Goadrich, M. (2006). The relationship between precision–recall and ROC curves. *Proceedings of the 23rd International Conference on Machine Learning (ICML)*, 233–240.  
+
+ 
+:::
+---
+
+## Matching metrics to real-world context
+
+- **High precision preferred:** Email spam filters (avoid blocking important mail).  
+- **High recall preferred:** Medical screening (catch every possible case).  
+- **F1-score:** Balanced need for both precision and recall.  
+- Key idea: **metric choice = context choice**, not math choice.  
+
+::: {.notes}
+
+### Detailed Notes
+- High precision preferred for spam filters.  
+- High recall preferred for medical screening.  
+- F1-score balances both when they matter equally.  
+- Metric choice = context choice.  
+
+### DEEPER DIVE
+Choosing the “best” evaluation metric is not a mathematical question—it is a question of purpose.  
+Each metric reflects implicit priorities about which errors matter most. For example:  
+- **Precision-oriented** systems (spam filters, recommendation alerts) minimize false positives because user trust is fragile.  
+- **Recall-oriented** systems (medical screening, cybersecurity alerts) minimize false negatives because missed detections are unacceptable.  
+- **F1-score** balances both priorities when trade-offs are symmetric.  
+
+The key is **alignment** between metrics and business objectives. In real deployments, model success is defined by cost reduction, risk mitigation, or service improvement—not abstract accuracy. Metric selection should therefore reflect the economics of decision-making, ensuring that evaluation measures what truly matters.  
+
+**References**  
+- Hand, D. J. (2009). Measuring classifier performance: A coherent alternative to the area under the ROC curve. *Machine Learning, 77*(1), 103–123.*   
+:::
+---
+
+## Cost-sensitive thresholding aligns models with business goals
+
+- Not all errors are equal — cost matters.  
+- Example:  
+  - Missing fraud (false negative) costs more than false alarm (false positive).  
+  - Lowering threshold increases recall but increases false alarms.  
+- The decision rule is part of **business strategy**, not just modeling.  
+
+
+::: {.notes}
+
+### Detailed Notes
+- Not all errors are equal—cost matters.  
+- Example: missing fraud (false negative) costs more than a false alarm.  
+- Lowering threshold increases recall but increases false positives.  
+- The decision rule is part of business strategy.  
+
+### DEEPER DIVE
+In practice, model evaluation must account for the **asymmetric costs of errors**. A model that minimizes overall error may still be suboptimal if false negatives and false positives carry unequal consequences.  
+
+Cost-sensitive evaluation embeds these trade-offs formally through a loss function:
+\[
+\text{Expected Cost} = C_{FN} P(FN) + C_{FP} P(FP),
+\]
+where \(C_{FN}\) and \(C_{FP}\) are the monetary or operational costs of false negatives and false positives. The **optimal threshold** minimizes expected cost rather than maximizing accuracy or F1-score.  
+
+For instance, in fraud detection, missing a fraudulent transaction (FN) may cost hundreds of dollars, whereas investigating a legitimate one (FP) costs only a few cents. In this scenario, the model should operate at a lower threshold to prioritize recall.  
+
+This cost-sensitive framing bridges analytics and decision science. It highlights that model performance cannot be separated from context—the value of a classifier lies in its ability to optimize real-world outcomes, not statistical purity.  
+
+**References**  
+- Elkan, C. (2001). The foundations of cost-sensitive learning. *Proceedings of the 17th International Joint Conference on Artificial Intelligence (IJCAI)*, 973–978.  
+- Drummond, C., & Holte, R. C. (2006). Cost curves: An improved method for visualizing classifier performance. *Machine Learning, 65*(1), 95–130.  
+
+
+
+ 
+:::
+---
+
+
+# 3.7 Model Tuning and Validation  
+
+---
+
+## Cross-validation improves confidence in model performance
+
+Same principle as regression: use multiple train/validation splits to assess generalization.  **Stratified k-fold** preferred in classification — keeps class ratios consistent across folds.  
+
+
+<figure>
+  <img src="../materials/assets/images/cv_stratified_kfold2.svg"
+       alt="**Figure:** Diagram showing data split into folds, cycling through training and validation.">
+  <figcaption>**Figure:** Diagram showing data split into folds, cycling through training and validation.</figcaption>
+</figure>  
+
+::: {.notes}
+single train-test splits can be misleading, especially for small or imbalanced datasets.  
+Demonstrate stratified k-fold visually — emphasize preserving class balance.  
+Remind students that cross-validation measures stability, not just accuracy.  
+:::
+---
+
+## Classification models have key hyperparameters. Grid search systematically tunes these, testing for the best combination via cross- validation. 
+
+-  
+  - **Decision Trees:** `max_depth`, `min_samples_split`.  
+  - **Random Forest:** `n_estimators`, `max_features`.  
+  - **XGBoost:** `learning_rate`, `max_depth`, `subsample`.  
+- **Trade-off:** computational cost vs. thoroughness.  
+
+--
+
+<figure>
+  <img src="../materials/assets/images/tuning_grid_search_heatmap.png"
+       alt="**Figure:** Grid search heatmap visual showing accuracy across combinations of hyperparameters.">
+  <figcaption>**Figure:** Grid search heatmap visual showing accuracy across combinations of hyperparameters.</figcaption>
+</figure>  
+
+::: {.notes}
+Show the idea of evaluating performance across a grid of parameters.  
+Contrast brute-force grid search with more efficient methods (e.g., random search, Bayesian optimization).  
+Stress that the best settings are those that generalize — not just those with highest training accuracy.  
+:::
+---
+
+## Diagnosing overfitting, underfitting, and imbalance
+
+- **Overfitting:**  
+  - Training accuracy ≫ validation accuracy.  
+  - Fix: reduce model complexity, use regularization, or gather more data.  
+
+- **Underfitting:**  
+  - Both training and validation performance are poor.  
+  - Fix: increase model complexity, add features, or try flexible models.  
+
+- **Class imbalance:**  
+  - Model predicts majority class well but misses minority class.  
+  - Fix: use class weights, resampling, or metrics like F1 and AUC.  
+
+--
+
+<figure>
+  <img src="../materials/assets/images/diagnose_overfit_underfit_imbalance.png"
+       alt="**Figure:** Three-panel chart showing (1) overfit: gap between train/test accuracy, (2) underfit: both low, (3) imbalance: skewed predictions.">
+  <figcaption>**Figure:** Three-panel chart showing (1) overfit: gap between train/test accuracy, (2) underfit: both low, (3) imbalance: skewed predictions.</figcaption>
+</figure>  
+
+::: {.notes}
+Explain the bias–variance connection using overfit/underfit graphs.  
+Discuss how imbalance can mislead accuracy metrics — tie back to Section 3.6.  
+Encourage diagnosing using learning curves and confusion matrices.  
+:::
+---
+
+## Tuning is an iterative process, not a destination
+
+- Goal: **generalization**, not perfection.  
+- Tuning is about **balancing**:  
+  - Complexity vs. interpretability.  
+  - Accuracy vs. robustness.  
+- No “best” model — only models that perform well **for a given context**.  
+
+
+::: {.notes}
+tuning is iterative exploration, not final optimization.  
+Encourage experimentation, documentation, and reproducibility in workflow.  
+Tie this section back to the “exploration” theme of your overall teaching approach.  
+:::
+---
+
+#  Hands-On Exercise - Apply classification concepts end-to-end. 

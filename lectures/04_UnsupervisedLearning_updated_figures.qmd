@@ -1,0 +1,1353 @@
+---
+title: "Gateway Technical"
+subtitle: "Unsupervised Learning"
+format: 
+  pptx:
+    reference-doc: ../../materials/assets/template_fixed2.pptx
+
+#author:
+#  - name: Joel Davis
+#    email: joel.davis@warrington.ufl.edu
+#    affiliations:
+#      - University of Florida
+
+#license: "CC BY"
+
+bibliography: ../../materials/assets/shared_references_courses.bib
+csl: ../../materials/assets/apa.csl
+---
+
+# 4.1 Introduction to Unsupervised Learning
+
+---
+
+## Unsupervised learning finds structure without labeled outcomes
+
+- **Definition:** Algorithms that discover patterns or relationships in data **without target labels**.  
+- Contrast with supervised learning, which learns mappings from inputs → known outputs.  
+- Goal: reveal **latent structure** — groups, patterns, or anomalies hidden in the data.  
+
+--
+
+<figure>
+  <img src="../materials/assets/images/intro_supervised_vs_unsupervised.svg"
+       alt="**Figure:** Comparison of supervised learning (labeled outcomes) vs. unsupervised learning (unlabeled structure discovery).">
+  <figcaption>**Figure:** Comparison of supervised learning (labeled outcomes) vs. unsupervised learning (unlabeled structure discovery).</figcaption>
+</figure>
+
+::: {.notes}
+
+### Detailed Notes  
+- Begin by clearly distinguishing **supervised** versus **unsupervised** learning. In supervised learning, the algorithm learns a mapping from inputs to known output labels; in unsupervised learning, there are no labels, and the goal is to uncover structure hidden within the input data itself.  
+- Emphasize that “structure” refers to **latent patterns**, such as clusters or relationships that may not be directly observable.  
+- Explain that unsupervised learning is **exploratory by nature**, helping analysts generate hypotheses or organize data before predictive modeling begins.  
+- Reinforce that while supervised models are optimized for accuracy, unsupervised models are evaluated on **interpretability, stability, and insight**.  
+- Use analogies to clarify: supervised learning is like “learning from an answer key,” while unsupervised learning is like “finding groups in a crowd without knowing who belongs together.”  
+- Show or describe the figure comparing supervised (labeled) and unsupervised (unlabeled) pipelines; highlight that the absence of labeled outcomes means the model must infer similarity from the data’s internal geometry.  
+
+### DEEPER DIVE  
+Unsupervised learning refers to methods that identify patterns or groupings within data without predefined categories or labels (Hastie, Tibshirani, & Friedman, 2009). The algorithms rely on the intrinsic structure of the data rather than external supervision. Common mathematical objectives include minimizing within-group variance (as in K-Means), maximizing separability among features, or identifying statistical deviations from expected distributions.  
+
+This learning paradigm is foundational for **exploratory data analysis (EDA)** and is often a precursor to supervised modeling. For example, cluster analysis can reveal latent market segments that later inform classification tasks. Similarly, dimensionality reduction (e.g., PCA) helps reveal the principal axes of variation in high-dimensional spaces.  
+
+A key conceptual distinction lies in **optimization criteria**. Supervised learning optimizes an explicit loss function based on known outcomes (e.g., minimizing mean squared error). Unsupervised learning lacks this reference point; it relies on internal metrics like within-cluster compactness or reconstruction error. Thus, its success depends as much on human interpretation as on algorithmic fit.  
+
+From a philosophical standpoint, unsupervised learning represents an epistemic shift from prediction to **discovery** (von Luxburg & Schölkopf, 2011). Rather than asking “Can we predict Y?”, it asks “What structure exists within X?” This shift underlies much of modern data-driven insight generation in fields like marketing analytics, anomaly detection, and bioinformatics.  
+
+**References**  
+- Hastie, T., Tibshirani, R., & Friedman, J. (2009). *The Elements of Statistical Learning* (2nd ed.). Springer.  
+- von Luxburg, U., & Schölkopf, B. (2011). Statistical learning theory: Models, concepts, and results. *Handbook of the Philosophy of Science: Philosophy of Statistics*, 7, 651–706.  
+
+:::
+
+---
+
+## The three pillars and goals of unsupervised learning
+
+- **Clustering:** group similar observations to reveal structure.  
+- **Dimensionality reduction:** simplify high-dimensional data for analysis or visualization.  
+- **Anomaly detection:** identify rare or unexpected events that deviate from the norm.  
+- Together, these form the **core toolkit** for exploring and understanding unlabeled data.  
+
+--
+
+<figure>
+  <img src="../materials/assets/images/intro_unsupervised_roadmap.svg"
+       alt="**Figure:** Conceptual roadmap diagram showing progression: Clustering → Dimensionality Reduction → Anomaly Detection, with short captions: “Find patterns,” “Simplify data,” “Detect what’s unusual.”">
+  <figcaption>**Figure:** Conceptual roadmap diagram showing progression: Clustering → Dimensionality Reduction → Anomaly Detection, with short captions: “Find patterns,” “Simplify data,” “Detect what’s unusual.”</figcaption>
+</figure>
+
+::: {.notes}
+ 
+
+### Detailed Notes  
+- Explain that unsupervised learning encompasses multiple goals—pattern discovery, simplification, and detection of irregularities.  
+- Introduce the three “pillars”: **clustering**, **dimensionality reduction**, and **anomaly detection**.  
+- Stress that these are not mutually exclusive; often, dimensionality reduction precedes clustering, and anomaly detection builds on both.  
+- Relate to business analytics: clustering supports segmentation, dimensionality reduction enables visualization, and anomaly detection safeguards operations.  
+- Present this as a roadmap for the rest of the module.  
+
+### DEEPER DIVE  
+The three primary objectives of unsupervised learning form a methodological continuum (Jain, Murty, & Flynn, 1999).  
+
+1. **Clustering** groups similar observations based on distance or density. It is widely used for market segmentation, customer behavior profiling, and image grouping. The mathematical formulations range from partition-based methods like K-Means to hierarchical and density-based approaches such as DBSCAN.  
+2. **Dimensionality reduction** seeks lower-dimensional representations that capture most of the variance or information content. Techniques like PCA or manifold learning (t-SNE, UMAP) are crucial for handling the “curse of dimensionality” (Bellman, 1961).  
+3. **Anomaly detection** identifies data points that deviate significantly from normal patterns, often corresponding to rare or high-impact events.  
+
+Together, these form the foundation for **exploratory modeling**, where the primary goal is interpretive understanding rather than prediction accuracy.  
+
+**References**  
+- Jain, A. K., Murty, M. N., & Flynn, P. J. (1999). Data clustering: A review. *ACM Computing Surveys, 31*(3), 264–323.  
+- Bellman, R. (1961). *Adaptive Control Processes: A Guided Tour*. Princeton University Press.  
+
+:::
+
+---
+
+## When to use unsupervised methods
+
+- **Exploration:** discover hidden relationships before labels exist.  
+- **Segmentation:** identify natural customer or product groups.  
+- **Novelty detection:** detect emerging risks or rare behaviors.  
+
+
+::: {.notes}
+
+### Detailed Notes  
+- Use concrete business contexts to ground the discussion: customer segmentation, product recommendation, operational monitoring, and fraud detection.  
+- Emphasize the **exploratory** and **diagnostic** roles of these methods before predictive models are available.  
+- Clarify that unsupervised learning is useful when labeled data are unavailable or prohibitively expensive to obtain.  
+- Reinforce that the insights derived often drive data labeling strategies or feature engineering downstream.  
+
+### DEEPER DIVE  
+Unsupervised methods are most appropriate in settings where the underlying structure of the data is unknown or only partially understood. For example, in early-stage analytics projects, clustering and dimensionality reduction can expose natural groupings or latent factors that guide hypothesis formulation (Hand, Mannila, & Smyth, 2001).  
+
+They are also essential for **novelty and anomaly detection**, where the goal is to identify previously unseen patterns. In cybersecurity, for instance, unsupervised models can flag unusual network activity that supervised systems, trained on known threats, would miss.  
+
+Unsupervised approaches serve both as **precursors** (data exploration before labeling) and **complements** (ongoing structure monitoring) to supervised pipelines. Their value lies in surfacing meaningful structure from raw, unlabeled data.  
+
+**References**  
+- Hand, D., Mannila, H., & Smyth, P. (2001). *Principles of Data Mining*. MIT Press.  
+ 
+:::
+
+---
+
+## From “nice-to-have” insight to mission-critical capability
+
+- **Segmentation** supports smarter marketing and personalization.  
+- **Anomaly detection** safeguards against fraud, failure, or loss.  
+- Takeaway: unsupervised methods range from exploratory insight to **critical operational tools**.  
+
+--
+
+<figure>
+  <img src="../materials/assets/images/intro_segmentation_vs_anomaly.svg"
+       alt="**Figure:** Split visualization — left: marketing segmentation; right: anomaly detection alert.">
+  <figcaption>**Figure:** Split visualization — left: marketing segmentation; right: anomaly detection alert.</figcaption>
+</figure>
+
+::: {.notes}
+
+### Detailed Notes  
+- Emphasize that unsupervised methods have matured from exploratory curiosities to integral parts of enterprise analytics pipelines.  
+- Provide contrasting examples: early market segmentation studies vs. modern real-time anomaly detection in cybersecurity.  
+- Stress the link between unsupervised methods and operational decision-making.  
+- Conclude this section by foreshadowing the practical algorithms that follow (K-Means, DBSCAN, PCA).  
+
+### DEEPER DIVE  
+Historically, unsupervised learning was treated as supplementary—useful for visualization or exploratory insights. However, as data systems have scaled, the ability to autonomously detect structure or deviation has become operationally vital. In fraud detection, for instance, unsupervised algorithms can identify suspicious transactions before labeled fraud cases exist (Chandola, Banerjee, & Kumar, 2009).  
+
+This transition reflects a broader trend toward **self-organizing systems** capable of continuous learning without explicit supervision. The line between “exploratory” and “production-critical” analytics is now fluid.  
+
+As enterprises deploy AI for real-time monitoring, recommendation, and optimization, unsupervised techniques form the backbone of adaptive intelligence — systems that learn from structure rather than instruction.  
+
+**References**  
+- Chandola, V., Banerjee, A., & Kumar, V. (2009). Anomaly detection: A survey. *ACM Computing Surveys, 41*(3), 1–58.  
+ 
+:::
+
+---
+
+# 4.2 Clustering: K-Means
+
+---
+
+## K-Means assigns each point to the nearest centroid
+
+- Algorithm steps:  
+  1. Randomly initialize *k* centroids.  
+  2. Assign each point to the nearest centroid (Euclidean distance).  
+  3. Recompute each centroid as the mean of its cluster.  
+  4. Repeat until cluster assignments stabilize.  
+- Output: each data point gets a **cluster label**.  
+
+--
+
+<figure>
+  <img src="../materials/assets/images/K-Means_clustering.svg"
+       alt="**Figure:** 2D points colored by cluster assignment with centroids marked by Xs.">
+  <figcaption>**Figure:** 2D points colored by cluster assignment with centroids marked by Xs.</figcaption>
+</figure>
+
+::: {.notes}
+
+### Detailed Notes  
+- Introduce clustering as the foundational unsupervised learning problem.  
+- Walk through the **iterative process** of K-Means: initialize centroids, assign each point to the nearest centroid, recompute centroids, and repeat until convergence.  
+- Emphasize that K-Means minimizes **within-cluster sum of squares (WCSS)** — the total squared distance of points to their cluster centroids.  
+- Use visual aids to show how centroids “move” as the algorithm iterates; animation helps reinforce the idea of convergence.  
+- Note that the final cluster label for each point is not predefined but *emerges* from data structure.  
+- Clarify terminology: “centroid” refers to the mean vector of all points in a cluster.  
+
+### DEEPER DIVE  
+K-Means, first formalized by MacQueen (1967), remains the most widely used clustering algorithm due to its conceptual simplicity and computational efficiency. The algorithm seeks to partition \( n \) observations into \( k \) clusters such that each observation belongs to the cluster with the nearest mean, serving as a prototype of that cluster.  
+
+The objective function is to minimize:  
+\[
+J = \sum_{i=1}^{k} \sum_{x_j \in C_i} \|x_j - \mu_i\|^2
+\]
+where \( \mu_i \) is the mean vector (centroid) of cluster \( C_i \). This criterion defines compactness — minimizing within-cluster variance while implicitly maximizing separation among clusters.  
+
+However, K-Means assumes **Euclidean geometry**, meaning that distance is measured in a continuous, convex feature space. This assumption limits its performance on non-spherical or categorical data. Moreover, it optimizes a **non-convex** objective function, which guarantees convergence but not necessarily to the global optimum (Bishop, 2006).  
+
+Conceptually, K-Means exemplifies *prototype-based learning*: clusters are represented by central exemplars rather than density or connectivity. This approach reflects an implicit assumption that “similarity” can be measured by proximity to an average — an idea both powerful and fragile when data distributions are irregular or contain outliers.  
+
+**References**  
+- MacQueen, J. (1967). Some methods for classification and analysis of multivariate observations. *Proceedings of the Fifth Berkeley Symposium on Mathematical Statistics and Probability*, 1, 281–297.  
+- Bishop, C. M. (2006). *Pattern Recognition and Machine Learning*. Springer.  
+:::
+
+---
+
+## Initialization and convergence affect results
+
+- **Initialization:** random starting centroids can yield poor local minima.  
+  - `k-means++` improves starting positions by spreading centroids apart.  
+- **Convergence:** algorithm always converges but not always to the global optimum.  
+- **Choosing k:**  
+  - **Elbow method:** plot within-cluster sum of squares (WCSS) vs. *k*.  
+  - Identify the “elbow” where added clusters give diminishing returns.  
+
+--
+
+<figure>
+  <img src="../materials/assets/images/kmeans_elbow_wcss_vs_k.svg"
+       alt="**Figure:** Line chart of WCSS vs. k showing elbow point around optimal cluster count.">
+  <figcaption>**Figure:** Line chart of WCSS vs. k showing elbow point around optimal cluster count.</figcaption>
+</figure>
+
+::: {.notes}
+
+### Detailed Notes  
+- Explain that K-Means is deterministic given its initial centroid placements, but those placements are random by default.  
+- Emphasize that **poor initialization** can trap the algorithm in local minima, producing suboptimal clusters.  
+- Introduce the **k-means++** initialization, which improves robustness by spreading initial centroids apart (Arthur & Vassilvitskii, 2007).  
+- Demonstrate the **elbow method**: plot WCSS versus number of clusters \( k \) and identify the “elbow point” where improvements level off.  
+- Clarify that while K-Means always converges, it does not guarantee finding the global minimum of the objective function.  
+
+### DEEPER DIVE  
+Initialization plays a critical role in the behavior and performance of K-Means. Because the algorithm’s optimization landscape is non-convex, random starting positions for centroids often lead to different local minima (Forgy, 1965). This sensitivity motivates the practice of running the algorithm multiple times and selecting the solution with the lowest WCSS.  
+
+The **k-means++** initialization method significantly improves reliability by selecting initial centroids that are probabilistically distant from each other. The probability of choosing a new centroid is proportional to the squared distance from the nearest existing centroid. This ensures broader coverage of the data space and reduces the likelihood of poor local optima.  
+
+The **Elbow Method** and its alternatives (such as the Gap Statistic) help estimate an appropriate number of clusters, though these remain heuristic rather than formal criteria. The key pedagogical insight is that clustering evaluation requires interpretive judgment — the “right” number of clusters often depends on **analytic purpose**, not just numerical optimization.  
+
+Mathematically, convergence occurs when cluster assignments stabilize and centroids stop moving. However, the final solution depends on the initialization trajectory, and the criterion for “convergence” is typically when centroid movement falls below a threshold.  
+
+**References**  
+- Arthur, D., & Vassilvitskii, S. (2007). k-means++: The advantages of careful seeding. *Proceedings of the Eighteenth Annual ACM-SIAM Symposium on Discrete Algorithms*, 1027–1035.  
+- Forgy, E. W. (1965). Cluster analysis of multivariate data: Efficiency versus interpretability of classifications. *Biometrics, 21*(3), 768–769.  
+:::
+
+---
+
+## Feature scaling ensures fair distance comparisons
+
+- **Preprocessing:** standardize or normalize features before clustering.  
+- **Goal:** make all variables contribute equally to distance calculations.  
+- Without scaling, features with large ranges (e.g., income) dominate smaller-scale features (e.g., age).  
+
+
+::: {.notes}
+
+### Detailed Notes  
+- Demonstrate that features measured on different scales distort Euclidean distance.  
+- Emphasize that **standardization** (z-score scaling) or **normalization** (min–max scaling) ensures equal contribution of each variable.  
+- Use a simple example (e.g., “income” in dollars vs. “age” in years) to show how unscaled features dominate the clustering outcome.  
+- Reinforce that scaling is a **non-negotiable preprocessing step** for any distance-based algorithm.  
+
+### DEEPER DIVE  
+Because K-Means relies on Euclidean distance, the geometry of the feature space directly influences clustering outcomes. Variables with larger numeric ranges exert disproportionate influence on centroid computation. This violates the implicit assumption that all dimensions contribute equally to similarity.  
+
+Two common scaling strategies address this imbalance:  
+
+1. **Z-score standardization:**  
+   \[
+   x' = \frac{x - \mu}{\sigma}
+   \]
+   Centers features at zero mean with unit variance.  
+2. **Min–max normalization:**  
+
+$$
+   x' = \frac{x - \min(x)}{\max(x) - \min(x)}
+$$
+
+   Scales all features to a uniform range, typically [0, 1].  
+
+The choice depends on context. Standardization preserves the distribution’s shape, while normalization preserves proportional relationships.  
+
+Beyond preprocessing, scaling also affects **distance metrics** (e.g., cosine vs. Euclidean) and thus the topology of the resulting clusters. Pedagogically, scaling illustrates that data representation — not just the algorithm — defines what “similarity” means (Tan, Steinbach, & Kumar, 2018).  
+
+**References**  
+- Tan, P.-N., Steinbach, M., & Kumar, V. (2018). *Introduction to Data Mining* (2nd ed.). Pearson.  
+  
+:::
+
+---
+
+## K-Means has practical limitations
+
+- **Scale sensitivity:** features on large numeric scales dominate distances.  
+  - Example: income (in \$) vs. purchase count.  
+- **Shape limitation:** assumes clusters are convex and spherical.  
+  - Struggles with elongated or irregular clusters.  
+- **Fixed k:** must specify the number of clusters in advance.  
+
+
+::: {.notes}
+
+### Detailed Notes  
+- Emphasize that K-Means performs best on **spherical**, **uniformly sized**, and **well-separated** clusters.  
+- Explain that it fails on irregularly shaped clusters or when the number of clusters is not known in advance.  
+- Note that the algorithm assumes **equal cluster variance** and **feature independence** — rarely true in real-world data.  
+- Use visual examples contrasting circular versus elongated cluster shapes to illustrate limitations.  
+
+### DEEPER DIVE  
+K-Means’ core assumptions — Euclidean distance, isotropic cluster variance, and fixed \( k \) — restrict its flexibility. The method partitions the feature space using **Voronoi cells**, effectively drawing linear decision boundaries perpendicular to the midpoint between centroids. This geometry implies that clusters are convex and hyperspherical.  
+
+When data exhibit non-convex or variable-density structures (e.g., crescent shapes, nested clusters), K-Means produces misleading partitions. Its reliance on mean vectors also makes it sensitive to **outliers**, which can dramatically shift centroids (Celebi, Kingravi, & Vela, 2013).  
+
+Alternative algorithms like DBSCAN and Gaussian Mixture Models (GMMs) relax some of these assumptions. DBSCAN defines clusters by density rather than distance to a centroid, while GMMs allow elliptical cluster boundaries through probabilistic modeling.  
+
+The deeper conceptual issue is that **distance-based clustering** embeds an epistemic assumption: similarity = proximity. This assumption breaks down when data relationships are non-linear, motivating the transition to **density-based** and **manifold-based** methods explored later in the module.  
+
+**References**  
+- Celebi, M. E., Kingravi, H. A., & Vela, P. A. (2013). A comparative study of efficient initialization methods for the k-means clustering algorithm. *Expert Systems with Applications, 40*(1), 200–210.  
+
+:::
+
+---
+
+## Hierarchical clustering builds a tree of merges without pre-specifying k
+
+- **Agglomerative**: start with each point; iteratively **merge the closest** clusters.  
+- **Dendrogram**: **merge height** = dissimilarity; **cut** the tree at a height to get *k* clusters.  
+- **Linkage choices**: complete (max), average (mean), single (min).  
+- **Distance**: Euclidean common; **correlation distance** groups similar *profiles*.
+
+--
+
+<figure>
+  <img src="../materials/assets/images/hierarchical_dendrogram_cut.svg"
+       alt="**Figure:** Dendrogram with a horizontal cut; clusters below the cut in distinct colors.">
+  <figcaption>**Figure:** Dendrogram with a horizontal cut; clusters below the cut in distinct colors.</figcaption>
+</figure>
+
+::: {.notes}
+Vertical height reflects similarity; horizontal order is arbitrary.  
+Add as a reference method; we’ll stay focused on K-Means and DBSCAN in practice.  
+
+
+Now, compared to K-Means and Hierarchical, DBSCAN handles irregular shapes and identifies noise explicitly ... let’s see how.
+
+:::
+
+
+# 4.3 Clustering: DBSCAN and Density-Based Methods
+
+---
+
+
+## DBSCAN groups points by density, not distance to centroids
+
+K-Means struggles with **irregular shapes** and **outliers**.
+
+DBSCANS key advantage is **flexibility** in capturing **nonlinear** or uneven density clusters.
+
+<figure>
+  <img src="../materials/assets/images/dbscan_moons_comparison_1.svg"
+       alt="**Figure:** Two datasets: left—K-Means enforces circular clusters; right—DBSCAN adapts to curved and irregular shapes.">
+  <figcaption>**Figure:** Two datasets: left—K-Means enforces circular clusters; right—DBSCAN adapts to curved and irregular shapes.</figcaption>
+</figure>
+
+--
+
+<figure>
+  <img src="../materials/assets/images/dbscan_moons_comparison_2.svg"
+       alt="**Figure:** Two datasets: left—K-Means enforces circular clusters; right—DBSCAN adapts to curved and irregular shapes.">
+  <figcaption>**Figure:** Two datasets: left—K-Means enforces circular clusters; right—DBSCAN adapts to curved and irregular shapes.</figcaption>
+</figure>
+
+::: {.notes}
+
+### Detailed Notes  
+- Start by contrasting DBSCAN with K-Means. Emphasize that while K-Means assumes spherical, evenly sized clusters defined by distance to centroids, DBSCAN defines clusters by **density** — groups of closely packed points separated by sparse regions.  
+- Explain that DBSCAN automatically detects **noise points** (outliers) and does not require pre-specifying the number of clusters.  
+- Highlight that this flexibility makes DBSCAN effective on **irregular, curved, or unevenly dense** data structures.  
+- Reinforce that DBSCAN is based on two core parameters: `eps` (neighborhood radius) and `min_samples` (minimum points to form a cluster).  
+
+### DEEPER DIVE  
+DBSCAN (Density-Based Spatial Clustering of Applications with Noise), introduced by Ester et al. (1996), was a pivotal development in clustering methodology. Unlike partitioning algorithms that optimize a global objective, DBSCAN operates on a **local connectivity principle**: points belong to the same cluster if they can be reached from one another through a chain of dense neighborhoods.  
+
+Formally, for a point \( p \), the **ε-neighborhood** \( N_{\epsilon}(p) \) consists of all points within distance \( \epsilon \). A point is a **core point** if \(|N_{\epsilon}(p)| \geq \text{min\_samples}\). A cluster is then the transitive closure of all density-reachable points.  
+
+This approach has several conceptual implications:  
+- **No prior k:** Clusters emerge naturally based on data topology rather than user-specified count.  
+- **Noise awareness:** Points not belonging to any dense region are explicitly labeled as outliers.  
+- **Arbitrary shape handling:** Clusters can follow complex, non-convex manifolds.  
+
+DBSCAN’s success lies in redefining “similarity” not as proximity to a center but as **membership in a dense continuum**. However, it is sensitive to the choice of ε — too small and clusters fragment; too large and distinct clusters merge.  
+
+Pedagogically, DBSCAN demonstrates a paradigm shift: clustering as **spatial reasoning** rather than optimization.  
+
+**References**  
+- Ester, M., Kriegel, H.-P., Sander, J., & Xu, X. (1996). A density-based algorithm for discovering clusters in large spatial databases with noise. *Proceedings of the Second International Conference on Knowledge Discovery and Data Mining (KDD-96)*, 226–231.  
+  
+:::
+
+---
+
+## DBSCAN groups points by density, not distance to centroids
+
+- DBSCAN (Density-Based Spatial Clustering of Applications with Noise):  
+  - Groups points based on **density** — not distance to a fixed centroid.  
+  - Automatically identifies **noise points** that belong to no cluster.  
+- Excels where K-Means fails — clusters of arbitrary shape or variable size.  
+
+--
+
+<figure>
+  <img src="../materials/assets/images/DBSCAN_clustering.svg"
+       alt="**Figure:** Two datasets: left—K-Means enforces circular clusters; right—DBSCAN adapts to curved and irregular shapes.">
+  <figcaption>**Figure:** Two datasets: left—K-Means enforces circular clusters; right—DBSCAN adapts to curved and irregular shapes.</figcaption>
+</figure>
+
+::: {.notes}
+
+### Detailed Notes  
+- Start by contrasting DBSCAN with K-Means. Emphasize that while K-Means assumes spherical, evenly sized clusters defined by distance to centroids, DBSCAN defines clusters by **density** — groups of closely packed points separated by sparse regions.  
+- Explain that DBSCAN automatically detects **noise points** (outliers) and does not require pre-specifying the number of clusters.  
+- Highlight that this flexibility makes DBSCAN effective on **irregular, curved, or unevenly dense** data structures.  
+- Reinforce that DBSCAN is based on two core parameters: `eps` (neighborhood radius) and `min_samples` (minimum points to form a cluster).  
+
+### DEEPER DIVE  
+DBSCAN (Density-Based Spatial Clustering of Applications with Noise), introduced by Ester et al. (1996), was a pivotal development in clustering methodology. Unlike partitioning algorithms that optimize a global objective, DBSCAN operates on a **local connectivity principle**: points belong to the same cluster if they can be reached from one another through a chain of dense neighborhoods.  
+
+Formally, for a point \( p \), the **ε-neighborhood** \( N_{\epsilon}(p) \) consists of all points within distance \( \epsilon \). A point is a **core point** if \(|N_{\epsilon}(p)| \geq \text{min\_samples}\). A cluster is then the transitive closure of all density-reachable points.  
+
+This approach has several conceptual implications:  
+- **No prior k:** Clusters emerge naturally based on data topology rather than user-specified count.  
+- **Noise awareness:** Points not belonging to any dense region are explicitly labeled as outliers.  
+- **Arbitrary shape handling:** Clusters can follow complex, non-convex manifolds.  
+
+DBSCAN’s success lies in redefining “similarity” not as proximity to a center but as **membership in a dense continuum**. However, it is sensitive to the choice of ε — too small and clusters fragment; too large and distinct clusters merge.  
+
+Pedagogically, DBSCAN demonstrates a paradigm shift: clustering as **spatial reasoning** rather than optimization.  
+
+**References**  
+- Ester, M., Kriegel, H.-P., Sander, J., & Xu, X. (1996). A density-based algorithm for discovering clusters in large spatial databases with noise. *Proceedings of the Second International Conference on Knowledge Discovery and Data Mining (KDD-96)*, 226–231.  
+  
+:::
+
+---
+
+## Core ideas behind density-based clustering
+
+- **Density threshold:** a cluster is a dense group of points separated by sparse regions.  
+- **Core point:** has at least `min_samples` neighbors within distance `eps`.  
+- **Reachability:** points within `eps` of a core point belong to its cluster.  
+- **Noise points:** isolated points not reachable from any dense region.  
+
+--
+
+<figure>
+  <img src="../materials/assets/images/DBSCAN_clustering.svg"
+       alt="**Figure:** Illustration labeling core, border, and noise points in a 2D dataset.">
+  <figcaption>**Figure:** Illustration labeling core, border, and noise points in a 2D dataset.</figcaption>
+</figure>
+
+::: {.notes}
+
+### Detailed Notes  
+- Define the key terms explicitly:  
+  - **Core points:** have at least `min_samples` neighbors within `eps`.  
+  - **Border points:** lie within the neighborhood of a core point but lack enough neighbors to be core points themselves.  
+  - **Noise points:** are neither core nor border points.  
+- Walk through DBSCAN’s cluster-building process step by step: start from an unvisited point, identify dense regions, expand by reachability, mark noise.  
+- Emphasize **density reachability** as the transitive property linking points within a cluster.  
+
+### DEEPER DIVE  
+The conceptual backbone of DBSCAN is its **local density criterion**. It reframes clustering as identifying contiguous regions of high point density in a metric space.  
+
+The distinction between **core**, **border**, and **noise** points is not just mechanical — it reflects the algorithm’s epistemic stance on what constitutes “structure.” A core point defines a dense locality; border points extend its periphery; noise points belong to sparse regions outside any coherent structure.  
+
+From a statistical perspective, DBSCAN approximates **mode-seeking** methods, akin to **mean shift clustering** (Comaniciu & Meer, 2002), where clusters correspond to high-density modes of an underlying probability distribution. However, DBSCAN’s binary density thresholding makes it computationally simpler and conceptually clearer for teaching purposes.  
+
+By explicitly labeling noise, DBSCAN bridges clustering and **anomaly detection**, anticipating later sections of this module. It implicitly models the “normal” manifold and identifies points deviating from it.  
+
+
+## Two key parameters control cluster formation
+
+- **`eps` (ε):** maximum distance to consider points as neighbors.  
+  - Smaller `eps` → fragmented clusters, more noise.  
+  - Larger `eps` → merged clusters, less noise.  
+
+- **`min_samples`:** minimum points required to form a dense region.  
+  - Larger values → stricter density requirement, fewer clusters.  
+
+
+### Detailed Notes  
+- Explain the meaning of `eps` (radius) and `min_samples` (minimum cluster size).  
+- Use visuals to show how different values affect outcomes:  
+  - Small `eps` → fragmented clusters and excessive noise.  
+  - Large `eps` → merged clusters and loss of granularity.  
+- Discuss the heuristic tuning process using a **k-distance plot** — plot the sorted distances to the k-th nearest neighbor and look for a “knee” to select `eps`.  
+- Emphasize that parameter tuning depends on **domain knowledge** and data scale.  
+
+### DEEPER DIVE  
+Parameter selection in DBSCAN exemplifies the trade-off between **model flexibility and interpretability**. The parameters `eps` and `min_samples` jointly determine the definition of “dense.” Their tuning reflects an analyst’s implicit prior about what counts as meaningful proximity.  
+
+Formally, `eps` defines the spatial resolution of analysis, while `min_samples` defines statistical support. Smaller `eps` and larger `min_samples` yield stricter definitions of density — useful when distinguishing tight, well-defined clusters. Conversely, larger `eps` or smaller `min_samples` produce broader, more inclusive clusters at the cost of specificity.  
+
+The **k-distance heuristic** automates this process by identifying the point of maximum curvature in the plot of distances to the k-th nearest neighbor. This curvature marks a threshold between dense and sparse regions.  
+
+In advanced contexts, parameter estimation can be reframed probabilistically (Campello, Moulavi, & Sander, 2013), treating `eps` as a scale parameter in density estimation. This leads naturally into hierarchical density methods like **HDBSCAN**, which extract clusters across multiple scales of density, eliminating the need for fixed parameters.  
+
+**References**  
+- Campello, R. J. G. B., Moulavi, D., & Sander, J. (2013). Density-based clustering based on hierarchical density estimates. *Pacific-Asia Conference on Knowledge Discovery and Data Mining (PAKDD)*, 160–172.    
+
+**References**  
+- Comaniciu, D., & Meer, P. (2002). Mean shift: A robust approach toward feature space analysis. *IEEE Transactions on Pattern Analysis and Machine Intelligence, 24*(5), 603–619.  
+
+:::
+
+---
+
+## DBSCAN vs. K-Means: flexibility vs. constraint
+
+| **Feature** | **K-Means** | **DBSCAN** |
+|:--|:--|:--|
+| **Cluster shape** | Spherical / convex | Arbitrary (nonlinear) |
+| **Number of clusters** | Must specify *k* | Found automatically |
+| **Noise handling** | None | Identifies outliers explicitly |
+| **Scalability** | Fast, simple | Slower on large datasets |
+| **Scale sensitivity** | High | Moderate (still requires normalization) |
+
+
+::: {.notes}
+
+### Detailed Notes  
+- Use the comparison table to summarize conceptual contrasts:  
+  - **Cluster shape:** spherical (K-Means) vs. arbitrary (DBSCAN).  
+  - **Number of clusters:** fixed vs. automatic.  
+  - **Noise handling:** absent vs. explicit.  
+  - **Scalability:** K-Means is faster, DBSCAN slower but more flexible.  
+- Emphasize that DBSCAN relaxes geometric constraints at the cost of computational efficiency.  
+- Conclude the clustering section by previewing the next topic — dimensionality reduction — which complements clustering by simplifying feature spaces.  
+
+### DEEPER DIVE  
+This comparison highlights two competing paradigms in unsupervised learning:  
+- **Prototype-based clustering (K-Means):** defines structure by minimizing variance around centroids.  
+- **Density-based clustering (DBSCAN):** defines structure by continuity in local density.  
+
+K-Means represents a **parametric** approach — simple, scalable, but constrained by assumptions about cluster shape and count. DBSCAN, in contrast, is **nonparametric** — flexible, interpretable, but computationally intensive on large datasets.  
+
+These trade-offs illustrate the broader methodological tension between **model simplicity and expressiveness**. Prototype models generalize well and are easy to interpret but fail on complex topologies. Density-based models fit reality more closely but require greater computational care.  
+
+The conceptual takeaway is that clustering algorithms embody different philosophical views of similarity: K-Means’ “proximity to center” vs. DBSCAN’s “membership in dense neighborhoods.” Recognizing this distinction prepares students to appreciate **manifold learning** and **graph-based** methods that follow in dimensionality reduction topics.  
+
+**References**  
+- Xu, D., & Tian, Y. (2015). A comprehensive survey of clustering algorithms. *Annals of Data Science, 2*(2), 165–193.   
+:::
+
+
+
+
+---
+
+# 4.4 Dimensionality Reduction Techniques
+
+---
+
+## Dimensionality reduction simplifies complex, high-dimensional data
+
+- Real-world datasets often have **many correlated features**, making analysis and visualization difficult.  
+- Dimensionality reduction compresses features into fewer variables while preserving **essential structure and variance**.  
+- Benefits:  
+  - Easier visualization and interpretation.  
+  - Reduced noise and redundancy.  
+  - Better performance for clustering and anomaly detection.  
+
+
+::: {.notes}
+
+### Detailed Notes  
+- Begin by defining **dimensionality reduction** as the process of representing high-dimensional data in fewer dimensions while preserving essential information.  
+- Emphasize that high-dimensional spaces are difficult to visualize and often contain redundant or correlated features.  
+- Explain that dimensionality reduction serves both **analytic** (interpretation) and **computational** (efficiency) purposes.  
+- Introduce examples: PCA for continuous data, t-SNE and UMAP for nonlinear manifolds.  
+- Highlight the practical benefits: improved visualization, reduced noise, and simplified clustering.  
+
+### DEEPER DIVE  
+High-dimensional data pose challenges known collectively as the **curse of dimensionality** (Bellman, 1961). As the number of dimensions increases, distances between points become less informative because all points tend to appear equally far apart (Aggarwal, Hinneburg, & Keim, 2001). This phenomenon undermines clustering and similarity-based reasoning.  
+
+Dimensionality reduction techniques combat this by finding **lower-dimensional manifolds** that preserve the essential geometric or statistical structure of the data.  
+
+Two conceptual approaches exist:  
+1. **Feature extraction** — creating new composite variables (e.g., principal components).  
+2. **Feature selection** — retaining a subset of original variables.  
+
+The former dominates unsupervised learning, especially for visualization and anomaly detection.  
+
+Pedagogically, this slide transitions students from thinking about “grouping points” (clustering) to “representing structure” (projection). It introduces the mathematical foundation for PCA and nonlinear manifold learning — the backbone of modern representation techniques.  
+
+**References**  
+- Bellman, R. (1961). *Adaptive Control Processes: A Guided Tour*. Princeton University Press.  
+- Aggarwal, C. C., Hinneburg, A., & Keim, D. A. (2001). On the surprising behavior of distance metrics in high dimensional space. *International Conference on Database Theory*, 420–434.    
+:::
+
+---
+
+## Scaling features is essential before applying PCA
+
+- **Why scaling matters:** PCA depends on **variance**, and features with large numeric ranges dominate unscaled data.  
+- Always **center and scale** variables before PCA unless all features share the same units.  
+- Example: Without scaling, “Annual Income” (in dollars) outweighs “Age” (in years).  
+- Scaling equalizes contribution across features → unbiased components.  
+
+
+::: {.notes}
+
+### Detailed Notes  
+- Emphasize that PCA depends on **variance**, so features with larger numeric scales dominate the analysis if not standardized.  
+- Demonstrate with an example: income (in dollars) vs. age (in years) — unscaled data yield misleading components.  
+- Introduce **z-score standardization** as the standard preprocessing step.  
+- Reinforce that scaling ensures each variable contributes equally to the covariance matrix used in PCA.  
+
+### DEEPER DIVE  
+Principal Component Analysis (PCA) is a **variance-maximizing projection** method. It identifies orthogonal directions (principal components) that capture the greatest variability in the data (Jolliffe & Cadima, 2016). Because the technique operates on the covariance or correlation matrix, the **scale of measurement** directly influences the results.  
+
+If one feature has a much larger numeric range, it disproportionately affects the variance-covariance structure, and thus the first principal component will largely reflect that feature. Standardizing to zero mean and unit variance eliminates this bias.  
+
+Mathematically, given a dataset \( X \), PCA involves computing:  
+\[
+\Sigma = \frac{1}{n-1} X^T X
+\]
+and solving for eigenvectors and eigenvalues of \( \Sigma \). The eigenvectors define the new axes (principal components), and eigenvalues quantify the variance explained.  
+
+Pedagogically, scaling offers a clear lesson in *data geometry*: machine learning algorithms interpret numerical magnitude as meaningful unless told otherwise. This slide reinforces that careful preprocessing is not optional — it defines the coordinate system of interpretation.  
+
+**References**  
+- Jolliffe, I. T., & Cadima, J. (2016). Principal component analysis: A review and recent developments. *Philosophical Transactions of the Royal Society A: Mathematical, Physical and Engineering Sciences, 374*(2065), 20150202.  
+ 
+:::
+
+---
+
+## PCA finds new orthogonal axes that capture maximum variance
+
+- **Principal Component Analysis (PCA):** finds new directions (principal components) that maximize variance.  
+- Each component is a **linear combination** of the original features.  
+- The **explained variance ratio** shows how much information each component retains.  
+- Example: The first two components may explain 80% of total variance → suitable for 2D visualization.  
+- **Limitation:** PCA is linear — it cannot model curved or manifold structures.  
+
+--
+
+<figure>
+  <img src="../materials/assets/images/PCA.svg"
+       alt="**Figure:** Scatterplot showing first two principal components as orthogonal axes;">
+  <figcaption>**Figure:** Scatterplot showing first two principal components as orthogonal axes;</figcaption>
+</figure>
+
+::: {.notes}
+
+### Detailed Notes  
+- Introduce PCA formally as a **linear transformation** of the feature space.  
+- Emphasize that each principal component is a **linear combination** of the original variables.  
+- Use visuals to show the rotation of the coordinate system to align with directions of greatest variance.  
+- Explain the concept of **explained variance ratio** — how much total variability each component captures.  
+- Note that PCA is linear and cannot capture nonlinear manifolds.  
+
+### DEEPER DIVE  
+PCA operates through **orthogonal decomposition** of the data covariance matrix. It identifies a new basis for the feature space that maximizes the variance captured in successive components.  
+
+Mathematically, PCA solves the eigenvalue problem:  
+\[
+\Sigma v_i = \lambda_i v_i
+\]
+where \( v_i \) is the eigenvector corresponding to eigenvalue \( \lambda_i \). The eigenvectors form orthogonal directions, and eigenvalues quantify the variance explained along each direction.  
+
+The **explained variance ratio** is defined as \( \lambda_i / \sum_j \lambda_j \), providing a cumulative measure of how much structure is retained by the first \( k \) components.  
+
+Conceptually, PCA performs two operations:  
+1. **Rotation** — aligns the coordinate axes with the directions of greatest variation.  
+2. **Projection** — reduces dimensionality by discarding low-variance components.  
+
+This method assumes that directions with high variance contain the most information — an assumption rooted in Gaussian data models. It fails when informative patterns lie in low-variance subspaces, as in certain anomaly detection or sparse-feature contexts (Ringnér, 2008).  
+
+Pedagogically, PCA’s elegance lies in its transparency: every transformation can be traced mathematically and visually, making it a cornerstone for understanding latent structure.  
+
+**References**  
+- Ringnér, M. (2008). What is principal component analysis? *Nature Biotechnology, 26*(3), 303–304.  
+:::
+
+---
+
+## Nonlinear methods capture complex structures PCA misses (out of scope for today, but included for competeness)
+
+- **t-SNE (t-distributed Stochastic Neighbor Embedding):**  
+  - Preserves **local neighborhoods** — nearby points stay close after projection.  
+  - Excellent for visualizing clusters in image, text, or embedding data.  
+  - Computationally intensive and mainly for **exploration**.  
+
+- **UMAP (Uniform Manifold Approximation and Projection):**  
+  - Balances **local** and **global** structure preservation.  
+  - Faster and more scalable than t-SNE.  
+  - Increasingly common for exploratory data visualization.  
+
+
+::: {.notes}
+
+### Detailed Notes  
+- Contrast **linear** (PCA) and **nonlinear** (t-SNE, UMAP) dimensionality reduction.  
+- Explain that nonlinear methods preserve **local neighborhood relationships** rather than global variance.  
+- Clarify that t-SNE emphasizes **local fidelity**, while UMAP balances **local and global structure**.  
+- Emphasize that these methods are primarily **visualization tools**, not preprocessing steps for modeling.  
+
+### DEEPER DIVE  
+Nonlinear dimensionality reduction addresses PCA’s inability to capture **manifold structure** — the curved, nonlinear geometry of many real-world datasets.  
+
+**t-SNE (t-distributed Stochastic Neighbor Embedding)**, introduced by van der Maaten and Hinton (2008), converts pairwise similarities between points into probabilities. It minimizes the Kullback–Leibler divergence between high-dimensional and low-dimensional distributions. This ensures that nearby points in the original space remain close in the projection. The cost function is:  
+\[
+C = KL(P \| Q) = \sum_{i \neq j} p_{ij} \log \frac{p_{ij}}{q_{ij}}
+\]
+where \( P \) and \( Q \) represent high- and low-dimensional similarities.  
+
+While t-SNE produces visually intuitive clusters, it distorts global distances and is computationally expensive.  
+
+**UMAP (Uniform Manifold Approximation and Projection)**, by McInnes et al. (2018), builds on **topological manifold learning**. It constructs a weighted graph of local relationships, optimizes a fuzzy topological representation, and embeds it in low dimensions. UMAP preserves both local and some global structure, scales efficiently, and allows more interpretable parameters (`n_neighbors`, `min_dist`).  
+
+Pedagogically, this slide expands the learner’s conceptual horizon: not all structure is linear, and geometry — not just variance — defines meaning in data. Nonlinear embeddings lay the conceptual foundation for deep learning representation spaces.  
+
+**References**  
+- van der Maaten, L., & Hinton, G. (2008). Visualizing data using t-SNE. *Journal of Machine Learning Research, 9*, 2579–2605.  
+- McInnes, L., Healy, J., & Melville, J. (2018). UMAP: Uniform manifold approximation and projection for dimension reduction. *arXiv preprint arXiv:1802.03426.*  
+
+
+:::
+
+---
+
+## Reduced-dimensional spaces often reveal anomalies
+
+- **Anomalies often appear isolated** in reduced-dimensional projections.  
+- **PCA-based anomaly detection:**  
+  - Reconstruct input from principal components.  
+  - Large reconstruction error → potential anomaly.  
+- Dimensionality reduction can serve as both **preprocessing** and a **direct detection** tool.  
+
+
+::: {.notes}
+
+### Detailed Notes  
+- Explain that dimensionality reduction can highlight anomalies — outliers often appear isolated in low-dimensional projections.  
+- Introduce **PCA-based anomaly detection**, where reconstruction error serves as an anomaly score.  
+- Reinforce that reduced-dimensional representations separate “normal” structure from deviations.  
+
+### DEEPER DIVE  
+Dimensionality reduction and anomaly detection are conceptually intertwined. By capturing dominant variance patterns, PCA effectively models the “normal” subspace. Deviations from this subspace indicate anomalies.  
+
+In **PCA-based anomaly detection**, each data point is projected onto the principal component subspace and reconstructed:  
+\[
+\hat{x} = W W^T x
+\]
+where \( W \) contains the first \( k \) eigenvectors. The **reconstruction error**, \( \|x - \hat{x}\|^2 \), quantifies how well the model represents the point. Large errors signal potential anomalies.  
+
+This approach connects statistical theory to intuition: anomalies lie orthogonal to the dominant modes of variation.  
+
+Nonlinear reductions like autoencoders generalize this logic — the latent space learns “normality,” and reconstruction failure flags deviation. This conceptual continuity prepares students for the deep learning extensions covered later in the module.  
+
+**References**  
+- Shyu, M.-L., Chen, S.-C., Sarinnapakorn, K., & Chang, L. (2003). A novel anomaly detection scheme based on principal component classifier. *Proceedings of the IEEE Foundations and New Directions of Data Mining Workshop*, 172–179.    
+:::
+
+---
+
+## Bridge: from reduced spaces to anomaly detection
+
+- Dimensionality reduction helps **understand structure**, but also exposes what doesn’t fit.  
+- **Key insight:**  
+  - Normal data follows consistent structure → captured by low-dimensional representation.  
+  - Anomalies break that structure → appear isolated or poorly reconstructed.  
+- Next: dedicated algorithms like **Isolation Forest** and **One-Class SVM** make this principle explicit.  
+
+--
+
+<figure>
+  <img src="../materials/assets/images/dr_to_anomaly_bridge.svg"
+       alt="**Figure:** Flow diagram — PCA/t-SNE projection feeding into anomaly detection step (Isolation Forest).">
+  <figcaption>**Figure:** Flow diagram — PCA/t-SNE projection feeding into anomaly detection step (Isolation Forest).</figcaption>
+</figure>
+
+::: {.notes}
+
+### Detailed Notes  
+- Use this slide as a conceptual bridge linking dimensionality reduction to anomaly detection.  
+- Emphasize that low-dimensional structure captures “normal” patterns, while deviations represent anomalies.  
+- Preview that upcoming methods (Isolation Forest, One-Class SVM) formalize this idea algorithmically.  
+
+### DEEPER DIVE  
+Dimensionality reduction reveals **the geometry of normality** — dense, coherent regions where data naturally cluster. Points far from these regions are structural anomalies. This insight motivates modern anomaly detection algorithms.  
+
+From a systems perspective, dimensionality reduction reduces **signal complexity** and enhances **signal-to-noise ratio**, making deviations more apparent. From a philosophical perspective, it enacts a form of **compression-based learning**: what can be compressed (low reconstruction error) is regular; what cannot be compressed (high error) is exceptional.  
+
+This principle underlies everything from PCA reconstruction to deep autoencoders and even language model embeddings. The shift from structure discovery to anomaly recognition marks the transition from **descriptive to diagnostic unsupervised learning**.  
+
+**References**  
+- Hawkins, D. M. (1980). *Identification of Outliers*. Springer.  
+  
+:::
+
+---
+
+# 4.5a Classical Anomaly Detection
+
+---
+
+## Anomaly detection identifies rare, high-impact events
+
+- **Goal:** detect data points that deviate significantly from normal patterns.  
+- **Examples:**  
+  - Fraudulent transactions in finance.  
+  - Faulty sensor readings in manufacturing.  
+  - Unusual network activity in cybersecurity.  
+
+
+::: {.notes}
+
+### Detailed Notes  
+- Begin with motivation: anomalies represent **rare but consequential** events — small in frequency but large in impact.  
+- Provide relatable examples: fraudulent transactions, equipment failure, or cybersecurity breaches.  
+- Emphasize that anomaly detection focuses on **identifying deviations** from normal patterns, not predicting labels.  
+- Reinforce that this is a fundamentally **imbalanced problem**: the normal class dominates, and anomalies are sparse.  
+- Use this slide to frame anomaly detection as a **risk management tool**, not merely a statistical exercise.  
+
+### DEEPER DIVE  
+Anomaly detection formalizes the process of identifying observations that deviate significantly from the majority of data. Its intellectual roots trace back to early **statistical process control** in manufacturing (Shewhart, 1931), where the goal was to detect shifts or defects in production before catastrophic failure.  
+
+In modern contexts, anomaly detection supports domains where **ground truth is scarce**, **risk asymmetry** is high, and **novelty** is expected. Examples include fraud detection, health monitoring, and intrusion detection.  
+
+Conceptually, anomalies can arise from:  
+1. **Noise:** random fluctuations that break regularity.  
+2. **Novelty:** genuinely new phenomena outside prior experience.  
+3. **Systemic change:** drift or regime shift in data generation processes.  
+
+Mathematically, anomaly detection reframes the notion of *probability density*: anomalies reside in the tails of the data distribution. Density estimation methods (e.g., Gaussian models, kernel density) interpret anomalies as low-probability events.  
+
+Pedagogically, this slide repositions the student’s mindset: anomaly detection is not about labeling “wrong” data, but about discovering meaningful exceptions that warrant explanation or intervention.  
+
+**References**  
+- Shewhart, W. A. (1931). *Economic Control of Quality of Manufactured Product*. D. Van Nostrand Company.  
+- Chandola, V., Banerjee, A., & Kumar, V. (2009). Anomaly detection: A survey. *ACM Computing Surveys, 41*(3), 1–58.  
+:::
+
+---
+
+## Three main strategies for detecting anomalies
+
+| **Approach** | **Concept** | **Intuition** |
+|:--|:--|:--|
+| **Isolation-based** | Separate anomalies quickly via random splits | Outliers are easy to isolate |
+| **Boundary-based** | Learn a frontier around normal data | Anomalies fall outside the boundary |
+| **Reconstruction-based** | Measure how well data can be rebuilt | Poor reconstruction → anomaly |
+
+
+::: {.notes}
+
+### Detailed Notes  
+- Introduce the three core paradigms of anomaly detection: **isolation-based**, **boundary-based**, and **reconstruction-based**.  
+- Emphasize the different logics:  
+  - Isolation-based: anomalies are easy to separate.  
+  - Boundary-based: anomalies fall outside learned normal boundaries.  
+  - Reconstruction-based: anomalies cannot be well reconstructed from compressed representations.  
+- Explain that these paradigms span both classical and modern (deep learning) approaches.  
+- Use the table to organize conceptual understanding before diving into algorithms.  
+
+### DEEPER DIVE  
+These three paradigms represent fundamentally different ways to formalize “deviation.”  
+
+1. **Isolation-based methods** (e.g., Isolation Forest) rely on the intuition that anomalies can be separated from the bulk of the data with fewer rules or splits. This approach is algorithmically efficient and does not require explicit modeling of normality.  
+2. **Boundary-based methods** (e.g., One-Class SVM) define a decision boundary that encloses normal instances; anomalies are points lying outside this boundary. This approach connects directly to the geometry of **support vector machines**, where normality corresponds to a high-density region in feature space.  
+3. **Reconstruction-based methods** (e.g., PCA reconstruction error, autoencoders) measure how well a model trained on normal data can reproduce inputs. Poorly reconstructed points are flagged as anomalies.  
+
+These strategies mirror broader epistemic traditions in AI: *discriminative* (boundary), *generative* (reconstruction), and *heuristic* (isolation). Each reflects a different trade-off among interpretability, scalability, and flexibility.  
+
+Pedagogically, this taxonomy provides a mental map for navigating diverse algorithms — emphasizing conceptual unity beneath surface diversity.  
+
+**References**  
+- Zimek, A., Schubert, E., & Kriegel, H.-P. (2012). A survey on unsupervised outlier detection in high-dimensional numerical data. *Statistical Analysis and Data Mining: The ASA Data Science Journal, 5*(5), 363–387.  
+:::
+
+---
+
+## Isolation Forest isolates anomalies instead of modeling normal data
+
+- Builds many **random trees** that split features recursively.  
+- **Key idea:** outliers are easier to isolate → have **shorter path lengths** in the trees.  
+- **Anomaly score:** average path length across trees (shorter = more anomalous).  
+- **Strengths:** fast, scalable, effective in high dimensions.  
+
+--
+
+<figure>
+  <img src="../materials/assets/images/anomaly_isolation_forest_concept.svg"
+       alt="**Figure:** Forest of random splits showing shallow isolation of anomalies vs. deeper paths for normal data.">
+  <figcaption>**Figure:** Forest of random splits showing shallow isolation of anomalies vs. deeper paths for normal data.</figcaption>
+</figure>
+
+::: {.notes}
+
+### Detailed Notes  
+- Introduce **Isolation Forest** as an algorithm that detects anomalies by randomly partitioning data.  
+- Explain the core intuition: anomalies are easier to isolate and require fewer splits in a decision-tree-like structure.  
+- Emphasize that this is **nonparametric** — it does not assume a specific data distribution.  
+- Highlight key advantages: scalability, interpretability, and robustness to high-dimensional noise.  
+- Connect conceptually to students’ prior understanding of **decision trees** from supervised learning.  
+
+### DEEPER DIVE  
+Isolation Forest (Liu, Ting, & Zhou, 2008) departs from traditional density or distance-based frameworks. Instead of estimating what “normal” looks like, it isolates anomalies directly. The algorithm constructs multiple random binary trees (isolation trees) by recursively partitioning the feature space.  
+
+For each point \( x \), the algorithm computes its **average path length** across trees — the number of splits required to isolate it. Anomalies, being distinct, tend to be separated earlier, resulting in shorter paths.  
+
+The anomaly score is defined as:  
+\[
+s(x, n) = 2^{-\frac{E(h(x))}{c(n)}}
+\]
+where \( E(h(x)) \) is the expected path length, and \( c(n) \) is the average path length of unsuccessful searches in binary trees of size \( n \).  
+
+Conceptually, Isolation Forest embodies an **algorithmic minimalism**: instead of modeling probability distributions, it models *separability*. This simplicity yields high scalability (linear in \( n \)) and excellent performance on tabular data.  
+
+Pedagogically, the algorithm’s interpretability makes it ideal for teaching anomaly detection — it connects intuitive geometric reasoning (isolation) with probabilistic scoring.  
+
+**References**  
+- Liu, F. T., Ting, K. M., & Zhou, Z.-H. (2008). Isolation forest. *Proceedings of the 2008 IEEE International Conference on Data Mining*, 413–422.  
+:::
+
+---
+
+## One-Class SVM defines a flexible boundary around normal data
+
+- Learns a **soft boundary** that encloses most of the data.  
+- Points outside → **anomalies**.  
+- Uses **kernel functions** to create nonlinear boundaries.  
+- **Pros:** flexible, works in complex feature spaces.  
+- **Cons:** sensitive to hyperparameters, slower on large datasets.  
+
+--
+
+<figure>
+  <img src="../materials/assets/images/SVM_Anomaly.svg"
+       alt="**Figure:** Two-dimensional feature space with One-Class SVM circular boundary; anomalies fall outside.">
+  <figcaption>**Figure:** Two-dimensional feature space with One-Class SVM circular boundary; anomalies fall outside.</figcaption>
+</figure>
+
+::: {.notes}
+
+### Detailed Notes  
+- Introduce **One-Class SVM** as a boundary-based method.  
+- Emphasize that it learns a **decision function** that encloses most of the data, labeling points outside the boundary as anomalies.  
+- Explain that the boundary can be **nonlinear** via kernel functions (RBF, polynomial, etc.).  
+- Note strengths: adaptable to complex feature spaces.  
+- Note weaknesses: computationally expensive and sensitive to parameter tuning (`nu`, `gamma`).  
+
+### DEEPER DIVE  
+The One-Class Support Vector Machine (Schölkopf et al., 2001) extends the geometric intuition of traditional SVMs to unsupervised settings. It learns a function \( f(x) \) that is positive for most of the data (normal) and negative for outliers.  
+
+Mathematically, it solves:  
+\[
+\min_{w,\xi,\rho} \frac{1}{2}\|w\|^2 + \frac{1}{\nu n}\sum_i \xi_i - \rho
+\]
+subject to  
+\[
+(w \cdot \phi(x_i)) \geq \rho - \xi_i, \quad \xi_i \geq 0
+\]
+where \( \phi(x) \) is a feature mapping induced by a kernel, \( \nu \) controls the expected proportion of anomalies, and \( \rho \) defines the decision boundary offset.  
+
+This framework implicitly estimates a high-density region in feature space, drawing an enclosing “shell” around the data. Anomalies fall outside this shell.  
+
+One-Class SVM bridges classical geometric intuition with modern kernel methods — illustrating how nonlinear transformations expand the expressive power of traditional algorithms. However, its reliance on kernel choice and scaling makes it less robust for large or heterogeneous datasets.  
+
+Pedagogically, this slide links anomaly detection back to familiar supervised learning geometry, reinforcing conceptual continuity.  
+
+**References**  
+- Schölkopf, B., Platt, J. C., Shawe-Taylor, J., Smola, A. J., & Williamson, R. C. (2001). Estimating the support of a high-dimensional distribution. *Neural Computation, 13*(7), 1443–1471.  
+
+:::
+
+---
+
+## Comparing classical anomaly detection methods
+
+| **Criterion** | **Isolation Forest** | **One-Class SVM** |
+|:--|:--|:--|
+| **Concept** | Randomly isolates outliers | Learns boundary around normal data |
+| **Scalability** | Excellent (fast, parallel) | Moderate (depends on kernel) |
+| **Interpretability** | High (path length) | Moderate (opaque boundaries) |
+| **Tuning needs** | Low | High (`nu`, `gamma`, kernel type) |
+| **Best for** | Large tabular data | Smaller, nonlinear feature spaces |
+
+::: {.notes}
+
+### Detailed Notes  
+- Use the table to summarize trade-offs between Isolation Forest and One-Class SVM.  
+- Emphasize that method selection depends on data characteristics (size, dimensionality, distribution complexity).  
+- Reinforce that no single algorithm dominates across all contexts.  
+- Encourage students to think of **anomaly detection as context-sensitive** — the cost of false alarms vs. misses determines choice.  
+
+### DEEPER DIVE  
+Comparing classical algorithms highlights enduring trade-offs in machine learning design:  
+
+| **Criterion** | **Isolation Forest** | **One-Class SVM** |  
+|---------------|----------------------|-------------------|  
+| Model Type | Random tree ensemble | Kernel-based boundary |  
+| Scalability | Excellent (O(n log n)) | Moderate (depends on kernel) |  
+| Assumptions | None (random partitioning) | Implicit density enclosure |  
+| Interpretability | High (path length) | Moderate |  
+| Data Suitability | Tabular, high-dim | Low-dim, nonlinear |  
+
+This comparison illustrates a broader principle: **simplicity scales, flexibility adapts**. Isolation Forest’s randomness yields generalization, while One-Class SVM’s mathematical rigor provides precision at computational cost.  
+
+In practice, many pipelines combine the two: PCA or autoencoder-based compression followed by Isolation Forest or One-Class SVM in the latent space.  
+
+Pedagogically, this comparison reinforces model selection as a **strategic decision** balancing speed, interpretability, and domain risk.  
+
+**References**  
+- Tax, D. M. J., & Duin, R. P. W. (2004). Support vector data description. *Machine Learning, 54*(1), 45–66.  
+  
+:::
+
+---
+
+
+# 4.5b Representation-Based Anomaly Detection  *(Advanced Preview)*
+
+---
+
+## Bridge: from classical boundaries to learned representations
+
+- Classical models rely on **distance** or **boundary rules** in raw feature space.  
+- Modern deep learning models learn **latent representations** of “normality.”  
+- These capture richer, nonlinear relationships before evaluating anomalies.  
+- Shift from **geometry-based** to **representation-based** detection.  
+
+--
+
+<figure>
+  <img src="../materials/assets/images/anomaly_representation_bridge.svg"
+       alt="**Figure:** Flow diagram — raw data → learned latent space → anomaly scoring.">
+  <figcaption>**Figure:** Flow diagram — raw data → learned latent space → anomaly scoring.</figcaption>
+</figure>
+
+::: {.notes}
+
+### Detailed Notes  
+- Introduce this as a conceptual bridge rather than a technical deep dive.  
+- Emphasize that classical anomaly detection operates directly in the **original feature space**, whereas modern approaches first learn **latent representations** of normality.  
+- Explain that deep learning methods capture **nonlinear, hierarchical features**, allowing richer modeling of complex systems.  
+- Highlight that this shift moves from **geometry-based reasoning** to **representation-based reasoning**.  
+- Reinforce that this section previews ideas that will reappear in the deep learning module.  
+
+### DEEPER DIVE  
+Representation-based anomaly detection marks a paradigm shift from surface-level pattern recognition to **latent structure modeling**. Classical algorithms define normality in observed feature space (e.g., Euclidean distance, kernel boundaries), but deep methods learn transformations \( f_{\theta}(x) \) that map raw inputs into compact, informative latent spaces.  
+
+These latent representations are designed such that “normal” data occupy dense, coherent regions, while anomalies fall in sparse, low-probability zones. Conceptually, this shift mirrors broader developments in AI: moving from **explicit modeling of patterns** to **implicit modeling of data-generating processes** (LeCun, Bengio, & Hinton, 2015).  
+
+Representation learning captures *features of normality* that are invariant to irrelevant variation — for example, lighting or noise in images, or seasonality in time series. This makes anomaly detection more robust but less interpretable.  
+
+Pedagogically, this slide introduces the intellectual bridge between classical geometry and learned manifolds. It situates anomaly detection within the broader trajectory of AI, from algorithms that measure to models that *understand structure*.  
+
+**References**  
+- LeCun, Y., Bengio, Y., & Hinton, G. (2015). Deep learning. *Nature, 521*(7553), 436–444.  
+:::
+
+---
+
+## Autoencoders reconstruct normal data and expose anomalies
+
+- **Idea:** train a neural network to reproduce its input.  
+- **Training:**  
+  - The encoder compresses input → latent space.  
+  - The decoder reconstructs it → output.  
+- **Anomaly rule:**  
+  - Normal samples → low reconstruction error.  
+  - Anomalies → high reconstruction error.  
+- Works well on sensor data, transactions, or images.  
+
+--
+
+<figure>
+  <img src="../materials/assets/images/anomaly_autoencoder_architecture.svg"
+       alt="**Figure:** Autoencoder architecture showing input → bottleneck → reconstructed output; anomalies have higher error.">
+  <figcaption>**Figure:** Autoencoder architecture showing input → bottleneck → reconstructed output; anomalies have higher error.</figcaption>
+</figure>
+
+::: {.notes}
+
+### Detailed Notes  
+- Introduce **autoencoders** as neural networks trained to reconstruct their input data.  
+- Explain that during training, the network learns a **compressed latent representation** of normal examples.  
+- Emphasize that normal data are reconstructed accurately, while anomalies show **high reconstruction error**.  
+- Connect this to PCA: autoencoders generalize linear reconstruction to nonlinear manifolds.  
+- Reinforce that this method assumes anomalies differ structurally from normal patterns, not just statistically.  
+
+### DEEPER DIVE  
+An **autoencoder** consists of two neural components: an **encoder** \( f_{\theta} \) that maps inputs to a lower-dimensional latent vector \( z = f_{\theta}(x) \), and a **decoder** \( g_{\phi} \) that reconstructs the input \( \hat{x} = g_{\phi}(z) \). Training minimizes the reconstruction loss:  
+\[
+L(x, \hat{x}) = \|x - \hat{x}\|^2
+\]
+or, in probabilistic formulations, negative log-likelihood.  
+
+During training, only normal data are presented. The autoencoder thus learns a **manifold of normality** — a low-dimensional surface embedded in feature space. Anomalies, which lie off this manifold, yield large reconstruction errors.  
+
+Conceptually, autoencoders extend PCA’s linear projection to nonlinear, multi-layer mappings capable of capturing curved manifolds. Variational autoencoders (VAEs) add probabilistic structure, modeling the latent space as a learned distribution \( p(z|x) \).  
+
+Autoencoder-based anomaly detection excels in high-dimensional domains such as sensor telemetry, credit transactions, and medical imaging, where “normal” patterns follow complex nonlinear dependencies.  
+
+Pedagogically, this slide introduces students to **representation learning as compression** — a core idea underpinning generative AI. It also reinforces that unsupervised models can learn implicit knowledge structures from raw data without labels.  
+
+**References**  
+- Hinton, G. E., & Salakhutdinov, R. R. (2006). Reducing the dimensionality of data with neural networks. *Science, 313*(5786), 504–507.  
+- Kingma, D. P., & Welling, M. (2014). Auto-encoding variational Bayes. *arXiv preprint arXiv:1312.6114.*  
+  
+:::
+
+---
+
+## Classical vs. representation-based detection
+
+| **Aspect** | **Classical (IF, SVM)** | **Representation-Based (AE, SVDD)** |
+|:--|:--|:--|
+| **Feature space** | Original data space | Learned latent representation |
+| **Model type** | Tree / kernel | Neural network |
+| **Nonlinearity** | Limited | High |
+| **Data size need** | Moderate | Large |
+| **Interpretability** | High | Low |
+| **Use case** | Tabular / simple | Images, sensors, embeddings |
+
+
+::: {.notes}
+
+### Detailed Notes  
+- Use the comparison table to summarize how deep representation-based methods differ from classical approaches.  
+- Emphasize that representation learning enables **nonlinear manifolds**, while classical methods rely on linear or distance-based relationships.  
+- Reinforce that interpretability decreases as flexibility increases.  
+- Highlight use cases: autoencoders for sensor and image data, Deep SVDD for embeddings and features.  
+- Encourage framing these methods as **extensions, not replacements**, of classical techniques.  
+
+### DEEPER DIVE  
+The evolution from classical to deep anomaly detection reflects broader transitions in machine learning:  
+- From **explicit geometric reasoning** to **implicit representation learning**.  
+- From **distance-based metrics** to **latent space modeling**.  
+- From **handcrafted features** to **learned features**.  
+
+This transformation brings both advantages and challenges. Deep methods uncover complex dependencies but often obscure causality and interpretability. As Ribeiro, Singh, and Guestrin (2016) argue, interpretability is crucial for trustworthy AI; thus, combining representation-based detection with post-hoc explainability (e.g., SHAP, LIME) is increasingly standard practice.  
+
+Pedagogically, this slide encourages meta-level reflection: as algorithms grow more powerful, the need for human oversight and conceptual understanding increases proportionally.  
+
+**References**  
+- Ribeiro, M. T., Singh, S., & Guestrin, C. (2016). "Why should I trust you?": Explaining the predictions of any classifier. *Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining*, 1135–1144.  
+ 
+:::
+
+---
+
+## Takeaway: understanding and evolution
+
+- **Classical methods:** fast, interpretable, and broadly applicable.  
+- **Representation-based methods:** powerful for complex, high-dimensional data.  
+- Both aim to model what’s *normal* to detect what’s *not*.  
+- This progression mirrors the broader trend in AI — from rule-based systems to learned representations.  
+
+
+::: {.notes}
+
+### Detailed Notes  
+- Conclude this section by synthesizing the progression from classical to representation-based approaches.  
+- Reinforce that both aim to **define normality** in order to detect deviations — they differ only in how they represent structure.  
+- Emphasize the conceptual through-line: from geometric intuition to deep representation learning.  
+- Highlight that mastering classical intuition remains essential to understanding deep models.  
+- Use this as a transition into the next module on evaluation and trust.  
+
+### DEEPER DIVE  
+The evolution of anomaly detection encapsulates the story of modern AI: increasing abstraction, representation, and scale.  
+- **Classical methods** (Isolation Forest, One-Class SVM) operate in explicit spaces, offering speed, transparency, and broad applicability.  
+- **Representation-based methods** (Autoencoders, Deep SVDD) operate in latent manifolds, capturing subtle dependencies invisible to linear models.  
+
+Yet both are bound by the same epistemic constraint: without labels, the definition of “anomaly” depends on **context and interpretation**. This underscores that anomaly detection is not a purely technical exercise but a form of *epistemic judgment*.  
+
+From an educational standpoint, this module illustrates how AI advances do not erase foundational methods — they reinterpret them through new architectures. Understanding this lineage fosters intellectual humility and adaptability — key traits of a responsible AI practitioner.  
+
+**References**  
+- Ruff, L., Kauffmann, J. R., Vandermeulen, R. A., Montavon, G., Samek, W., Kloft, M., ... & Müller, K.-R. (2021). A unifying review of deep and shallow anomaly detection. *Proceedings of the IEEE, 109*(5), 756–795.  
+
+
+:::
+
+---
+
+
+# 4.6 Evaluation in Unsupervised Learning
+
+---
+
+## Evaluating unsupervised models requires evidence, not accuracy
+
+- In **supervised learning**, metrics like accuracy or RMSE are clear.  
+- In **unsupervised learning**, there are **no ground truth labels**.  
+- The central challenge:  
+  - *How do we know if our discovered clusters or anomalies are meaningful?*  
+- Evaluation depends on **pattern coherence, visualization, Stability/robustness checks and domain validation**.  
+
+
+::: {.notes}
+
+### Detailed Notes  
+- Open this section by reframing evaluation: unlike supervised learning, **unsupervised models lack ground truth**.  
+- Emphasize that metrics like accuracy, precision, and recall do not apply without labels.  
+- Highlight that evaluation in unsupervised contexts relies on three pillars: **structure**, **stability**, and **interpretability**.  
+- Use examples: cluster coherence, visual inspection, expert validation.  
+- Reinforce that evaluation is **interpretive** and **evidence-driven** — guided by plausibility, not prediction error.  
+
+### DEEPER DIVE  
+Unsupervised evaluation presents an epistemological challenge: in the absence of labels, “correctness” must be inferred from internal consistency and external utility. The goal is not to prove the model right but to establish that it reveals **meaningful and stable structure**.  
+
+Three primary evaluation lenses dominate:  
+1. **Internal validation** — measures the quality of structure (e.g., silhouette scores, compactness, separation).  
+2. **Stability validation** — assesses robustness under perturbations (e.g., resampling, initialization changes).  
+3. **External validation** — relies on expert interpretation or partial labeling.  
+
+This marks a philosophical shift: the model’s value lies not in predictive power but in **interpretive trust** (Doshi-Velez & Kim, 2017). Evaluation becomes a process of triangulation — aligning mathematical coherence, visual plausibility, and domain meaning.  
+
+Pedagogically, this slide reframes how students think about “model performance.” In unsupervised learning, good models don’t predict better; they *reveal structure more convincingly*.  
+
+**References**  
+- Doshi-Velez, F., & Kim, B. (2017). Towards a rigorous science of interpretable machine learning. *arXiv preprint arXiv:1702.08608.*
+
+:::
+
+---
+
+## Do you have labels?
+
+- When labels exist — use quantitative validation. But beware. 
+  - **Silhouette Score:**  Measures how well points fit within their cluster vs. others. Good for checking internal consistency.  
+  - **Adjusted Rand Index (ARI):** Compares predicted clusters to known classes.  Useful only when some labeled benchmark exists. But then... are you sure you need to be doing unsupervised learning?   
+
+- When no labels exist — rely on visualization and expert judgment
+  - **Visualization:** Use PCA, t-SNE, or UMAP to project results into 2D/3D. Check if clusters or anomalies look plausible.
+  - **Domain validation:**  Are discovered groups meaningful to experts?  Do anomalies align with real unusual cases (e.g., known fraud, failed sensors)?  
+
+::: {.notes}
+
+### Detailed Notes  
+- Explain that when partial labels or known groupings exist, quantitative metrics can assess clustering quality.  
+- Introduce the **Silhouette Score**: measures how similar a point is to its own cluster versus others.  
+- Introduce the **Adjusted Rand Index (ARI)**: compares predicted clusters to true labels, adjusting for chance.  
+- Emphasize that these metrics are helpful but limited — they depend on label availability or assumptions about geometry.  
+
+- Emphasize that most real-world unsupervised projects lack labeled data.  
+- Teach the **human-in-the-loop** evaluation approach: combine algorithmic results with domain expertise.  
+- Use PCA, t-SNE, or UMAP visualizations to examine whether clusters or anomalies make sense.  
+- Encourage iterative refinement: adjust parameters, re-visualize, and validate with experts.  
+- Reinforce that **plausibility and utility** are the primary success criteria.
+
+### DEEPER DIVE  
+Quantitative validation metrics formalize the intuitive notion of “good clusters.”  
+
+**Silhouette Coefficient** (Rousseeuw, 1987):  
+\[
+s(i) = \frac{b(i) - a(i)}{\max(a(i), b(i))}
+\]  
+where \( a(i) \) is the mean intra-cluster distance, and \( b(i) \) is the mean nearest-cluster distance. Scores near 1 indicate well-separated, coherent clusters; scores near 0 suggest overlap.  
+
+**Adjusted Rand Index (ARI)** measures agreement between two partitions (true vs. predicted) while correcting for random chance. It is defined as:  
+\[
+ARI = \frac{\text{Index} - \text{Expected Index}}{\text{Max Index} - \text{Expected Index}}
+\]  
+
+While useful in benchmarking (e.g., comparing algorithms on labeled datasets), these metrics are rarely applicable in business or scientific contexts where no “true” grouping exists. They should be treated as **diagnostic aids**, not definitive evaluations.  
+
+Pedagogically, this slide illustrates a broader idea: quantitative measures can inform confidence but cannot replace interpretation.  
+
+Visualization serves as both an analytical and epistemic validation tool in unsupervised learning. Low-dimensional projections (via PCA, t-SNE, or UMAP) allow qualitative assessment of structural coherence and anomaly plausibility.  
+
+However, human judgment remains indispensable. Experts can evaluate whether discovered groups align with meaningful categories (e.g., customer types, biological pathways). This process mirrors **grounded theory** in qualitative research — patterns emerge through interpretation, not predefinition (Charmaz, 2014).  
+
+This hybrid human–machine validation represents an **interpretive loop**:  
+1. Model discovers potential structure.  
+2. Humans evaluate relevance and coherence.  
+3. Insights inform model refinement.  
+
+This cycle is not a failure of automation but a recognition that knowledge discovery is a **socio-technical process**. Models propose; experts dispose.  
+
+Pedagogically, this slide reinforces humility in AI practice — unsupervised learning reveals possibilities, not truths.  
+
+**References**  
+- Charmaz, K. (2014). *Constructing Grounded Theory* (2nd ed.). SAGE Publications.  
+
+- Rousseeuw, P. J. (1987). Silhouettes: A graphical aid to the interpretation and validation of cluster analysis. *Journal of Computational and Applied Mathematics, 20*, 53–65.  
+
+:::
+  
+---
+
+## Practical takeaway: evaluate structure, not prediction
+
+- There is **no universal score** for unsupervised learning.  
+- Evaluate through **three complementary lenses:**  
+  1. **Structure:** Does the model reveal coherent, stable patterns?  
+  2. **Interpretation:** Do results make sense to experts?  
+  3. **Impact:** Does it support real-world decision-making or risk reduction?  
+ 
+
+
+::: {.notes}
+
+### Detailed Notes  
+- Conclude by synthesizing the philosophy of unsupervised evaluation.  
+- Reinforce that **structure**, **interpretation**, and **impact** are the three pillars of validation.  
+- Encourage documenting both visual evidence and expert rationale.  
+- Highlight that the goal is **trustworthy insight**, not perfect scores.  
+- Transition to upcoming modules (e.g., model monitoring and interpretability).  
+
+### DEEPER DIVE  
+Unsupervised learning demands a new epistemology of evaluation — one grounded in coherence, plausibility, and utility. Because there is no ground truth, the standard of success becomes *trustworthy understanding*.  
+
+Three interdependent dimensions define this:  
+1. **Structural coherence** — does the model uncover stable, interpretable relationships?  
+2. **Expert interpretability** — do results align with domain understanding or generate plausible hypotheses?  
+3. **Decision impact** — does the model improve insight, prediction, or risk management downstream?  
+
+This tripartite framework parallels Lincoln and Guba’s (1985) criteria for qualitative research: *credibility, transferability, and dependability*. Unsupervised evaluation, like ethnography, relies on triangulation rather than single metrics.  
+
+Pedagogically, this final slide anchors the module’s core lesson: unsupervised learning is a **dialogue between models and meaning**. Evaluation is the language that makes that dialogue rigorous and credible.  
+
+**References**  
+- Lincoln, Y. S., & Guba, E. G. (1985). *Naturalistic Inquiry*. SAGE Publications.  
+
+:::
+
+
+

@@ -1,0 +1,818 @@
+---
+title: Week 1
+subtitle: QMB3302 Foundations of Analytics and AI
+format:
+  metropolis-beamer-revealjs:
+    slide-number: c
+    embed-resources: true
+    # Syntax highlighting theme (pick one: pygments, tango, zenburn, kate, breeze, nord, github, dracula, monokai, etc.)
+    highlight-style: ../materials/assets/highlight_accessible.theme
+    # Nice-to-have code UX for slides
+    code-line-numbers: true      # add line numbers to all code blocks
+    code-overflow: wrap          # wrap long lines (good for projectors)
+    code-copy: true              # copy-to-clipboard button
+    code-block-bg: true          # subtle background behind code blocks
+    code-block-border-left: "#E69F00"  # UF-amber accent; pick your brand color
+author:
+  - name: Joel Davis
+    orcid: 0000-0000-0000-0000
+    email: joel.davis@warrington.ufl.edu
+    affiliations: University of Florida
+date: last-modified
+bibliography: ../materials/assets/shared_references_courses.bib
+---
+
+
+
+# Definitions of Analytics and AI
+
+
+## Definitions of Analytics and AI
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- **Analytics**: supports decisions with data-backed insight  
+- **AI**: participates in decisions through automation + judgment under uncertainty  
+- The difference is often **how outputs are used**, not the math
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+Open by framing both as parts of decision systems. Emphasize that the boundary is practical (deployment + autonomy), not philosophical.
+Avoid “AI = magic”; define it as decision participation in uncertain settings.
+:::
+
+## Analytics is a progression of questions
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- **Descriptive**: what happened?
+- **Diagnostic**: why did it happen?
+- **Predictive**: what is likely to happen?
+- **Prescriptive**: what should we do?
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+Use a single business story (e.g., inventory or subscription business) to show the same domain question evolving across the four types.
+Keep definitions short—students will confuse these without concrete examples.
+:::
+
+## Same business problem, four analytics roles
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- Descriptive: “Stockouts increased last month.”
+- Diagnostic: “They spiked after supplier delays.”
+- Predictive: “Next month’s stockout risk is 0.35.”
+- Prescriptive: “Increase reorder point for items A/B.”
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+Important: emphasize that prescriptive requires an objective and constraints; it’s not “a fancier prediction.”
+You can swap in a different example later (fraud, churn, staffing) as long as the pattern remains.
+:::
+
+## AI is about decision participation
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- Produces **scores / classes / recommendations**
+- Operates **at scale** (many decisions, quickly)
+- Often triggers actions with **limited human-in-the-loop**
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+Clarify “AI” here is not only generative AI; it’s any system embedded into a workflow that makes or shapes decisions.
+Mention that humans still define goals, constraints, and oversight.
+:::
+
+## A continuum: decision autonomy
+
+:::: {.columns} 
+::: {.column width="50%"} 
+<figure>
+  <img src="../materials/assets/images/1_autonomy_continuum.svg"
+       alt="Autonomy continuum showing four stages from left to right: Dashboard, Decision Support, Assisted Action, and Automated Action. The left side indicates lower autonomy and the right side indicates higher autonomy.">
+  <figcaption>Decision autonomy increases as model outputs move from being viewed to driving actions.</figcaption>
+</figure>
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+autonomy changes risk, governance needs, and accountability.
+
+“AI-ness” often increases when outputs are connected to actions.
+:::
+
+## Same model, different label
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- Churn model on a dashboard → typically **analytics**
+- Same churn model auto-sends offers → typically **AI**
+- Label changes because **the system’s role changes**
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+Stress: it’s not about whether it uses regression vs a neural net; it’s about integration into the workflow.
+Use this slide to normalize ambiguity: many systems are hybrids.
+:::
+
+## Prediction is a component, not the system
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- A prediction answers: “What is likely?”
+- A system must answer: “What do we do now?”
+- Turning prediction → action requires **decision logic**
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+Set up the next video: data/models/logic. “Models produce predictions; systems produce decisions.”
+Common misconception: “If accuracy is high, decisions are good.” Not necessarily.
+:::
+
+## Checkpoint
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- Is a fraud model that **flags** transactions for review: analytics, AI, or both?
+- What changes when the model can **block** transactions automatically?
+- Where would you place each on the autonomy continuum?
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+Pause . Encourage them to justify using “who acts on the output?” and “how much autonomy?”
+
+:::
+
+## Takeaways
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- Analytics organizes **questions**; AI organizes **actions**
+- The boundary depends on **deployment and autonomy**
+- Good outcomes require models **and** well-designed decision logic
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+
+:::
+
+# AI Can mean more than one thing
+
+
+## Nested Model of AI
+
+:::: {.columns} 
+::: {.column width="50%"} 
+<figure>
+  <img src="../materials/assets/images/1_qmb_nested_ai.svg"
+       alt="Conceptual diagram showing artificial intelligence as the broad category, with machine learning as a subset and deep learning as a further subset.">
+  <figcaption>AI is sometimes thought of as a wrapper for machine learning and deep learning.</figcaption>
+</figure>
+
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+# Data + Models + Logic: The Core of AI Systems
+
+## Data + Models + Logic: The Core of AI Systems
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- Most real systems are not “a model”  
+- They are **data + model + logic** working together  
+- Failures are often **system failures**, not algorithm failures
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+M
+:::
+
+## The system view
+
+:::: {.columns} 
+::: {.column width="50%"} 
+<figure>
+  <img src="../materials/assets/images/1_core_system.svg"
+       alt="Core AI system diagram showing a left-to-right flow: Data feeds into Model, Model feeds into Logic, and Logic triggers Action. Arrows indicate sequential flow from inputs to decisions.">
+  <figcaption>AI systems are typically built from data, a model, and decision logic that connects outputs to actions.</figcaption>
+</figure>
+
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+- **Data** provides observations
+- **Model** produces a prediction/score
+- **Logic** converts outputs into decisions
+
+
+:::
+
+## Data: what it is and why it fails
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- Observations are **partial** and often **proxy-based**
+- Two roles: **training data** and **run-time (operational) data**
+- Risks: missingness, drift, bad labels
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+Clarify train vs run-time mismatch: model trained on last year; deployed into a different world.
+Emphasize “data reflects collection choices.”
+:::
+
+## Model: what it contributes
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- Learns a mapping: inputs → **score/class/value**
+- Trades off: accuracy vs robustness vs interpretability
+- Can be “right on average” but wrong where it matters
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+Introduce the idea of “metric choice is a business decision.” Accuracy may be the wrong target.
+Use an example: rare fraud vs common non-fraud.
+:::
+
+## Logic: where predictions become actions
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- Thresholds: when do we act?
+- Constraints: budget, capacity, compliance
+- Objectives: what are we optimizing?
+- Guardrails: overrides, escalation, audits
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+Make logic concrete: “Only offer retention discount if churn risk > 0.7 and margin allows.”
+Logic is often simpler than the model, but higher impact on outcomes.
+:::
+
+## Diagnosing failure by layer
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- Bad outcomes can come from:
+  - **Data** (wrong inputs)
+  - **Model** (wrong mapping)
+  - **Logic** (wrong decision rule)
+- Fixing the wrong layer wastes time
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+Give a quick diagnostic heuristic: “If inputs look wrong, don’t retrain; if outputs drift, check data pipeline; if actions are misaligned, revisit thresholds/objectives.”
+:::
+
+## Monitoring is part of the system
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- Monitor **data quality** (schema, missingness, drift)
+- Monitor **model performance** (by segment)
+- Monitor **decision outcomes** (costs, harm, ROI)
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+Stress: outcome monitoring is not optional once actions are automated.
+Mention that “model metrics” ≠ “business outcomes.”
+:::
+
+## Checkpoint
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- A model’s precision improves, but complaints rise.  
+  Where would you look first: data, model, or logic?
+- What business metric would you track to validate improvement?
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+Prompt them to separate “model score quality” from “decision impact.”
+:::
+
+## Takeaways
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- AI systems = **data + model + logic**
+- Most problems are **integration and governance** problems
+- Diagnose failures by **layer** before you “fix the model”
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+Transition to paradigms: different ways to build the “model/logic” parts.
+:::
+
+# AI Paradigms Overview
+
+
+## AI Paradigms Overview
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- Three core approaches:
+  - **Symbolic** (rules/logic)
+  - **Statistical / ML** (learned from data)
+  - **Neural / deep** (representation learning)
+- Most production systems are **hybrids**
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+Frame this as a toolkit question: “What approach fits the problem constraints?”
+Avoid teaching as history; teach as trade-offs.
+:::
+
+## Symbolic AI
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- Knowledge encoded as **rules**, constraints, ontologies
+- Strong when:
+  - domain rules are stable
+  - explanations are required
+- Weak when:
+  - rules are brittle
+  - perception (images/text) is needed
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+Business examples: eligibility rules, compliance checks, pricing constraints.
+Misconception: “symbolic is obsolete”—it’s common in regulated environments.
+:::
+
+## Statistical / Machine Learning
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- Learns patterns from labeled or historical data
+- Strong when:
+  - you have data + feedback
+  - relationships are complex but learnable
+- Weak when:
+  - data is scarce/biased
+  - environment shifts quickly
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+Examples: churn, demand forecasting, fraud scoring.
+Stress: ML is not “automatic truth”; it is empirical pattern extraction.
+:::
+
+## Neural / Deep Learning
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- Learns features/representations automatically
+- Strong for:
+  - vision, speech, text, complex signals
+- Weak for:
+  - interpretability
+  - data/compute demands
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+Mention that deep learning often improves perception; decision logic may still be rules/optimization.
+If you reference generative AI, keep it as an example, not the focus.
+:::
+
+## Choosing among paradigms
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- Ask:
+  - Do we know the rules, or must we learn them?
+  - How much data do we have?
+  - How much explainability is required?
+  - How costly are mistakes?
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+This is the managerial “fit” checklist. Encourage students to connect paradigm choice to governance and risk.
+:::
+
+## Hybrids are the norm
+
+:::: {.columns} 
+::: {.column width="50%"} 
+<figure>
+  <img src="../materials/assets/images/1_hybrid_paradigm.svg"
+       alt="Hybrid AI paradigm diagram showing two inputs—ML or neural methods and rules or constraints—combining into a decision layer, which then flows to human oversight. A dashed arrow indicates that oversight can guide or override the decision layer.">
+  <figcaption>Hybrid systems combine learned components with rules and human oversight to manage risk and governance.</figcaption>
+</figure>
+
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+Explain: “Perception” might be neural, “ranking” might be ML, “policy constraints” are symbolic.
+This is how many real systems work.
+:::
+
+## Checkpoint
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- Pick a business task (e.g., underwriting, hiring, returns).  
+  Which parts are best handled by rules vs ML vs deep learning?
+- What would force you toward interpretability?
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+Prompt for decomposition: task → subtask → best-fit paradigm.
+:::
+
+## Takeaways
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- Paradigms differ in **representation**, **data needs**, and **governance**
+- Selection is a **constraints problem**, not a popularity contest
+- Hybrids combine strengths and manage risk
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+Transition: to build any paradigm, you need data acquisition.
+:::
+
+# How Systems Acquire Data
+
+
+## How Systems Acquire Data
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- Data is **engineered into existence**
+- Acquisition choices shape:
+  - what the system can learn
+  - who is represented
+  - how quickly the system can respond
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+Open with the key idea: “Data is not ‘found’; it is collected under constraints.”
+Link to incentives: teams log what they measure; what they measure becomes what gets optimized.
+:::
+
+## Common acquisition channels
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- **Operational systems**: transactions, CRM, ERP
+- **Instrumentation/logs**: clicks, events, telemetry
+- **User-generated content**: text, images, forms
+- **Sensors/IoT**: location, devices, wearables
+- **External data**: partners, vendors, public sources
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+Give one sentence per channel with a concrete example students recognize.
+Emphasize that each channel brings different quality and privacy constraints.
+:::
+
+## Batch vs streaming
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- **Batch**: periodic snapshots (cheap, slower)
+- **Streaming**: continuous events (fast, complex)
+- Trade-off: responsiveness vs engineering + monitoring burden
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+Use an example: weekly demand forecast (batch) vs fraud detection (streaming).
+Highlight operational consequences: alert fatigue, latency, incident response.
+:::
+
+## Measurement and proxy risk
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- We often record **proxies**, not the true concept
+- Proxies can drift as behavior changes
+- Representativeness matters: who is missing from the data?
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+Example: “engagement” as proxy for “satisfaction.”
+Tie to bias: if some users generate fewer logs, the system learns less about them.
+:::
+
+## Identity and joining data
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- Most value comes from **linking** sources
+- Requires stable identifiers (user_id, device_id, account_id)
+- Errors here create “ghost” customers and broken histories
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+Keep it practical: “If you can’t join datasets reliably, the model sees fragmented reality.”
+:::
+
+## Data acquisition is a governance issue
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- Consent, privacy, retention
+- Access control and auditability
+- Documentation: what is collected, why, and limitations
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+This is where business/legal/IT intersect. Highlight that governance affects feasibility and ethics, not just compliance.
+:::
+
+## Checkpoint
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- For a recommendation system, what data is:
+  1) essential, 2) useful, 3) risky or unnecessary?
+- What would change if you had to operate with **no third-party data**?
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+Prompt them to separate “nice to have” from “must have” and to anticipate constraints.
+:::
+
+## Takeaways
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- Data acquisition is a **design choice**
+- Source + cadence shape model capability and risk
+- Good pipelines start with clear **measurement intent**
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+Transition: pipeline turns raw acquisition into usable inputs; then decision frameworks turn outputs into action.
+:::
+
+# From Data Pipeline to Decision Frameworks
+
+
+## From Data Pipeline to Decision Frameworks
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- Pipelines make data **usable and reliable**
+- Decision frameworks make outputs **actionable**
+- Value comes from the **end-to-end loop**, not any single step
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+Frame as: “Pipelines reduce chaos; decision frameworks reduce ambiguity.”
+:::
+
+## A minimal pipeline
+
+:::: {.columns} 
+::: {.column width="50%"} 
+::: {.r-fit-text}
+Acquire → Clean → Transform → Store → Serve
+:::
+
+- Each stage adds structure and reduces errors downstream
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+Keep it high-level. The goal is conceptual: pipelines encode assumptions.
+If students ask “what tools,” defer to later weeks.
+:::
+
+## Pipeline → model → decision framework
+
+:::: {.columns} 
+::: {.column width="50%"} 
+::: {.r-fit-text}
+Pipeline (inputs) → Model (scores) → Decision logic (actions) → Outcomes (feedback)
+:::
+
+- Decisions change behavior, which changes future data
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+Introduce feedback loop early: deployment is not “set and forget.”
+:::
+
+## What is a decision framework?
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- **Objective**: what outcome are we optimizing?
+- **Constraints**: what must we respect?
+- **Thresholds**: when do we act?
+- **Costs**: what is the cost of false positives/negatives?
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+Make it concrete: “objective might be retention ROI; constraint might be discount budget.”
+Stress: thresholds are managerial choices.
+:::
+
+## Example: churn model → retention action
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- Model outputs: churn risk 0–1
+- Decision logic:
+  - act if risk > 0.7
+  - only if customer margin is high enough
+  - cap offers per week (capacity constraint)
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+This slide intentionally separates model output from action rule.
+Emphasize that “best threshold” depends on cost/benefit and capacity.
+:::
+
+## Feedback loops and drift
+
+:::: {.columns} 
+::: {.column width="50%"} 
+<figure>
+  <img src="../materials/assets/images/1_feedback_loop.svg"
+       alt="Feedback loop diagram showing a decision system where data and a model produce actions, actions lead to outcomes or behavior, and a dashed arrow returns from outcomes back to data to indicate that deployment changes future data.">
+  <figcaption>Deployment creates feedback: actions change outcomes, and outcomes change the data the system learns from next.</figcaption>
+</figure>
+
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+Example: after launching retention offers, “high-risk” customers behave differently; old model assumptions may break.
+:::
+
+## Common failure modes
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- Pipeline delivers stale/incorrect features
+- Decision logic optimizes the wrong objective
+- Automation outpaces oversight (no guardrails)
+- “Metric wins” that reduce real business value
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+Link back to earlier: a good model can still produce bad outcomes.
+Mention that governance is part of system design.
+:::
+
+## Checkpoint
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- What is one constraint you would add to prevent harm or waste?
+- What metric would you track to detect misalignment between:
+  model quality vs decision outcomes?
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+Encourage answers like: “budget caps,” “human review for edge cases,” “complaints rate,” “profit per decision.”
+:::
+
+## Takeaways
+
+:::: {.columns} 
+::: {.column width="50%"} 
+- Pipelines create **reliable inputs**
+- Decision frameworks translate outputs into **accountable actions**
+- The loop (including feedback) determines long-run value
+::: 
+::: {.column width="50%"} 
+::: 
+::::
+
+::: notes
+Close the week’s conceptual arc: decisions, autonomy, systems, paradigms, data, pipelines.
+:::

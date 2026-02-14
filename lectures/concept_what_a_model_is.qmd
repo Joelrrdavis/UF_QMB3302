@@ -1,0 +1,110 @@
+---
+title: "Concept: What is a model"
+subtitle: "One idea. One mental model. No workflow."
+format:
+  revealjs:
+    theme: default
+    slide-number: true
+    embed-resources: true
+    Highlight-style: ../materials/assets/highlight_accessible.theme
+    # Nice-to-have code UX for slides
+    code-line-numbers: true      # add line numbers to all code blocks
+    code-overflow: wrap          # wrap long lines (good for projectors)
+    code-copy: true              # copy-to-clipboard button
+    code-block-bg: true          # subtle background behind code blocks
+    code-block-border-left: "#E69F00"  # UF-amber accent; pick your brand color
+execute:
+  echo: false
+---
+
+## The confusion we need to fix
+
+:::: {.columns}
+::: {.column width="50%"}
+- Its easy to assume the model knows the truth
+- Predictions feel authoritative
+- Outputs look precise
+- This creates false confidence
+:::
+
+::: {.column width="50%"}
+:::
+::::
+
+---
+
+## The core idea
+
+:::: {.columns}
+::: {.column width="50%"}
+- A model does not know reality
+- It learns a rule from data
+- That rule approximates patterns
+- Approximation is not understanding
+:::
+
+::: {.column width="50%"}
+:::
+::::
+
+---
+
+## The mental model
+
+:::: {.columns}
+::: {.column width="50%"}
+- A map is not the territory
+- A summary is not the full story
+- A model is a compressed representation
+- Compression always loses detail
+:::
+
+::: {.column width="50%"}
+:::
+::::
+
+---
+
+## Why models feel “wrong” sometimes
+
+:::: {.columns}
+::: {.column width="50%"}
+- Real systems are messy
+- Models simplify aggressively
+- Edge cases are ignored
+- Errors are expected
+:::
+
+::: {.column width="50%"}
+:::
+::::
+
+---
+
+## Why this matters later
+
+:::: {.columns}
+::: {.column width="50%"}
+- Performance will never be perfect
+- Coefficients may not align with intuition
+- Predictions may fail in new settings
+- None of this means the model is broken
+:::
+
+::: {.column width="50%"}
+:::
+::::
+
+---
+
+## Check point: 
+
+:::: {.columns}
+::: {.column width="50%"}
+- **A model is a rule that summarizes patterns, not a mirror of reality**
+:::
+
+::: {.column width="50%"}
+:::
+::::
+

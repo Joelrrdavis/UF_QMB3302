@@ -1,0 +1,11 @@
+project:
+  title: "Lectures"
+
+title: Lectures 
+author: "Dr. Joel Davis"
+format: 
+  metropolis-beamer-revealjs:
+    theme: style1.scss
+    embed-resources: true
+    toc: true
+    toc-expand: 1

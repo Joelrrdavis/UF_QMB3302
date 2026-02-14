@@ -1,0 +1,487 @@
+---
+title: Week 6 - part B
+subtitle: QMB3302 Foundations of Analytics and AI
+format:
+  metropolis-beamer-revealjs:
+    slide-number: c
+    embed-resources: true
+    # Syntax highlighting theme (pick one: pygments, tango, zenburn, kate, breeze, nord, github, dracula, monokai, etc.)
+    highlight-style: ../materials/assets/highlight_accessible.theme
+    # Nice-to-have code UX for slides
+    code-line-numbers: true      # add line numbers to all code blocks
+    code-overflow: wrap          # wrap long lines (good for projectors)
+    code-copy: true              # copy-to-clipboard button
+    code-block-bg: true          # subtle background behind code blocks
+    code-block-border-left: "#E69F00"  # UF-amber accent; pick your brand color
+author:
+  - name: Joel Davis
+    orcid: 0000-0000-0000-0000
+    email: joel.davis@warrington.ufl.edu
+    affiliations: University of Florida
+bibliography: ../materials/assets/shared_references_courses.bib
+
+---
+
+# Introduction to Unsupervised Learning
+
+---
+
+## Unsupervised learning finds structure without labeled outcomes
+
+
+:::: {.columns} 
+::: {.column width="50%"} 
+
+- **Definition:** Algorithms that discover patterns or relationships in data **without target labels**.  
+- Contrast with supervised learning, which learns mappings from inputs → known outputs.  
+- Goal: reveal **latent structure** (groups, patterns, or anomalies hidden in the data.)  
+
+
+::: 
+::: {.column width="50%"} 
+
+<figure>
+  <img src="../materials/assets/images/intro_supervised_vs_unsupervised.svg"
+       alt="**Figure:** Comparison of supervised learning (labeled outcomes) vs. unsupervised learning (unlabeled structure discovery).">
+  <figcaption>**Figure:** Comparison of supervised learning (labeled outcomes) vs. unsupervised learning (unlabeled structure discovery).</figcaption>
+</figure>
+
+::: 
+::::
+
+
+---
+
+## The three pillars and goals of unsupervised learning
+
+
+:::: {.columns} 
+::: {.column width="50%"} 
+
+- **Clustering:** group similar observations to reveal structure.  
+- **Dimensionality reduction:** simplify high-dimensional data for analysis or visualization.  
+- **Anomaly detection:** identify rare or unexpected events that deviate from the norm.  
+- Together, these form the **core toolkit** for exploring and understanding unlabeled data.  
+
+
+::: 
+::: {.column width="50%"} 
+
+<figure>
+  <img src="../materials/assets/images/intro_unsupervised_roadmap.svg"
+       width="95%"
+       alt="**Figure:** Conceptual roadmap diagram showing progression: Clustering → Dimensionality Reduction → Anomaly Detection, with short captions: “Find patterns,” “Simplify data,” “Detect what’s unusual.”">
+  <figcaption>**Figure:** Conceptual roadmap diagram showing progression: Clustering → Dimensionality Reduction → Anomaly Detection, with short captions: “Find patterns,” “Simplify data,” “Detect what’s unusual.”</figcaption>
+</figure>
+
+::: 
+::::
+
+
+---
+
+## When to use unsupervised methods
+
+- **Exploration:** discover hidden relationships before labels exist.  
+- **Segmentation:** identify natural customer or product groups.  
+- **Novelty detection:** detect emerging risks or rare behaviors.  
+
+
+# Clustering: K-Means
+
+---
+
+## K-Means assigns each point to the nearest centroid
+
+
+:::: {.columns} 
+::: {.column width="50%"} 
+
+- Algorithm steps:  
+  1. Randomly initialize *k* centroids.  
+  2. Assign each point to the nearest centroid (Euclidean distance).  
+  3. Recompute each centroid as the mean of its cluster.  
+  4. Repeat until cluster assignments stabilize.  
+- Output: each data point gets a **cluster label**.  
+
+
+::: 
+::: {.column width="50%"} 
+
+<figure>
+  <img src="../materials/assets/images/K-Means_clustering.svg"
+       alt="**Figure:** 2D points colored by cluster assignment with centroids marked by Xs.">
+  <figcaption>**Figure:** 2D points colored by cluster assignment with centroids marked by Xs.</figcaption>
+</figure>
+
+::: 
+::::
+
+
+---
+
+## How to choose K? 
+
+:::: {.columns} 
+::: {.column width="50%"} 
+
+- **Choosing k:**  
+  - **Elbow method:** plot within-cluster sum of squares (WCSS) vs. *k*.  
+  - Identify the “elbow” where added clusters give diminishing returns.  
+
+
+::: 
+::: {.column width="50%"} 
+
+<figure>
+  <img src="../materials/assets/images/kmeans_elbow_wcss_vs_k.svg"
+       width="100%"
+       style="max-height: 500px;"
+       alt="**Figure:** Line chart of WCSS vs. k showing elbow point.">
+  <figcaption>**Figure:** Line chart of WCSS vs. k showing elbow point..</figcaption>
+</figure>
+
+
+::: 
+::::
+
+
+
+---
+
+## Feature scaling ensures fair distance comparisons
+
+- **Preprocessing:** standardize or normalize features before clustering.  
+- **Goal:** make all variables contribute equally to distance calculations.  
+- Without scaling, features with large ranges (e.g., income) dominate smaller-scale features (e.g., age).  
+
+
+
+---
+
+## K-Means has practical limitations
+
+- **Scale sensitivity:** features on large numeric scales dominate distances.  
+  - Example: income (in \$) vs. purchase count.  
+- **Shape limitation:** assumes clusters are convex and spherical.  
+  - Struggles with elongated or irregular clusters.  
+- **Fixed k:** must specify the number of clusters in advance.  
+
+
+
+---
+
+## Hierarchical clustering builds a tree of merges without pre-specifying k
+
+:::: {.columns} 
+::: {.column width="50%"} 
+
+- **Agglomerative**: start with each point; iteratively **merge the closest** clusters.  
+- **Dendrogram**: **merge height** = dissimilarity; **cut** the tree at a height to get *k* clusters.  
+- **Distance**: Euclidean common; **correlation distance** groups similar *profiles*.
+
+
+::: 
+::: {.column width="50%"} 
+
+<figure>
+  <img src="../materials/assets/images/hierarchical_dendrogram_cut.svg"
+       width="95%"
+       alt="**Figure:** Dendrogram with a horizontal cut; clusters below the cut in distinct colors.">
+  <figcaption>**Figure:** Dendrogram with a horizontal cut; clusters below the cut in distinct colors.</figcaption>
+</figure>
+
+::: 
+::::
+
+
+
+# Clustering: DBSCAN and Density-Based Methods
+
+---
+
+
+## DBSCAN groups points by density, not distance to centroids
+
+
+:::: {.columns} 
+::: {.column width="50%"} 
+
+K-Means struggles with **irregular shapes** and **outliers**.
+
+DBSCANS key advantage is **flexibility** in capturing **nonlinear** or uneven density clusters.
+
+
+::: 
+::: {.column width="50%"} 
+
+<figure>
+  <img src="../materials/assets/images/dbscan_moons_comparison_1.svg"
+       width="100%"
+       style="max-height: 500px;"
+       alt="**Figure:** K-Means enforces circular clusters">
+  <figcaption>**Figure:** K-Means enforces circular clusters.</figcaption>
+</figure>
+
+::: 
+::::
+
+---
+
+## Core ideas behind density-based clustering
+
+
+:::: {.columns} 
+::: {.column width="50%"} 
+
+- **Density threshold:** a cluster is a dense group of points separated by sparse regions.  
+- **Core point:** has at least `min_samples` neighbors within distance `eps`.  
+- **Reachability:** points within `eps` of a core point belong to its cluster.  
+- **Noise points:** isolated points not reachable from any dense region.  
+
+
+::: 
+::: {.column width="50%"} 
+
+<figure>
+  <img src="../materials/assets/images/DBSCAN_clustering.svg"
+       alt="**Figure:** Illustration labeling core, border, and noise points in a 2D dataset.">
+  <figcaption>**Figure:** Illustration labeling core, border, and noise points in a 2D dataset.</figcaption>
+</figure>
+
+::: 
+::::
+
+
+---
+
+## DBSCAN vs. K-Means: flexibility vs. constraint
+
+| **Feature** | **K-Means** | **DBSCAN** |
+|:--|:--|:--|
+| **Cluster shape** | Spherical / convex | Arbitrary (nonlinear) |
+| **Number of clusters** | Must specify *k* | Found automatically |
+| **Noise handling** | None | Identifies outliers explicitly |
+| **Scalability** | Fast, simple | Slower on large datasets |
+| **Scale sensitivity** | High | Moderate (still requires normalization) |
+
+
+
+# Classical Anomaly Detection
+
+---
+
+## Anomaly detection identifies rare, high-impact events
+
+- **Goal:** detect data points that deviate significantly from normal patterns.  
+- **Examples:**  
+  - Fraudulent transactions in finance.  
+  - Faulty sensor readings in manufacturing.  
+  - Unusual network activity in cybersecurity.  
+
+---
+
+## Three main strategies for detecting anomalies
+
+| **Approach** | **Concept** | **Intuition** |
+|:--|:--|:--|
+| **Isolation-based** | Separate anomalies quickly via random splits | Outliers are easy to isolate |
+| **Boundary-based** | Learn a frontier around normal data | Anomalies fall outside the boundary |
+| **Reconstruction-based** | Measure how well data can be rebuilt | Poor reconstruction → anomaly |
+
+---
+
+## Isolation Forest isolates anomalies instead of modeling normal data
+
+
+:::: {.columns} 
+::: {.column width="50%"} 
+
+- Builds many **random trees** that split features recursively.  
+- **Key idea:** outliers are easier to isolate → have **shorter path lengths** in the trees.  
+- **Anomaly score:** average path length across trees (shorter = more anomalous).  
+- **Strengths:** fast, scalable, effective in high dimensions.  
+
+
+::: 
+::: {.column width="50%"} 
+
+<figure>
+  <img src="../materials/assets/images/anomaly_isolation_forest_concept.svg"
+       alt="**Figure:** Forest of random splits showing shallow isolation of anomalies vs. deeper paths for normal data.">
+  <figcaption>**Figure:** Forest of random splits showing shallow isolation of anomalies vs. deeper paths for normal data.</figcaption>
+</figure>
+
+::: 
+::::
+
+---
+
+
+## One-Class SVM defines a flexible boundary around normal data
+
+:::: {.columns} 
+::: {.column width="50%"} 
+
+- Learns a **soft boundary** that encloses most of the data.  
+- Points outside → **anomalies**.  
+- Uses **kernel functions** to create nonlinear boundaries.  
+- **Pros:** flexible, works in complex feature spaces.  
+- **Cons:** sensitive to hyperparameters, slower on large datasets.  
+
+
+::: 
+::: {.column width="50%"} 
+
+<figure>
+  <img src="../materials/assets/images/SVM_Anomaly.svg"
+       width="75%"
+       alt="**Figure:** Two-dimensional feature space with One-Class SVM circular boundary; anomalies fall outside.">
+  <figcaption>**Figure:** One-Class SVM circular boundary; anomalies fall outside.</figcaption>
+</figure>
+
+::: 
+::::
+
+
+---
+
+## Comparing classical anomaly detection methods
+
+| **Criterion** | **Isolation Forest** | **One-Class SVM** |
+|:--|:--|:--|
+| **Concept** | Randomly isolates outliers | Learns boundary around normal data |
+| **Scalability** | Excellent (fast, parallel) | Moderate (depends on kernel) |
+| **Interpretability** | High (path length) | Moderate (opaque boundaries) |
+| **Tuning needs** | Low | High (`nu`, `gamma`, kernel type) |
+| **Best for** | Large tabular data | Smaller, nonlinear feature spaces |
+
+
+
+# (Optional Reading) Representation-Based Anomaly Detection  *(Advanced Preview)*
+
+---
+
+## Bridge: from classical boundaries to learned representations
+
+
+:::: {.columns} 
+::: {.column width="50%"} 
+
+- Classical models rely on **distance** or **boundary rules** in raw feature space.  
+- Modern deep learning models learn **latent representations** of “normality.”  
+- These capture richer, nonlinear relationships before evaluating anomalies.  
+- Shift from **geometry-based** to **representation-based** detection.  
+
+
+::: 
+::: {.column width="50%"} 
+
+<figure>
+  <img src="../materials/assets/images/anomaly_representation_bridge.svg"
+      width="95%"
+       alt="**Figure:** Flow diagram — raw data → learned latent space → anomaly scoring.">
+  <figcaption>**Figure:** Flow diagram — raw data → learned latent space → anomaly scoring.</figcaption>
+</figure>
+
+::: 
+::::
+
+
+---
+
+## Autoencoders reconstruct normal data and expose anomalies
+
+:::: {.columns} 
+::: {.column width="60%"} 
+
+- **Idea:** train a neural network to reproduce its input.  
+- **Training:**  
+  - The encoder compresses input → latent space.  
+  - The decoder reconstructs it → output.  
+- **Anomaly rule:**  
+  - Normal samples → low reconstruction error.  
+  - Anomalies → high reconstruction error.  
+- Works well on sensor data, transactions, or images.  
+
+
+::: 
+::: {.column width="40%"} 
+
+<figure>
+  <img src="../materials/assets/images/anomaly_autoencoder_architecture.svg"
+       width="100%"
+       style="max-height: 500px;"
+       alt="**Figure:** Autoencoder architecture showing input → bottleneck → reconstructed output; anomalies have higher error.">
+  <figcaption>**Figure:** Autoencoder architecture showing input → bottleneck → reconstructed output; anomalies have higher error.</figcaption>
+</figure>
+
+::: 
+::::
+
+
+---
+
+## Classical vs. representation-based detection
+
+| **Aspect** | **Classical (IF, SVM)** | **Representation-Based (AE, SVDD)** |
+|:--|:--|:--|
+| **Feature space** | Original data space | Learned latent representation |
+| **Model type** | Tree / kernel | Neural network |
+| **Nonlinearity** | Limited | High |
+| **Data size need** | Moderate | Large |
+| **Interpretability** | High | Low |
+| **Use case** | Tabular / simple | Images, sensors, embeddings |
+
+
+---
+
+## Takeaway: understanding and evolution
+
+- **Classical methods:** fast, interpretable, and broadly applicable.  
+- **Representation-based methods:** powerful for complex, high-dimensional data.  
+- Both aim to model what’s *normal* to detect what’s *not*.  
+- This progression mirrors the broader trend in AI — from rule-based systems to learned representations.  
+
+
+
+# Evaluation in Unsupervised Learning
+
+---
+
+## Evaluating unsupervised models requires evidence, less related to some type of accuracy
+
+- In **supervised learning**, metrics like accuracy or RMSE are clear.  
+- In **unsupervised learning**, there are **no ground truth labels**.  
+- The central challenge:  
+  - *How do we know if our discovered clusters or anomalies are meaningful?*  
+- Evaluation depends on **pattern coherence, visualization, Stability/robustness checks and domain validation**.  
+
+
+
+---
+
+## Do you have labels?
+
+- When labels exist, use quantitative validation. But beware. 
+  - **Silhouette Score:**  Measures how well points fit within their cluster vs. others. Good for checking internal consistency.  
+  - **Adjusted Rand Index (ARI):** Compares predicted clusters to known classes.  Useful only when some labeled benchmark exists. But then... are you sure you need to be doing unsupervised learning?   
+
+- When no labels exist: rely on visualization and expert judgment
+  - **Visualization:** Use PCA, t-SNE, or UMAP to project results into 2D/3D. Check if clusters or anomalies look plausible.
+  - **Domain validation:**  Are discovered groups meaningful to experts?  Do anomalies align with real unusual cases (e.g., known fraud, failed sensors)?  
+
+---
+
+## Practical takeaway: evaluate structure, not prediction
+
+- There is **no universal score** for unsupervised learning.  
+- Evaluate through **three complementary lenses:**  
+  1. **Structure:** Does the model reveal coherent, stable patterns?  
+  2. **Interpretation:** Do results make sense to experts?  
+  3. **Impact:** Does it support real-world decision-making or risk reduction?  
+ 
+
+
+
+

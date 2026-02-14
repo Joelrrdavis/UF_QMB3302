@@ -1,0 +1,62 @@
+---
+title: Week 5
+subtitle: QMB3302 Foundations of Analytics and AI
+format:
+  metropolis-beamer-revealjs:
+    slide-number: c
+    embed-resources: true
+    # Syntax highlighting theme (pick one: pygments, tango, zenburn, kate, breeze, nord, github, dracula, monokai, etc.)
+    highlight-style: ../materials/assets/highlight_accessible.theme
+    # Nice-to-have code UX for slides
+    code-line-numbers: true      # add line numbers to all code blocks
+    code-overflow: wrap          # wrap long lines (good for projectors)
+    code-copy: true              # copy-to-clipboard button
+    code-block-bg: true          # subtle background behind code blocks
+    code-block-border-left: "#E69F00"  # UF-amber accent; pick your brand color
+author:
+  - name: Joel Davis
+    orcid: 0000-0000-0000-0000
+    email: joel.davis@warrington.ufl.edu
+    affiliations: University of Florida
+date: last-modified
+bibliography: ../materials/assets/shared_references_courses.bib
+---
+
+
+
+# Definitions of Analytics and AI
+
+## Definitions of Analytics and AI
+
+- **Analytics**: supports decisions with data-backed insight  
+- **AI**: participates in decisions through automation + judgment under uncertainty  
+- The difference is often **how outputs are used**, not the math
+
+::: notes
+Open by framing both as parts of decision systems. Emphasize that the boundary is practical (deployment + autonomy), not philosophical.
+Avoid “AI = magic”; define it as decision participation in uncertain settings.
+:::
+
+## Analytics is a progression of questions
+
+- **Descriptive**: what happened?
+- **Diagnostic**: why did it happen?
+- **Predictive**: what is likely to happen?
+- **Prescriptive**: what should we do?
+
+::: notes
+Use a single business story (e.g., inventory or subscription business) to show the same domain question evolving across the four types.
+Keep definitions short—students will confuse these without concrete examples.
+:::
+
+## Same business problem, four analytics roles
+
+- Descriptive: “Stockouts increased last month.”
+- Diagnostic: “They spiked after supplier delays.”
+- Predictive: “Next month’s stockout risk is 0.35.”
+- Prescriptive: “Increase reorder point for items A/B.”
+
+::: notes
+Important: emphasize that prescriptive requires an objective and constraints; it’s not “a fancier prediction.”
+You can swap in a different example later (fraud, churn, staffing) as long as the pattern remains.
+:::

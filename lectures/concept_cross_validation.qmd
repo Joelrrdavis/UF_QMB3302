@@ -1,0 +1,199 @@
+---
+title: "Concept: Cross Validation"
+subtitle: "One idea. One mental model. No workflow."
+format:
+  revealjs:
+    theme: default
+    slide-number: true
+    embed-resources: true
+    Highlight-style: ../materials/assets/highlight_accessible.theme
+    # Nice-to-have code UX for slides
+    code-line-numbers: true      # add line numbers to all code blocks
+    code-overflow: wrap          # wrap long lines (good for projectors)
+    code-copy: true              # copy-to-clipboard button
+    code-block-bg: true          # subtle background behind code blocks
+    code-block-border-left: "#E69F00"  # UF-amber accent; pick your brand color
+execute:
+  echo: false
+---
+
+
+## What problem are we solving?
+
+:::: {.columns}
+::: {.column width="50%"}
+- A single train–test split can be misleading
+- Results may depend on how the data happened to be divided
+- One evaluation can overstate or understate performance
+- We need a more reliable judgment
+:::
+
+::: {.column width="50%"}
+<!-- reserved for video (you) -->
+:::
+::::
+
+---
+
+## The core idea
+
+:::: {.columns}
+::: {.column width="50%"}
+- Estimate performance across plausible datasets  
+- Each split simulates a different sample from the same process  
+- Results form a distribution, not a single score  
+- Judgment comes from consistency, not peaks
+:::
+
+::: {.column width="50%"}
+<!-- reserved for video (you) -->
+:::
+::::
+
+
+## What question cross-validation answers
+
+:::: {.columns}
+::: {.column width="50%"}
+- “How much should I trust this performance number?”
+- “Would this model still look good on a slightly different dataset?”
+- “Is this result stable—or fragile?”
+:::
+
+::: {.column width="50%"}
+<!-- reserved for video (you) -->
+:::
+::::
+
+---
+
+## The mental model
+
+:::: {.columns}
+::: {.column width="50%"}
+- Think of judging a performance by a single critic
+- Versus judging it by a panel
+- Individual opinions may vary
+- Patterns across judgments are more trustworthy
+
+:::
+
+::: {.column width="50%"}
+<!-- reserved for video (you) -->
+:::
+::::
+
+---
+
+## What cross-validation does
+
+:::: {.columns}
+::: {.column width="50%"}
+- Reuses the dataset in structured rotations
+- Every observation is tested at least once
+- No single split dominates the conclusion
+- Variability becomes visible
+:::
+
+::: {.column width="50%"}
+:::
+::::
+
+---
+
+## Why repetition matters
+
+:::: {.columns}
+::: {.column width="50%"}
+- Some splits are easier than others
+- Some test sets are unusually hard
+- One result can be an accident
+- Repetition exposes stability
+:::
+
+::: {.column width="50%"}
+:::
+::::
+
+---
+
+## What stays constant
+
+:::: {.columns}
+::: {.column width="50%"}
+- The modeling approach
+- The evaluation metric
+- The data source
+- Only the roles of observations change
+:::
+
+::: {.column width="50%"}
+<!-- reserved for video (you) -->
+:::
+::::
+
+---
+
+## What changes each time
+
+:::: {.columns}
+::: {.column width="50%"}
+- Which observations are used for training
+- Which observations are held out
+- The difficulty of the test set
+- The measured performance
+:::
+
+::: {.column width="50%"}
+<!-- reserved for video (you) -->
+:::
+::::
+
+---
+
+## A common misconception
+
+:::: {.columns}
+::: {.column width="50%"}
+- Cross-validation does not improve the model
+- It does not fix bias or variance
+- It does not guarantee success
+- It improves confidence in evaluation
+:::
+
+::: {.column width="50%"}
+<!-- reserved for video (you) -->
+:::
+::::
+
+---
+
+## What this is *not*
+
+:::: {.columns}
+::: {.column width="50%"}
+- Not a training trick
+- Not a performance booster
+- Not a deployment strategy
+- A method for honest judgment
+:::
+
+::: {.column width="50%"}
+<!-- reserved for video (you) -->
+:::
+::::
+
+---
+
+## Check point: 
+
+:::: {.columns}
+::: {.column width="50%"}
+**Cross-validation is a way to estimate how much your model’s performance depends on the particular data it saw.**
+:::
+
+::: {.column width="50%"}
+<!-- reserved for video (you) -->
+:::
+::::
+
